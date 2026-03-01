@@ -5,6 +5,7 @@ import { Redirect } from "@shopify/app-bridge/actions";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import PropTypes from "prop-types";
 import { formatUTCForDateTimeInput, formatUTCForDisplay } from "../components/BlockScheduler/utils";
+import BlockPreview from "../components/BlockPreview";
 export { loader, action } from "../services/block-scheduler.server";
 
 const isDevEnvironment =
@@ -39,6 +40,8 @@ export default function BlockSchedulerPage() {
   const [userTimeZone, setUserTimeZone] = useState("UTC");
   const [userTimezoneOffset, setUserTimezoneOffset] = useState(0);
   const [formBlockType, setFormBlockType] = useState("hero");
+  const [previewData, setPreviewData] = useState({});
+  const previewDebounceRef = useRef(null);
   const statusInputId = useId();
   const blockTypes = loaderData?.blockTypes ?? {};
   const defaultBlockType = loaderData?.defaultBlockType ?? "hero";
@@ -70,6 +73,38 @@ export default function BlockSchedulerPage() {
     },
     [shopify],
   );
+
+  const readFormData = useCallback(() => {
+    const form = formRef.current;
+    if (!form) return {};
+    const fd = new FormData(form);
+    const data = {};
+    for (const [k, v] of fd.entries()) {
+      if (typeof v === "string") data[k] = v;
+    }
+    return data;
+  }, []);
+
+  const updatePreview = useCallback(() => {
+    setPreviewData(readFormData());
+  }, [readFormData]);
+
+  useEffect(() => {
+    if (!showForm) return;
+    const t = setTimeout(updatePreview, 100);
+    return () => clearTimeout(t);
+  }, [showForm, formBlockType, updatePreview]);
+
+  useEffect(() => {
+    if (!showForm) return;
+    const id = setInterval(updatePreview, 400);
+    return () => clearInterval(id);
+  }, [showForm, updatePreview]);
+
+  const handleFormInput = useCallback(() => {
+    if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
+    previewDebounceRef.current = setTimeout(updatePreview, 150);
+  }, [updatePreview]);
 
   useEffect(() => {
     // Skip if no fetcher data
@@ -244,7 +279,7 @@ export default function BlockSchedulerPage() {
 
             {/* Modal Content */}
             <div style={{ padding: "1.5rem" }}>
-              <fetcher.Form method="post" ref={formRef} encType="application/x-www-form-urlencoded">
+              <fetcher.Form method="post" ref={formRef} encType="application/x-www-form-urlencoded" onInput={handleFormInput}>
           <s-stack direction="block" gap="base">
             <input type="hidden" name="store_timezone" value={storeTimeZone} readOnly />
             <input type="hidden" name="timezone_offset" value={userTimezoneOffset} readOnly />
@@ -295,6 +330,7 @@ export default function BlockSchedulerPage() {
                         name="desktop_banner"
                         label="Desktop Banner"
                         mediaFiles={loaderMediaFiles || []}
+                        onSelect={() => setTimeout(updatePreview, 50)}
                       />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -302,6 +338,7 @@ export default function BlockSchedulerPage() {
                         name="mobile_banner"
                         label="Mobile Banner"
                         mediaFiles={loaderMediaFiles || []}
+                        onSelect={() => setTimeout(updatePreview, 50)}
                       />
                     </div>
                   </div>
@@ -375,6 +412,7 @@ export default function BlockSchedulerPage() {
                     name="collection_banner_image"
                     label="Banner Image (optional override)"
                     mediaFiles={loaderMediaFiles || []}
+                    onSelect={() => setTimeout(updatePreview, 50)}
                   />
                   <s-text-field
                     label="Headline Override"
@@ -411,6 +449,7 @@ export default function BlockSchedulerPage() {
                     name="countdown_bg_image"
                     label="Background Image"
                     mediaFiles={loaderMediaFiles || []}
+                    onSelect={() => setTimeout(updatePreview, 50)}
                   />
                   <div style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -432,6 +471,7 @@ export default function BlockSchedulerPage() {
                     name="image_with_text_image"
                     label="Image"
                     mediaFiles={loaderMediaFiles || []}
+                    onSelect={() => setTimeout(updatePreview, 50)}
                   />
                   <s-text-field label="Headline" name="image_with_text_headline" placeholder="Headline" />
                   <s-text-field label="Description" name="image_with_text_description" multiline={3} placeholder="Description" />
@@ -457,6 +497,7 @@ export default function BlockSchedulerPage() {
                     name="video_file"
                     label="Or select video from Shopify"
                     mediaFiles={loaderVideoFiles || []}
+                    onSelect={() => setTimeout(updatePreview, 50)}
                   />
                   <s-text-field label="Headline" name="video_headline" placeholder="Headline" />
                   <s-text-field label="Description" name="video_description" multiline={2} placeholder="Description" />
@@ -474,6 +515,7 @@ export default function BlockSchedulerPage() {
                     name="promo_card_image"
                     label="Image"
                     mediaFiles={loaderMediaFiles || []}
+                    onSelect={() => setTimeout(updatePreview, 50)}
                   />
                   <s-text-field label="Title" name="promo_card_title" placeholder="Promo title" />
                   <s-text-field label="Description" name="promo_card_description" multiline={2} placeholder="Short description" />
@@ -481,6 +523,12 @@ export default function BlockSchedulerPage() {
                   <s-text-field label="CTA Text" name="promo_card_cta_text" placeholder="Shop Now" />
                     </>
                   )}
+                  <BlockPreview
+                    blockType={formBlockType}
+                    data={previewData}
+                    mediaFiles={loaderMediaFiles || []}
+                    videoFiles={loaderVideoFiles || []}
+                  />
                   <div style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <label htmlFor="start_at" style={{ display: "block", marginBottom: "0", fontWeight: "500", fontSize: "0.8125rem" }}>
@@ -1098,6 +1146,9 @@ export default function BlockSchedulerPage() {
 function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = {}, onClose, onSuccess, storeTimeZone = "UTC", userTimeZone, userTimezoneOffset }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [editPreviewData, setEditPreviewData] = useState({});
+  const editFormRef = useRef(null);
+  const editPreviewDebounceRef = useRef(null);
   const baseId = useId();
   const titleInputId = `${baseId}-title`;
   const positionInputId = `${baseId}-position`;
@@ -1116,7 +1167,37 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
   } catch (_) {}
   
   const getDateTimeLocal = (isoDate) => formatUTCForDateTimeInput(isoDate, storeTimeZone);
-  
+
+  const readEditFormData = useCallback(() => {
+    const form = editFormRef.current;
+    if (!form) return {};
+    const fd = new FormData(form);
+    const data = {};
+    for (const [k, v] of fd.entries()) {
+      if (typeof v === "string") data[k] = v;
+    }
+    return data;
+  }, []);
+
+  const updateEditPreview = useCallback(() => {
+    setEditPreviewData(readEditFormData());
+  }, [readEditFormData]);
+
+  useEffect(() => {
+    const t = setTimeout(updateEditPreview, 100);
+    return () => clearTimeout(t);
+  }, [entry?.id, blockType, updateEditPreview]);
+
+  useEffect(() => {
+    const id = setInterval(updateEditPreview, 400);
+    return () => clearInterval(id);
+  }, [updateEditPreview]);
+
+  const handleEditFormInput = useCallback(() => {
+    if (editPreviewDebounceRef.current) clearTimeout(editPreviewDebounceRef.current);
+    editPreviewDebounceRef.current = setTimeout(updateEditPreview, 150);
+  }, [updateEditPreview]);
+
   const buildUpdateData = (formData) => {
     const base = {
       id: entry.id,
@@ -1293,7 +1374,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             </button>
           </div>
         </div>
-        <form onSubmit={handleSubmit} style={{ padding: "1.5rem" }}>
+        <form ref={editFormRef} onSubmit={handleSubmit} onInput={handleEditFormInput} style={{ padding: "1.5rem" }}>
           {error && (
             <div style={{ padding: "0.75rem", marginBottom: "1rem", backgroundColor: "#fee", color: "#d72c0d", borderRadius: "4px" }}>
               {error}
@@ -1362,10 +1443,10 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             <>
               <div style={{ display: "flex", gap: "15px", marginBottom: "1rem" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <MediaLibraryPicker name="desktop_banner" label="Desktop Banner" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} />
+                  <MediaLibraryPicker name="desktop_banner" label="Desktop Banner" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <MediaLibraryPicker name="mobile_banner" label="Mobile Banner" mediaFiles={mediaFiles} defaultValue={fieldMap.mobile_banner || ""} />
+                  <MediaLibraryPicker name="mobile_banner" label="Mobile Banner" mediaFiles={mediaFiles} defaultValue={fieldMap.mobile_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
                 </div>
               </div>
               <div style={{ marginBottom: "1rem" }}>
@@ -1414,7 +1495,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Collection Handle</label>
                 <input type="text" name="collection_handle" required defaultValue={typeConfig.collection_handle || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
               </div>
-              <MediaLibraryPicker name="collection_banner_image" label="Banner Image (optional)" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} />
+              <MediaLibraryPicker name="collection_banner_image" label="Banner Image (optional)" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline Override</label>
                 <input type="text" name="collection_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
@@ -1443,7 +1524,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Subtext</label>
                 <input type="text" name="countdown_subtext" defaultValue={typeConfig.subtext || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
               </div>
-              <MediaLibraryPicker name="countdown_bg_image" label="Background Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} />
+              <MediaLibraryPicker name="countdown_bg_image" label="Background Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ display: "flex", gap: "15px", marginBottom: "1rem" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Background Color</label>
@@ -1466,7 +1547,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
           )}
           {blockType === "image_with_text" && (
             <>
-              <MediaLibraryPicker name="image_with_text_image" label="Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} />
+              <MediaLibraryPicker name="image_with_text_image" label="Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
                 <input type="text" name="image_with_text_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
@@ -1498,7 +1579,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Video URL (hosted)</label>
                 <input type="text" name="video_url" defaultValue={typeConfig.video_url || ""} placeholder="https://..." style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
               </div>
-              <MediaLibraryPicker name="video_file" label="Or video from Shopify" mediaFiles={videoFiles} defaultValue={fieldMap.desktop_banner || ""} />
+              <MediaLibraryPicker name="video_file" label="Or video from Shopify" mediaFiles={videoFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
                 <input type="text" name="video_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
@@ -1523,7 +1604,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
           )}
           {blockType === "promo_card" && (
             <>
-              <MediaLibraryPicker name="promo_card_image" label="Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} />
+              <MediaLibraryPicker name="promo_card_image" label="Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Title</label>
                 <input type="text" name="promo_card_title" defaultValue={typeConfig.title || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
@@ -1542,6 +1623,12 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               </div>
             </>
           )}
+          <BlockPreview
+            blockType={blockType}
+            data={editPreviewData}
+            mediaFiles={mediaFiles}
+            videoFiles={videoFiles}
+          />
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1.5rem" }}>
             <button
               type="button"
@@ -1712,7 +1799,7 @@ function DeleteEntryModal({ entry, onClose, onSuccess }) {
   );
 }
 
-function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "" }) {
+function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "", onSelect }) {
   const [selectedFileId, setSelectedFileId] = useState(defaultValue);
   const [showPicker, setShowPicker] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1740,6 +1827,7 @@ function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "" })
     if (hiddenInputRef.current) {
       hiddenInputRef.current.value = fileId;
     }
+    onSelect?.(fileId);
   };
 
   const filteredFiles = localMediaFiles.filter((file) =>
@@ -1846,6 +1934,7 @@ function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "" })
           if (hiddenInputRef.current) {
             hiddenInputRef.current.value = newFile.id;
           }
+          onSelect?.(newFile.id);
           setUploadError("");
           setUploadSuccess(true);
           revalidator.revalidate();

@@ -5,7 +5,7 @@ const isDev =
   (typeof import.meta !== "undefined" && import.meta.env?.MODE !== "production") || typeof import.meta === "undefined";
 const debugLog = (...args) => isDev && console.log(...args);
 
-export default function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "" }) {
+export default function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "", onSelect }) {
   const [selectedFileId, setSelectedFileId] = useState(defaultValue);
   const [showPicker, setShowPicker] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,6 +32,7 @@ export default function MediaLibraryPicker({ name, label, mediaFiles = [], defau
     setShowPicker(false);
     setSearchTerm("");
     if (hiddenInputRef.current) hiddenInputRef.current.value = fileId;
+    onSelect?.(fileId);
   };
 
   const filteredFiles = localMediaFiles.filter(
@@ -83,6 +84,7 @@ export default function MediaLibraryPicker({ name, label, mediaFiles = [], defau
           setLocalMediaFiles((prev) => [newFile, ...prev]);
           setSelectedFileId(newFile.id);
           if (hiddenInputRef.current) hiddenInputRef.current.value = newFile.id;
+          onSelect?.(newFile.id);
           setUploadError("");
           setUploadSuccess(true);
           revalidator.revalidate();
