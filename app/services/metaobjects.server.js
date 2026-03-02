@@ -9,7 +9,7 @@ const METAOBJECT_TYPE = "schedulable_entity";
  */
 const FIELD_DEFINITIONS = [
   { name: "Title", key: "title", type: "single_line_text_field", required: true },
-  { name: "Position ID", key: "position_id", type: "single_line_text_field", required: true },
+  { name: "Position", key: "position_id", type: "single_line_text_field", required: true },
   { name: "Block Type", key: "block_type", type: "single_line_text_field", required: false },
   { name: "Type Config", key: "type_config", type: "json", required: false },
   { name: "Start At", key: "start_at", type: "date_time", required: false },
@@ -37,6 +37,7 @@ export async function ensureMetaobjectDefinition(admin) {
           name
           fieldDefinitions {
             key
+            name
             type { name }
           }
         }
@@ -60,6 +61,41 @@ export async function ensureMetaobjectDefinition(admin) {
       const existingKeys = (def.fieldDefinitions || []).map((f) => f.key);
       const needsBlockType = !existingKeys.includes("block_type");
       const needsTypeConfig = !existingKeys.includes("type_config");
+      const positionField = (def.fieldDefinitions || []).find((f) => f.key === "position_id");
+      const needsPositionNameUpdate = positionField && positionField.name !== "Position";
+
+      if (needsPositionNameUpdate) {
+        try {
+          await admin.graphql(
+            `#graphql
+            mutation UpdatePositionField($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
+              metaobjectDefinitionUpdate(id: $id, definition: $definition) {
+                metaobjectDefinition { id }
+                userErrors { field message }
+              }
+            }
+          `,
+            {
+              variables: {
+                id: def.id,
+                definition: {
+                  fieldDefinitions: [
+                    {
+                      update: {
+                        key: "position_id",
+                        name: "Position",
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          );
+          logger.info("Updated position_id field name to 'Position'");
+        } catch (updateError) {
+          logger.warn("Could not update position_id field name:", updateError);
+        }
+      }
 
       if (needsBlockType || needsTypeConfig) {
         const fieldDefinitions = [];
