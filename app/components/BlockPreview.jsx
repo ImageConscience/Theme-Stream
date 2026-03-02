@@ -2,7 +2,7 @@
  * Live preview of scheduled block types as they would appear on the storefront.
  * Renders a simplified version of each block type for the Create/Edit modals.
  */
-export default function BlockPreview({ blockType, data = {}, mediaFiles = [], videoFiles = [] }) {
+export default function BlockPreview({ blockType, data = {}, mediaFiles = [], videoFiles = [], variant = "inline" }) {
   const resolveUrl = (id) => {
     if (!id) return null;
     const file = mediaFiles.find((f) => f.id === id) || videoFiles.find((f) => f.id === id);
@@ -14,7 +14,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
 
   const previewStyles = {
     container: {
-      marginTop: "1rem",
+      ...(variant === "pane" ? { marginTop: 0 } : { marginTop: "1rem" }),
       padding: "1rem",
       backgroundColor: "#f9fafb",
       borderRadius: "8px",

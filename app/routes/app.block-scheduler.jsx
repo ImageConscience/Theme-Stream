@@ -8,6 +8,9 @@ import { formatUTCForDateTimeInput, formatUTCForDisplay } from "../components/Bl
 import BlockPreview from "../components/BlockPreview";
 export { loader, action } from "../services/block-scheduler.server";
 
+/** "two-column" = preview left, data right. "stacked" = preview on top, data below. */
+const MODAL_LAYOUT = "two-column";
+
 const isDevEnvironment =
   (typeof import.meta !== "undefined" && import.meta.env?.MODE !== "production") || typeof import.meta === "undefined";
 const debugLog = (...args) => {
@@ -248,17 +251,30 @@ export default function BlockSchedulerPage() {
             aria-modal="true"
             aria-label="Create new entry"
             tabIndex={-1}
+            className={`create-modal-dialog${MODAL_LAYOUT === "stacked" ? " create-modal-stacked" : ""}`}
             style={{
               backgroundColor: "white",
               borderRadius: "8px",
               width: "100%",
-              maxWidth: "600px",
+              maxWidth: "900px",
               maxHeight: "90vh",
-              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
             }}
           >
-            <div style={{ padding: "1.5rem", borderBottom: "1px solid #e1e3e5" }}>
+            <style>{`
+              .create-modal-dialog .create-modal-body { display: flex; flex-direction: row; flex: 1; min-height: 0; }
+              .create-modal-dialog .create-modal-preview { flex: 0 0 320px; padding: 1.5rem; border-right: 1px solid #e1e3e5; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+              .create-modal-dialog .create-modal-data { flex: 1; min-width: 0; overflow-y: auto; padding: 1.5rem; }
+              .create-modal-dialog.create-modal-stacked .create-modal-body { flex-direction: column; }
+              .create-modal-dialog.create-modal-stacked .create-modal-preview { flex: 0 0 auto; border-right: none; border-bottom: 1px solid #e1e3e5; }
+              @media (max-width: 768px) {
+                .create-modal-dialog .create-modal-body { flex-direction: column; }
+                .create-modal-dialog .create-modal-preview { flex: 0 0 auto; border-right: none; border-bottom: 1px solid #e1e3e5; }
+              }
+            `}</style>
+            <div style={{ padding: "1.5rem", borderBottom: "1px solid #e1e3e5", flexShrink: 0 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}>Create New Entry</h2>
                 <button
@@ -277,8 +293,18 @@ export default function BlockSchedulerPage() {
               </div>
             </div>
 
-            {/* Modal Content */}
-            <div style={{ padding: "1.5rem" }}>
+            {/* Modal Content: two-column layout */}
+            <div className="create-modal-body">
+              <div className="create-modal-preview">
+                <BlockPreview
+                  blockType={formBlockType}
+                  data={previewData}
+                  mediaFiles={loaderMediaFiles || []}
+                  videoFiles={loaderVideoFiles || []}
+                  variant="pane"
+                />
+              </div>
+              <div className="create-modal-data">
               <fetcher.Form method="post" ref={formRef} encType="application/x-www-form-urlencoded" onInput={handleFormInput}>
           <s-stack direction="block" gap="base">
             <input type="hidden" name="store_timezone" value={storeTimeZone} readOnly />
@@ -523,12 +549,6 @@ export default function BlockSchedulerPage() {
                   <s-text-field label="CTA Text" name="promo_card_cta_text" placeholder="Shop Now" />
                     </>
                   )}
-                  <BlockPreview
-                    blockType={formBlockType}
-                    data={previewData}
-                    mediaFiles={loaderMediaFiles || []}
-                    videoFiles={loaderVideoFiles || []}
-                  />
                   <div style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <label htmlFor="start_at" style={{ display: "block", marginBottom: "0", fontWeight: "500", fontSize: "0.8125rem" }}>
@@ -675,6 +695,7 @@ export default function BlockSchedulerPage() {
                   </div>
           </s-stack>
         </fetcher.Form>
+              </div>
             </div>
           </div>
         </div>
@@ -1346,17 +1367,30 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
         aria-modal="true"
         aria-label="Edit entry"
         tabIndex={-1}
+            className={`edit-modal-dialog${MODAL_LAYOUT === "stacked" ? " edit-modal-stacked" : ""}`}
         style={{
           backgroundColor: "white",
           borderRadius: "8px",
           width: "100%",
-          maxWidth: "600px",
+          maxWidth: "900px",
           maxHeight: "90vh",
-          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
         }}
       >
-        <div style={{ padding: "1.5rem", borderBottom: "1px solid #e1e3e5" }}>
+        <style>{`
+          .edit-modal-dialog .edit-modal-body { display: flex; flex-direction: row; flex: 1; min-height: 0; }
+          .edit-modal-dialog .edit-modal-preview { flex: 0 0 320px; padding: 1.5rem; border-right: 1px solid #e1e3e5; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+          .edit-modal-dialog .edit-modal-data { flex: 1; min-width: 0; overflow-y: auto; padding: 1.5rem; }
+          .edit-modal-dialog.edit-modal-stacked .edit-modal-body { flex-direction: column; }
+          .edit-modal-dialog.edit-modal-stacked .edit-modal-preview { flex: 0 0 auto; border-right: none; border-bottom: 1px solid #e1e3e5; }
+          @media (max-width: 768px) {
+            .edit-modal-dialog .edit-modal-body { flex-direction: column; }
+            .edit-modal-dialog .edit-modal-preview { flex: 0 0 auto; border-right: none; border-bottom: 1px solid #e1e3e5; }
+          }
+        `}</style>
+        <div style={{ padding: "1.5rem", borderBottom: "1px solid #e1e3e5", flexShrink: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}>Edit Entry</h2>
             <button
@@ -1374,7 +1408,18 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             </button>
           </div>
         </div>
-        <form ref={editFormRef} onSubmit={handleSubmit} onInput={handleEditFormInput} style={{ padding: "1.5rem" }}>
+        <form ref={editFormRef} onSubmit={handleSubmit} onInput={handleEditFormInput} style={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}>
+          <div className="edit-modal-body">
+            <div className="edit-modal-preview">
+              <BlockPreview
+                blockType={blockType}
+                data={editPreviewData}
+                mediaFiles={mediaFiles}
+                videoFiles={videoFiles}
+                variant="pane"
+              />
+            </div>
+            <div className="edit-modal-data">
           {error && (
             <div style={{ padding: "0.75rem", marginBottom: "1rem", backgroundColor: "#fee", color: "#d72c0d", borderRadius: "4px" }}>
               {error}
@@ -1623,12 +1668,6 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               </div>
             </>
           )}
-          <BlockPreview
-            blockType={blockType}
-            data={editPreviewData}
-            mediaFiles={mediaFiles}
-            videoFiles={videoFiles}
-          />
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1.5rem" }}>
             <button
               type="button"
@@ -1658,6 +1697,8 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             >
               {isSubmitting ? "Updating..." : "Update Entry"}
             </button>
+          </div>
+            </div>
           </div>
         </form>
       </div>
