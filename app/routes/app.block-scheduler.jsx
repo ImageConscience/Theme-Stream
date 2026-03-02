@@ -266,7 +266,7 @@ export default function BlockSchedulerPage() {
           >
             <style>{`
               .create-modal-dialog .create-modal-body { display: flex; flex-direction: row; flex: 1; min-height: 0; }
-              .create-modal-dialog .create-modal-preview { flex: 0 0 70%; padding: 1.5rem; border-right: 1px solid #e1e3e5; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+              .create-modal-dialog .create-modal-preview { flex: 0 0 60%; padding: 1.5rem; border-right: 1px solid #e1e3e5; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
               .create-modal-dialog .create-modal-data { flex: 1; min-width: 0; overflow-y: auto; padding: 1.5rem; }
               .create-modal-dialog .create-modal-data .data-field-row { flex-direction: column; }
               .create-modal-dialog.create-modal-stacked .create-modal-body { flex-direction: column; }
@@ -590,7 +590,8 @@ export default function BlockSchedulerPage() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Desktop)</label>
                           <select name="image_height" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
-                            <option value="adapt_to_image">Adapt to image</option>
+                            <option value="adapt_to_width">Adapt to width (native height at 100% width)</option>
+                            <option value="adapt_to_height">Adapt to height</option>
                             <option value="small">Small</option>
                             <option value="medium">Medium</option>
                             <option value="large">Large</option>
@@ -600,7 +601,8 @@ export default function BlockSchedulerPage() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Mobile)</label>
                           <select name="image_height_mobile" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
-                            <option value="adapt_to_image">Adapt to image</option>
+                            <option value="adapt_to_width">Adapt to width (native height at 100% width)</option>
+                            <option value="adapt_to_height">Adapt to height</option>
                             <option value="small">Small</option>
                             <option value="medium">Medium</option>
                             <option value="large">Large</option>
@@ -1397,8 +1399,8 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
       timezoneOffset: formData.get("timezone_offset") || "",
       cssClass: formData.get("css_class") || "",
       customCss: formData.get("custom_css") || "",
-      imageHeight: formData.get("image_height") || "medium",
-      imageHeightMobile: formData.get("image_height_mobile") || "medium",
+      imageHeight: formData.get("image_height") || "adapt_to_width",
+      imageHeightMobile: formData.get("image_height_mobile") || "adapt_to_width",
       imageFit: formData.get("image_fit") || "cover",
       imageFitMobile: formData.get("image_fit_mobile") || "cover",
       buttonBgColor: formData.get("button_bg_color") || null,
@@ -1563,7 +1565,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
       >
         <style>{`
           .edit-modal-dialog .edit-modal-body { display: flex; flex-direction: row; flex: 1; min-height: 0; }
-          .edit-modal-dialog .edit-modal-preview { flex: 0 0 70%; padding: 1.5rem; border-right: 1px solid #e1e3e5; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+          .edit-modal-dialog .edit-modal-preview { flex: 0 0 60%; padding: 1.5rem; border-right: 1px solid #e1e3e5; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
           .edit-modal-dialog .edit-modal-data { flex: 1; min-width: 0; overflow-y: auto; padding: 1.5rem; }
           .edit-modal-dialog .edit-modal-data .data-field-row { flex-direction: column; }
           .edit-modal-dialog.edit-modal-stacked .edit-modal-body { flex-direction: column; }
@@ -1890,8 +1892,9 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                 <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Desktop)</label>
-                    <select name="image_height" defaultValue={typeConfig.image_height || "medium"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
-                      <option value="adapt_to_image">Adapt to image</option>
+                    <select name="image_height" defaultValue={typeConfig.image_height || "adapt_to_width"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="adapt_to_width">Adapt to width (native height at 100% width)</option>
+                      <option value="adapt_to_height">Adapt to height</option>
                       <option value="small">Small</option>
                       <option value="medium">Medium</option>
                       <option value="large">Large</option>
@@ -1900,8 +1903,9 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Mobile)</label>
-                    <select name="image_height_mobile" defaultValue={typeConfig.image_height_mobile || "medium"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
-                      <option value="adapt_to_image">Adapt to image</option>
+                    <select name="image_height_mobile" defaultValue={typeConfig.image_height_mobile || "adapt_to_width"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="adapt_to_width">Adapt to width (native height at 100% width)</option>
+                      <option value="adapt_to_height">Adapt to height</option>
                       <option value="small">Small</option>
                       <option value="medium">Medium</option>
                       <option value="large">Large</option>

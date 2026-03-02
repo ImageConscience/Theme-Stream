@@ -117,8 +117,8 @@
               {% assign selected_iwt_link = tc.button_link %}
               {% assign selected_css_class = tc.css_class | default: '' %}
               {% assign selected_custom_css = tc.custom_css | default: '' %}
-              {% assign selected_image_height = tc.image_height | default: 'medium' %}
-              {% assign selected_image_height_mobile = tc.image_height_mobile | default: 'medium' %}
+              {% assign selected_image_height = tc.image_height | default: 'adapt_to_width' %}
+              {% assign selected_image_height_mobile = tc.image_height_mobile | default: 'adapt_to_width' %}
               {% assign selected_image_fit = tc.image_fit | default: 'cover' %}
               {% assign selected_image_fit_mobile = tc.image_fit_mobile | default: 'cover' %}
               {% assign selected_button_bg = tc.button_bg_color %}
@@ -142,8 +142,8 @@
               {% assign selected_button_text = entry.button_text %}
               {% assign selected_css_class = '' %}
               {% assign selected_custom_css = '' %}
-              {% assign selected_image_height = 'medium' %}
-              {% assign selected_image_height_mobile = 'medium' %}
+              {% assign selected_image_height = 'adapt_to_width' %}
+              {% assign selected_image_height_mobile = 'adapt_to_width' %}
               {% assign selected_image_fit = 'cover' %}
               {% assign selected_image_fit_mobile = 'cover' %}
               {% assign selected_button_bg = blank %}
@@ -192,10 +192,11 @@
 {% assign show_block = false %}
 {% if show_hero or show_announcement or show_collection or show_countdown or show_iwt or show_video or show_promo %}{% assign show_block = true %}{% endif %}
 
-{% assign img_height = selected_image_height | default: 'medium' %}
-{% assign img_height_m = selected_image_height_mobile | default: 'medium' %}
-{% if img_height == 'adapt_to_image' %}{% assign banner_min_d = 'auto' %}{% elsif img_height == 'small' %}{% assign banner_min_d = '200px' %}{% elsif img_height == 'large' %}{% assign banner_min_d = '480px' %}{% elsif img_height == 'full_screen' %}{% assign banner_min_d = '100vh' %}{% else %}{% assign banner_min_d = '320px' %}{% endif %}
-{% if img_height_m == 'adapt_to_image' %}{% assign banner_min_m = 'auto' %}{% elsif img_height_m == 'small' %}{% assign banner_min_m = '180px' %}{% elsif img_height_m == 'large' %}{% assign banner_min_m = '360px' %}{% elsif img_height_m == 'full_screen' %}{% assign banner_min_m = '100vh' %}{% else %}{% assign banner_min_m = '280px' %}{% endif %}
+{% assign img_height = selected_image_height | default: 'adapt_to_width' %}
+{% assign img_height_m = selected_image_height_mobile | default: 'adapt_to_width' %}
+{% comment %} adapt_to_width = native height when width 100% (no min-height). adapt_to_height = container adapts to image height (50vh). adapt_to_image = backward compat for adapt_to_width. {% endcomment %}
+{% if img_height == 'adapt_to_width' or img_height == 'adapt_to_image' %}{% assign banner_min_d = 'auto' %}{% elsif img_height == 'adapt_to_height' %}{% assign banner_min_d = '50vh' %}{% elsif img_height == 'small' %}{% assign banner_min_d = '200px' %}{% elsif img_height == 'large' %}{% assign banner_min_d = '480px' %}{% elsif img_height == 'full_screen' %}{% assign banner_min_d = '100vh' %}{% else %}{% assign banner_min_d = '320px' %}{% endif %}
+{% if img_height_m == 'adapt_to_width' or img_height_m == 'adapt_to_image' %}{% assign banner_min_m = 'auto' %}{% elsif img_height_m == 'adapt_to_height' %}{% assign banner_min_m = '50vh' %}{% elsif img_height_m == 'small' %}{% assign banner_min_m = '180px' %}{% elsif img_height_m == 'large' %}{% assign banner_min_m = '360px' %}{% elsif img_height_m == 'full_screen' %}{% assign banner_min_m = '100vh' %}{% else %}{% assign banner_min_m = '280px' %}{% endif %}
 {% assign img_fit_d = selected_image_fit | default: 'cover' %}
 {% assign img_fit_m = selected_image_fit_mobile | default: 'cover' %}
 

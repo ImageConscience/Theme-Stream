@@ -1,5 +1,7 @@
 const HEIGHT_MAP = {
-  adapt_to_image: null,
+  adapt_to_width: null,   // native height when width 100% (default)
+  adapt_to_height: "50vh", // container adapts to image height (min 50vh)
+  adapt_to_image: null,   // backward compat -> same as adapt_to_width
   small: { desktop: 200, mobile: 180 },
   medium: { desktop: 320, mobile: 280 },
   large: { desktop: 480, mobile: 360 },
@@ -24,8 +26,8 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
   const imgUrl = resolveUrl(data.desktop_banner || data.mobile_banner || data.image || data.collection_banner_image || data.countdown_bg_image || data.image_with_text_image || data.promo_card_image);
   const videoUrl = data.video_url || resolveUrl(data.video_file);
 
-  const imgHeightKey = (data.image_height || "medium").trim() || "medium";
-  const imgHeightMobileKey = (data.image_height_mobile || "medium").trim() || "medium";
+  const imgHeightKey = (data.image_height || "adapt_to_width").trim() || "adapt_to_width";
+  const imgHeightMobileKey = (data.image_height_mobile || "adapt_to_width").trim() || "adapt_to_width";
   const heightSpec = isMobile ? HEIGHT_MAP[imgHeightMobileKey] : HEIGHT_MAP[imgHeightKey];
   const bannerMinHeight = heightSpec === null ? undefined : (typeof heightSpec === "string" ? heightSpec : (isMobile ? heightSpec.mobile : heightSpec.desktop));
 

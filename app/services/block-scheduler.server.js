@@ -331,8 +331,8 @@ export const action = async ({ request }) => {
           css_class: (body.cssClass || "").trim() || null,
           custom_css: (body.customCss || "").trim() || null,
           // Image/Video height & fit (for blocks with media)
-          image_height: body.imageHeight || "medium",
-          image_height_mobile: body.imageHeightMobile || "medium",
+          image_height: body.imageHeight || "adapt_to_width",
+          image_height_mobile: body.imageHeightMobile || "adapt_to_width",
           image_fit: body.imageFit || "cover",
           image_fit_mobile: body.imageFitMobile || "cover",
           // Button styling
@@ -969,8 +969,8 @@ export const action = async ({ request }) => {
 
     const cssClass = String(formData.get("css_class") || "").trim() || null;
     const customCss = String(formData.get("custom_css") || "").trim() || null;
-    const imgHeight = String(formData.get("image_height") || "medium").trim();
-    const imgHeightMobile = String(formData.get("image_height_mobile") || "medium").trim();
+    const imgHeight = String(formData.get("image_height") || "adapt_to_width").trim();
+    const imgHeightMobile = String(formData.get("image_height_mobile") || "adapt_to_width").trim();
     const imgFit = String(formData.get("image_fit") || "cover").trim();
     const imgFitMobile = String(formData.get("image_fit_mobile") || "cover").trim();
     const btnBg = String(formData.get("button_bg_color") || "").trim() || null;
@@ -987,8 +987,8 @@ export const action = async ({ request }) => {
       ...c,
       css_class: cssClass,
       custom_css: customCss,
-      image_height: imgHeight || "medium",
-      image_height_mobile: imgHeightMobile || "medium",
+      image_height: imgHeight || "adapt_to_width",
+      image_height_mobile: imgHeightMobile || "adapt_to_width",
       image_fit: imgFit || "cover",
       image_fit_mobile: imgFitMobile || "cover",
       button_bg_color: btnBg,
