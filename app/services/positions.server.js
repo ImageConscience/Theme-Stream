@@ -11,12 +11,20 @@ export async function ensureDefaultPosition(shop) {
   const existing = await prisma.blockPosition.findFirst({
     where: { shop, handle: "homepage_banner" },
   });
-  if (existing) return existing;
+  if (existing) {
+    if (existing.name === "Homepage Banner") {
+      return prisma.blockPosition.update({
+        where: { id: existing.id },
+        data: { name: "Uncategorized", description: "Default position for scheduled content" },
+      });
+    }
+    return existing;
+  }
   return prisma.blockPosition.create({
     data: {
       shop,
-      name: "Homepage Banner",
-      description: "Main banner position on the homepage",
+      name: "Uncategorized",
+      description: "Default position for scheduled content",
       handle: "homepage_banner",
     },
   });

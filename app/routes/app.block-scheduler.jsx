@@ -463,7 +463,7 @@ export default function BlockSchedulerPage() {
                   <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Background Color</label>
-                      <input
+            <input
                         type="color"
                         name="announcement_bg_color"
                         defaultValue="#000000"
@@ -472,7 +472,7 @@ export default function BlockSchedulerPage() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Text Color</label>
-                      <input
+            <input
                         type="color"
                         name="announcement_text_color"
                         defaultValue="#ffffff"
@@ -484,10 +484,10 @@ export default function BlockSchedulerPage() {
                   )}
                   {formBlockType === "collection_banner" && (
                     <>
-                  <s-text-field
+            <s-text-field
                     label="Collection Handle"
                     name="collection_handle"
-                    required
+              required
                     placeholder="e.g. summer-collection"
                   />
                   <MediaLibraryPicker
@@ -495,8 +495,8 @@ export default function BlockSchedulerPage() {
                     label="Banner Image (optional override)"
                     mediaFiles={loaderMediaFiles || []}
                     onSelect={() => setTimeout(updatePreview, 50)}
-                  />
-                  <s-text-field
+            />
+            <s-text-field
                     label="Headline Override"
                     name="collection_headline"
                     placeholder="Leave blank to use collection title"
@@ -521,7 +521,7 @@ export default function BlockSchedulerPage() {
                     <input
                       type="datetime-local"
                       name="countdown_target_date"
-                      required
+              required
                       style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }}
                     />
                   </div>
@@ -1733,10 +1733,10 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
         ...base,
         headline: formData.get("headline") || "",
         description: formData.get("description") || "",
-        desktopBanner: formData.get("desktop_banner") || "",
-        mobileBanner: formData.get("mobile_banner") || "",
-        targetUrl: formData.get("target_url") || "",
-        buttonText: formData.get("button_text") || "",
+      desktopBanner: formData.get("desktop_banner") || "",
+      mobileBanner: formData.get("mobile_banner") || "",
+      targetUrl: formData.get("target_url") || "",
+      buttonText: formData.get("button_text") || "",
       };
     }
     if (blockType === "announcement_bar") {
@@ -2020,26 +2020,26 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
           {blockType === "hero" && (
             <>
               <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "1rem" }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
                   <MediaLibraryPicker name="desktop_banner" label="Desktop Banner" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
                   <MediaLibraryPicker name="mobile_banner" label="Mobile Banner" mediaFiles={mediaFiles} defaultValue={fieldMap.mobile_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
-                </div>
-              </div>
-              <div style={{ marginBottom: "1rem" }}>
+            </div>
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
                 <input type="text" name="headline" defaultValue={fieldMap.headline || typeConfig.headline || ""} placeholder="Headline" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
-              </div>
-              <div style={{ marginBottom: "1rem" }}>
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description</label>
                 <input type="text" name="description" defaultValue={fieldMap.description || typeConfig.description || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
-              </div>
-              <div style={{ marginBottom: "1rem" }}>
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Target URL</label>
                 <input type="text" name="target_url" defaultValue={fieldMap.target_url || typeConfig.target_url || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
-              </div>
-              <div style={{ marginBottom: "1rem" }}>
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Button Text</label>
                 <input type="text" name="button_text" defaultValue={fieldMap.button_text || typeConfig.button_text || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
               </div>
@@ -2331,7 +2331,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: "500", fontSize: "0.8125rem" }}>
                           <input type="checkbox" name="mobile_content_below" value="on" defaultChecked={typeConfig.mobile_content_below === true || typeConfig.mobile_content_below === "true"} style={{ width: "18px", height: "18px" }} />
                           Show content below image on mobile
-                        </label>
+            </label>
                       </div>
                     </>
                   )}
@@ -2792,18 +2792,18 @@ function MediaLibraryPicker({ name, label, mediaFiles = [], defaultValue = "", o
                 Video selected
               </div>
             ) : (
-              <img
-                src={selectedFile.url}
-                alt={selectedFile.alt || ""}
-                style={{
-                  maxWidth: "200px",
-                  maxHeight: "150px",
-                  objectFit: "contain",
-                  border: "1px solid #c9cccf",
-                  borderRadius: "4px",
-                  padding: "0.25rem",
-                }}
-              />
+            <img
+              src={selectedFile.url}
+              alt={selectedFile.alt || ""}
+              style={{
+                maxWidth: "200px",
+                maxHeight: "150px",
+                objectFit: "contain",
+                border: "1px solid #c9cccf",
+                borderRadius: "4px",
+                padding: "0.25rem",
+              }}
+            />
             )}
             <button
               type="button"

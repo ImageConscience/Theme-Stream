@@ -22,13 +22,20 @@ const shopify = shopifyApp({
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),
   hooks: {
-    afterAuth: async ({ admin }) => {
+    afterAuth: async ({ admin, session }) => {
       logger.info("[afterAuth] Ensuring metaobject definition exists");
       try {
         const result = await ensureMetaobjectDefinition(admin);
         if (!result.ok) {
           logger.error("[afterAuth] Metaobject definition error:", result.error);
           // Don't throw - we don't want to block installation
+        }
+        const shop = session?.shop;
+        if (shop) {
+          const { listPositions } = await import("./services/positions.server.js");
+          const { syncAllPositionsToMetaobjects } = await import("./services/positions-metaobject.server.js");
+          const positions = await listPositions(shop);
+          await syncAllPositionsToMetaobjects(admin, positions);
         }
       } catch (error) {
         logger.error("[afterAuth] Error in afterAuth hook:", error);

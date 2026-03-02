@@ -25,6 +25,19 @@ scopes = "read_content,read_files,read_metaobject_definitions,read_metaobjects,u
 optional_scopes = [ ]
 use_legacy_install_flow = false
 
+[metaobjects.app.scheduler_position]
+name = "Scheduler Position"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"
+
+[metaobjects.app.scheduler_position.fields.name]
+name = "Name"
+type = "single_line_text_field"
+
+[metaobjects.app.scheduler_position.fields.description]
+name = "Description"
+type = "multi_line_text_field"
+
 [auth]
 redirect_urls = [
   "https://block-scheduler-production.up.railway.app/auth",

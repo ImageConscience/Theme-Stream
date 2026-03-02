@@ -17,22 +17,22 @@ async function fetchAllMetaobjects(admin) {
   const query = `#graphql
     query ListSchedulableEntities($first: Int!, $after: String) {
       metaobjects(type: "schedulable_entity", first: $first, after: $after) {
-        nodes {
-          id
-          handle
-          fields {
-            key
-            value
-            reference {
-              ... on MediaImage {
-                id
+          nodes {
+            id
+            handle
+            fields {
+              key
+              value
+              reference {
+                ... on MediaImage {
+                  id
                 image { url }
               }
             }
           }
           capabilities { publishable { status } }
-          updatedAt
-        }
+            updatedAt
+          }
         pageInfo {
           hasNextPage
           endCursor
@@ -63,12 +63,12 @@ async function fetchAllFiles(admin, queryFilter, pageSize = 250) {
   const gql = `#graphql
     query GetFiles($first: Int!, $after: String, $fileQuery: String) {
       files(first: $first, after: $after, query: $fileQuery) {
-        edges {
-          node {
-            id
-            createdAt
-            ... on MediaImage {
-              alt
+            edges {
+              node {
+                id
+                createdAt
+                ... on MediaImage {
+                  alt
               image { url width height }
             }
             ... on Video {
@@ -554,21 +554,23 @@ export const action = async ({ request }) => {
       }
 
       if (body.intent === "positionCreate") {
-        const { session } = await authenticate.admin(request);
+        const { admin, session } = await authenticate.admin(request);
         const shop = session?.shop;
         if (!shop) return json({ error: "Invalid session", success: false });
         const { createPosition } = await import("./positions.server.js");
         const name = (body.name || "").trim();
         if (!name) return json({ error: "Position name is required", success: false });
-        const { id, name: n, handle, description } = await createPosition(shop, {
+        const position = await createPosition(shop, {
           name,
           description: (body.description || "").trim() || null,
         });
-        return json({ success: true, message: "Position created!", position: { id, name: n, handle, description } });
+        const { syncPositionToMetaobject } = await import("./positions-metaobject.server.js");
+        await syncPositionToMetaobject(admin, position);
+        return json({ success: true, message: "Position created!", position: { id: position.id, name: position.name, handle: position.handle, description: position.description } });
       }
 
       if (body.intent === "positionUpdate") {
-        const { session } = await authenticate.admin(request);
+        const { admin, session } = await authenticate.admin(request);
         const shop = session?.shop;
         if (!shop) return json({ error: "Invalid session", success: false });
         const { updatePosition } = await import("./positions.server.js");
@@ -577,16 +579,20 @@ export const action = async ({ request }) => {
           description: body.description !== undefined ? (body.description ? String(body.description).trim() : null) : undefined,
         });
         if (!updated) return json({ error: "Position not found", success: false });
+        const { updatePositionMetaobject } = await import("./positions-metaobject.server.js");
+        await updatePositionMetaobject(admin, updated);
         return json({ success: true, message: "Position updated!", position: updated });
       }
 
       if (body.intent === "positionDelete") {
-        const { session } = await authenticate.admin(request);
+        const { admin, session } = await authenticate.admin(request);
         const shop = session?.shop;
         if (!shop) return json({ error: "Invalid session", success: false });
         const { deletePosition } = await import("./positions.server.js");
         const deleted = await deletePosition(shop, body.id);
         if (!deleted) return json({ error: "Position not found", success: false });
+        const { deletePositionMetaobject } = await import("./positions-metaobject.server.js");
+        await deletePositionMetaobject(admin, deleted.handle);
         return json({ success: true, message: "Position deleted!" });
       }
     }
