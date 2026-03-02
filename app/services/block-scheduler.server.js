@@ -101,7 +101,8 @@ async function fetchAllFiles(admin, queryFilter, pageSize = 250) {
 }
 
 export const loader = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
+  const shop = session?.shop;
 
   const confirmationUrl = await ensureActiveSubscription(admin, request);
   if (confirmationUrl) {
@@ -137,15 +138,16 @@ export const loader = async ({ request }) => {
       const errorMessages = metaError.message || "";
       if (errorMessages.includes("metaobject definition") || errorMessages.includes("type")) {
         logger.warn("Metaobject definition may not exist yet. Returning empty entries.");
-        return {
-          entries: [],
-          mediaFiles: [],
-          videoFiles: [],
-          storeTimeZone,
-          blockTypes: BLOCK_TYPES,
-          defaultBlockType: DEFAULT_BLOCK_TYPE,
-          error: "Metaobject definition not found. Please ensure the app has been properly installed.",
-        };
+    return {
+      entries: [],
+      mediaFiles: [],
+      videoFiles: [],
+      storeTimeZone,
+      blockTypes: BLOCK_TYPES,
+      defaultBlockType: DEFAULT_BLOCK_TYPE,
+      positions: [],
+      error: "Metaobject definition not found. Please ensure the app has been properly installed.",
+    };
       }
       throw metaError;
     }
@@ -184,6 +186,16 @@ export const loader = async ({ request }) => {
       logger.error("Error loading media files:", error);
     }
 
+    let positions = [];
+    if (shop) {
+      try {
+        const { listPositions } = await import("./positions.server.js");
+        positions = await listPositions(shop);
+      } catch (posErr) {
+        logger.warn("Could not load positions:", posErr);
+      }
+    }
+
     return {
       entries,
       mediaFiles,
@@ -191,6 +203,7 @@ export const loader = async ({ request }) => {
       storeTimeZone,
       blockTypes: BLOCK_TYPES,
       defaultBlockType: DEFAULT_BLOCK_TYPE,
+      positions,
     };
   } catch (error) {
     logger.error("Error loading schedulable entities:", error);
@@ -201,6 +214,7 @@ export const loader = async ({ request }) => {
       storeTimeZone: "UTC",
       blockTypes: BLOCK_TYPES,
       defaultBlockType: DEFAULT_BLOCK_TYPE,
+      positions: [],
       error: `Failed to load entries: ${error.message}`,
     };
   }
@@ -347,7 +361,13 @@ export const action = async ({ request }) => {
           description_font_size: body.descriptionFontSize != null ? String(body.descriptionFontSize) : null,
           headline_color: body.headlineColor || null,
           description_color: body.descriptionColor || null,
+          headline_color_below: body.headlineColorBelow || null,
+          description_color_below: body.descriptionColorBelow || null,
+          button_bg_color_below: body.buttonBgColorBelow || null,
+          button_text_color_below: body.buttonTextColorBelow || null,
           text_alignment: body.textAlignment || null,
+          vertical_alignment: body.verticalAlignment || null,
+          mobile_content_below: body.mobileContentBelow === true || body.mobileContentBelow === "true",
           // Overlay (0 = off, 1-100 = opacity %)
           overlay_opacity: body.overlayOpacity != null ? Math.min(100, Math.max(0, Number(body.overlayOpacity))) : null,
           overlay_color: body.overlayColor || null,
@@ -531,6 +551,43 @@ export const action = async ({ request }) => {
 
         logger.debug("[ACTION] Status toggled successfully");
         return json({ success: true, message: "Status updated successfully!" });
+      }
+
+      if (body.intent === "positionCreate") {
+        const { session } = await authenticate.admin(request);
+        const shop = session?.shop;
+        if (!shop) return json({ error: "Invalid session", success: false });
+        const { createPosition } = await import("./positions.server.js");
+        const name = (body.name || "").trim();
+        if (!name) return json({ error: "Position name is required", success: false });
+        const { id, name: n, handle, description } = await createPosition(shop, {
+          name,
+          description: (body.description || "").trim() || null,
+        });
+        return json({ success: true, message: "Position created!", position: { id, name: n, handle, description } });
+      }
+
+      if (body.intent === "positionUpdate") {
+        const { session } = await authenticate.admin(request);
+        const shop = session?.shop;
+        if (!shop) return json({ error: "Invalid session", success: false });
+        const { updatePosition } = await import("./positions.server.js");
+        const updated = await updatePosition(shop, body.id, {
+          name: body.name != null ? String(body.name).trim() : undefined,
+          description: body.description !== undefined ? (body.description ? String(body.description).trim() : null) : undefined,
+        });
+        if (!updated) return json({ error: "Position not found", success: false });
+        return json({ success: true, message: "Position updated!", position: updated });
+      }
+
+      if (body.intent === "positionDelete") {
+        const { session } = await authenticate.admin(request);
+        const shop = session?.shop;
+        if (!shop) return json({ error: "Invalid session", success: false });
+        const { deletePosition } = await import("./positions.server.js");
+        const deleted = await deletePosition(shop, body.id);
+        if (!deleted) return json({ error: "Position not found", success: false });
+        return json({ success: true, message: "Position deleted!" });
       }
     }
 
@@ -984,6 +1041,10 @@ export const action = async ({ request }) => {
     const descFontSize = formData.get("description_font_size");
     const headColor = String(formData.get("headline_color") || "").trim() || null;
     const descColor = String(formData.get("description_color") || "").trim() || null;
+    const headColorBelow = String(formData.get("headline_color_below") || "").trim() || null;
+    const descColorBelow = String(formData.get("description_color_below") || "").trim() || null;
+    const btnBgBelow = String(formData.get("button_bg_color_below") || "").trim() || null;
+    const btnTextBelow = String(formData.get("button_text_color_below") || "").trim() || null;
     const textAlign = String(formData.get("text_alignment") || "").trim() || null;
     const addCreateStyling = (c) => ({
       ...c,
@@ -1003,7 +1064,16 @@ export const action = async ({ request }) => {
       description_font_size: descFontSize != null && descFontSize !== "" ? String(descFontSize) : null,
       headline_color: headColor,
       description_color: descColor,
+      headline_color_below: headColorBelow,
+      description_color_below: descColorBelow,
+      button_bg_color_below: btnBgBelow,
+      button_text_color_below: btnTextBelow,
       text_alignment: textAlign,
+      vertical_alignment: (() => {
+        const v = formData.get("vertical_alignment");
+        return v != null && v !== "" ? String(v).trim() : null;
+      })(),
+      mobile_content_below: formData.get("mobile_content_below") === "on" || formData.get("mobile_content_below") === "true",
       overlay_opacity: (() => {
         const v = formData.get("overlay_opacity");
         return v != null && v !== "" ? Math.min(100, Math.max(0, Number(v))) : null;

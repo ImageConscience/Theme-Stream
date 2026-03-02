@@ -3,11 +3,10 @@
   Supports Hero and Announcement Bar types. If multiple matches, selects the one with most recent start_at.
 {% endcomment %}
 
+{% comment %} Store-owned metaobjects. Use metaobjects.type.values to loop all entries. {% endcomment %}
 {% assign all_entries = metaobjects.schedulable_entity.values %}
 {% assign position_id = block.settings.position_id | default: '' | strip %}
-{% assign allowed_types_str = block.settings.allowed_block_types | default: 'hero' | strip %}
-{% assign allowed_types = allowed_types_str | split: ',' | map: 'strip' %}
-
+{% comment %} All block types allowed when scheduled for this position {% endcomment %}
 {% assign now_ts = 'now' | date: '%s' | plus: 0 %}
 
 {% assign latest_start_ts = 0 %}
@@ -50,19 +49,9 @@
 
 {% if all_entries != blank %}
   {% for entry in all_entries %}
-    {% assign entry_pos = entry.position_id | strip %}
+    {% assign entry_pos = entry.position_id.value | default: entry.position_id | strip %}
     {% assign entry_block_type = entry.block_type | default: 'hero' | strip %}
-    {% assign type_allowed = false %}
-    {% for at in allowed_types %}
-      {% if at == entry_block_type %}
-        {% assign type_allowed = true %}
-        {% break %}
-      {% endif %}
-    {% endfor %}
-    {% if allowed_types.size == 0 %}
-      {% assign type_allowed = true %}
-    {% endif %}
-    {% if entry_pos == position_id and type_allowed %}
+    {% if entry_pos == position_id %}
       {% assign start_at_value = entry.start_at %}
       {% assign end_at_value = entry.end_at %}
       
@@ -135,6 +124,12 @@
               {% assign selected_text_alignment = tc.text_alignment %}
               {% assign selected_overlay_opacity = tc.overlay_opacity %}
               {% assign selected_overlay_color = tc.overlay_color %}
+              {% assign selected_vertical_alignment = tc.vertical_alignment %}
+              {% assign selected_mobile_content_below = tc.mobile_content_below %}
+              {% assign selected_headline_color_below = tc.headline_color_below %}
+              {% assign selected_desc_color_below = tc.description_color_below %}
+              {% assign selected_button_bg_below = tc.button_bg_color_below %}
+              {% assign selected_button_text_color_below = tc.button_text_color_below %}
             {% else %}
               {% assign selected_title = entry.headline %}
               {% assign selected_description = entry.description %}
@@ -162,6 +157,13 @@
               {% assign selected_text_alignment = blank %}
               {% assign selected_overlay_opacity = blank %}
               {% assign selected_overlay_color = blank %}
+              {% assign selected_vertical_alignment = blank %}
+              {% assign selected_content_alignment = blank %}
+              {% assign selected_mobile_content_below = blank %}
+              {% assign selected_headline_color_below = blank %}
+              {% assign selected_desc_color_below = blank %}
+              {% assign selected_button_bg_below = blank %}
+              {% assign selected_button_text_color_below = blank %}
             {% endif %}
             {% assign found_match = true %}
           {% endif %}
@@ -183,7 +185,7 @@
 {% assign show_video = false %}
 {% assign show_promo = false %}
 {% if found_match %}
-  {% if selected_block_type == 'hero' and selected_target_url != blank %}{% assign show_hero = true %}{% endif %}
+  {% if selected_block_type == 'hero' and (selected_desktop_banner != blank or selected_mobile_banner != blank) %}{% assign show_hero = true %}{% endif %}
   {% if selected_block_type == 'announcement_bar' and selected_announcement_text != blank %}{% assign show_announcement = true %}{% endif %}
   {% if selected_block_type == 'collection_banner' and selected_collection_handle != blank %}{% assign show_collection = true %}{% endif %}
   {% if selected_block_type == 'countdown_banner' and selected_countdown_target != blank %}{% assign show_countdown = true %}{% endif %}
@@ -209,32 +211,32 @@
 {% endif %}
 <div class="scheduled-banner {{ selected_css_class }} {% unless show_block %}scheduled-banner--hidden{% endunless %}" style="margin-top: {{ margin_top }}px; margin-bottom: {{ margin_bottom }}px;" {{ block.shopify_attributes }}>
   {% if show_hero %}
-    {% assign mobile_content_below = block.settings.mobile_content_below | default: false %}
-    {% assign overlay_color = selected_overlay_color | default: block.settings.overlay_color | default: '#000000' %}
-    {% assign overlay_opacity_raw = selected_overlay_opacity | default: block.settings.overlay_opacity | default: 70 %}
+    {% assign mobile_content_below = selected_mobile_content_below | default: false %}
+    {% assign overlay_color = selected_overlay_color | default: '#000000' %}
+    {% assign overlay_opacity_raw = selected_overlay_opacity | default: 70 %}
     {% assign overlay_opacity = overlay_opacity_raw | divided_by: 100.0 %}
-    {% assign vertical_alignment = block.settings.vertical_alignment | default: 'bottom' %}
-    {% assign content_alignment_desktop = block.settings.content_alignment_desktop | default: 'left' %}
-    {% assign content_alignment_mobile = block.settings.content_alignment_mobile | default: 'left' %}
-    {% assign button_padding_top = block.settings.button_padding_top | default: 12 %}
-    {% assign button_padding_bottom = block.settings.button_padding_bottom | default: 12 %}
-    {% assign button_padding_left = block.settings.button_padding_left | default: 30 %}
-    {% assign button_padding_right = block.settings.button_padding_right | default: 30 %}
-    {% assign headline_font_size = block.settings.headline_font_size | default: 2.5 %}
-    {% assign title_font = block.settings.title_font %}
-    {% assign description_font = block.settings.description_font %}
-    {% assign description_font_size = block.settings.description_font_size | default: 0.9 %}
-    {% assign button_font_size = block.settings.button_font_size | default: 1.0 %}
-    {% assign button_border_radius = block.settings.button_border_radius | default: 6 %}
-    {% assign title_color_overlay = block.settings.title_color_overlay | default: '#ffffff' %}
-    {% assign title_color_below = block.settings.title_color_below | default: '#2c3e50' %}
-    {% assign description_color_overlay = block.settings.description_color_overlay | default: '#ffffff' %}
-    {% assign description_color_below = block.settings.description_color_below | default: '#666666' %}
-    {% assign button_text_uppercase = block.settings.button_text_uppercase | default: false %}
-    {% assign button_bg_overlay = block.settings.button_bg_overlay | default: '#ffffff' %}
-    {% assign button_text_overlay = block.settings.button_text_overlay | default: '#667eea' %}
-    {% assign button_bg_below = block.settings.button_bg_below | default: '#667eea' %}
-    {% assign button_text_below = block.settings.button_text_below | default: '#ffffff' %}
+    {% assign vertical_alignment = selected_vertical_alignment | default: 'bottom' %}
+    {% assign content_alignment_desktop = selected_text_alignment | default: 'left' %}
+    {% assign content_alignment_mobile = selected_text_alignment | default: 'left' %}
+    {% assign button_padding_top = 12 %}
+    {% assign button_padding_bottom = 12 %}
+    {% assign button_padding_left = 30 %}
+    {% assign button_padding_right = 30 %}
+    {% assign headline_font_size = 2.5 %}
+    {% assign title_font = blank %}
+    {% assign description_font = blank %}
+    {% assign description_font_size = 0.9 %}
+    {% assign button_font_size = 1.0 %}
+    {% assign button_border_radius = 6 %}
+    {% assign title_color_overlay = '#ffffff' %}
+    {% assign title_color_below = '#2c3e50' %}
+    {% assign description_color_overlay = '#ffffff' %}
+    {% assign description_color_below = '#666666' %}
+    {% assign button_text_uppercase = false %}
+    {% assign button_bg_overlay = '#ffffff' %}
+    {% assign button_text_overlay = '#667eea' %}
+    {% assign button_bg_below = '#667eea' %}
+    {% assign button_text_below = '#ffffff' %}
     {% if selected_headline_font_size != blank %}{% assign headline_font_size = selected_headline_font_size %}{% endif %}
     {% if selected_desc_font_size != blank %}{% assign description_font_size = selected_desc_font_size %}{% endif %}
     {% if selected_button_font_size != blank %}{% assign button_font_size = selected_button_font_size %}{% endif %}
@@ -246,9 +248,13 @@
     {% if selected_desc_color != blank %}{% assign description_color_overlay = selected_desc_color %}{% endif %}
     {% if selected_button_bg != blank %}{% assign button_bg_overlay = selected_button_bg %}{% endif %}
     {% if selected_button_text_color != blank %}{% assign button_text_overlay = selected_button_text_color %}{% endif %}
+    {% if selected_headline_color_below != blank %}{% assign title_color_below = selected_headline_color_below %}{% endif %}
+    {% if selected_desc_color_below != blank %}{% assign description_color_below = selected_desc_color_below %}{% endif %}
+    {% if selected_button_bg_below != blank %}{% assign button_bg_below = selected_button_bg_below %}{% endif %}
+    {% if selected_button_text_color_below != blank %}{% assign button_text_below = selected_button_text_color_below %}{% endif %}
     {% if selected_text_alignment != blank %}{% assign content_alignment_desktop = selected_text_alignment %}{% assign content_alignment_mobile = selected_text_alignment %}{% endif %}
     
-    <a href="{{ selected_target_url }}" class="scheduled-banner__link scheduled-banner__hero-link" style="--headline-size: {{ headline_font_size }}em; --desc-size: {{ description_font_size }}em; --btn-size: {{ button_font_size }}em; --btn-radius: {{ button_border_radius }}px; --btn-pad-t: {{ button_padding_top }}px; --btn-pad-r: {{ button_padding_right }}px; --btn-pad-b: {{ button_padding_bottom }}px; --btn-pad-l: {{ button_padding_left }}px; --title-overlay: {{ title_color_overlay }}; --desc-overlay: {{ description_color_overlay }}; --btn-bg-overlay: {{ button_bg_overlay }}; --btn-text-overlay: {{ button_text_overlay }}; --title-below: {{ title_color_below }}; --desc-below: {{ description_color_below }}; --btn-bg-below: {{ button_bg_below }}; --btn-text-below: {{ button_text_below }}; --headline-below-size: {{ headline_font_size | times: 0.8 }}em;{% if title_font != blank %} --title-font: {{ title_font.family }}, {{ title_font.fallback_families }}; --title-weight: {{ title_font.weight }}; --title-style: {{ title_font.style }};{% endif %}{% if description_font != blank %} --desc-font: {{ description_font.family }}, {{ description_font.fallback_families }}; --desc-weight: {{ description_font.weight }}; --desc-style: {{ description_font.style }};{% endif %}{% if button_text_uppercase %} --btn-uppercase: uppercase;{% else %} --btn-uppercase: none;{% endif %}">
+    <a href="{{ selected_target_url | default: '#' }}" class="scheduled-banner__link scheduled-banner__hero-link" style="--headline-size: {{ headline_font_size }}em; --desc-size: {{ description_font_size }}em; --btn-size: {{ button_font_size }}em; --btn-radius: {{ button_border_radius }}px; --btn-pad-t: {{ button_padding_top }}px; --btn-pad-r: {{ button_padding_right }}px; --btn-pad-b: {{ button_padding_bottom }}px; --btn-pad-l: {{ button_padding_left }}px; --title-overlay: {{ title_color_overlay }}; --desc-overlay: {{ description_color_overlay }}; --btn-bg-overlay: {{ button_bg_overlay }}; --btn-text-overlay: {{ button_text_overlay }}; --title-below: {{ title_color_below }}; --desc-below: {{ description_color_below }}; --btn-bg-below: {{ button_bg_below }}; --btn-text-below: {{ button_text_below }}; --headline-below-size: {{ headline_font_size | times: 0.8 }}em;{% if title_font != blank %} --title-font: {{ title_font.family }}, {{ title_font.fallback_families }}; --title-weight: {{ title_font.weight }}; --title-style: {{ title_font.style }};{% endif %}{% if description_font != blank %} --desc-font: {{ description_font.family }}, {{ description_font.fallback_families }}; --desc-weight: {{ description_font.weight }}; --desc-style: {{ description_font.style }};{% endif %}{% if button_text_uppercase %} --btn-uppercase: uppercase;{% else %} --btn-uppercase: none;{% endif %}">
       <div class="scheduled-banner__banner-container {% if mobile_content_below %}scheduled-banner__banner-container--mobile-below{% endif %}">
         {% if selected_desktop_banner != blank %}
           <div class="scheduled-banner__banner scheduled-banner__banner--desktop{% if banner_min_d != 'auto' %} scheduled-banner__banner--fixed-height{% endif %}"{% if banner_min_d != 'auto' %} style="min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};"{% endif %}>
@@ -972,16 +978,9 @@
     {
       "type": "text",
       "id": "position_id",
-      "label": "Position ID",
-      "info": "The position ID to filter scheduled content by",
+      "label": "Position Handle",
+      "info": "Use the handle from Block Scheduler > Positions (e.g. homepage_banner). Copy from the app.",
       "default": "homepage_banner"
-    },
-    {
-      "type": "text",
-      "id": "allowed_block_types",
-      "label": "Allowed block types",
-      "info": "Comma-separated: hero, announcement_bar, collection_banner, countdown_banner, image_with_text, background_video, promo_card. Empty = all.",
-      "default": "hero"
     },
     {
       "type": "number",
@@ -989,153 +988,6 @@
       "label": "Mobile Breakpoint (px)",
       "info": "Screen width below which mobile banner is shown",
       "default": 768
-    },
-    {
-      "type": "checkbox",
-      "id": "mobile_content_below",
-      "label": "Show content below image on mobile",
-      "info": "When enabled, title and button will appear below the image on mobile instead of as an overlay",
-      "default": false
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "title_color_overlay",
-      "label": "Title Color (Overlay)",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "title_color_below",
-      "label": "Title Color (Below Image)",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "description_color_overlay",
-      "label": "Description Color (Overlay)",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "description_color_below",
-      "label": "Description Color (Below Image)",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "button_bg_overlay",
-      "label": "Button Background (Overlay)",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_text_overlay",
-      "label": "Button Text (Overlay)",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "button_bg_below",
-      "label": "Button Background (Below Image)",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "button_text_below",
-      "label": "Button Text (Below Image)",
-      "default": "#ffffff"
-    },
-    {
-      "type": "header",
-      "content": "Overlay Settings"
-    },
-    {
-      "type": "color",
-      "id": "overlay_color",
-      "label": "Overlay Color",
-      "default": "#000000"
-    },
-    {
-      "type": "range",
-      "id": "overlay_opacity",
-      "label": "Overlay Opacity",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 70
-    },
-    {
-      "type": "header",
-      "content": "Content Positioning"
-    },
-    {
-      "type": "select",
-      "id": "vertical_alignment",
-      "label": "Vertical Alignment",
-      "options": [
-        {
-          "value": "top",
-          "label": "Top"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "bottom",
-          "label": "Bottom"
-        }
-      ],
-      "default": "bottom"
-    },
-    {
-      "type": "select",
-      "id": "content_alignment_desktop",
-      "label": "Content Text Alignment (Desktop)",
-      "options": [
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        }
-      ],
-      "default": "left"
-    },
-    {
-      "type": "select",
-      "id": "content_alignment_mobile",
-      "label": "Content Text Alignment (Mobile)",
-      "options": [
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        }
-      ],
-      "default": "left"
-    },
-    {
-      "type": "header",
-      "content": "Spacing"
     },
     {
       "type": "range",
@@ -1156,108 +1008,6 @@
       "step": 5,
       "unit": "px",
       "default": 20
-    },
-    {
-      "type": "header",
-      "content": "Typography & Button"
-    },
-    {
-      "type": "font_picker",
-      "id": "title_font",
-      "label": "Title Font",
-      "default": "assistant_n4"
-    },
-    {
-      "type": "font_picker",
-      "id": "description_font",
-      "label": "Description Font",
-      "default": "assistant_n4"
-    },
-    {
-      "type": "range",
-      "id": "headline_font_size",
-      "label": "Headline Font Size",
-      "min": 1.0,
-      "max": 5.0,
-      "step": 0.1,
-      "unit": "em",
-      "default": 3
-    },
-    {
-      "type": "range",
-      "id": "description_font_size",
-      "label": "Description Font Size",
-      "min": 0.5,
-      "max": 3.0,
-      "step": 0.1,
-      "unit": "em",
-      "default": 1.0
-    },
-    {
-      "type": "range",
-      "id": "button_font_size",
-      "label": "Button Font Size",
-      "min": 0.5,
-      "max": 2.0,
-      "step": 0.1,
-      "unit": "em",
-      "default": 0.9
-    },
-    {
-      "type": "range",
-      "id": "button_border_radius",
-      "label": "Button Border Radius",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "checkbox",
-      "id": "button_text_uppercase",
-      "label": "Button Text All Caps",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "button_padding_top",
-      "label": "Button Padding Top",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 20
-    },
-    {
-      "type": "range",
-      "id": "button_padding_bottom",
-      "label": "Button Padding Bottom",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 20
-    },
-    {
-      "type": "range",
-      "id": "button_padding_left",
-      "label": "Button Padding Left",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 30
-    },
-    {
-      "type": "range",
-      "id": "button_padding_right",
-      "label": "Button Padding Right",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 30
     }
   ]
 }

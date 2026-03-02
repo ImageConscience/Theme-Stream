@@ -40,6 +40,11 @@ export default function BlockSchedulerPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [positionModalOpen, setPositionModalOpen] = useState(false);
+  const [positionEditTarget, setPositionEditTarget] = useState(null);
+  const [positionFormName, setPositionFormName] = useState("");
+  const [positionFormDesc, setPositionFormDesc] = useState("");
+  const [positionDeleteConfirm, setPositionDeleteConfirm] = useState(null);
   const [userTimeZone, setUserTimeZone] = useState("UTC");
   const [userTimezoneOffset, setUserTimezoneOffset] = useState(0);
   const [formBlockType, setFormBlockType] = useState("hero");
@@ -49,6 +54,7 @@ export default function BlockSchedulerPage() {
   const statusInputId = useId();
   const blockTypes = loaderData?.blockTypes ?? {};
   const defaultBlockType = loaderData?.defaultBlockType ?? "hero";
+  const positions = loaderData?.positions ?? [];
 
   const performRedirect = useCallback(
     (url, source) => {
@@ -375,12 +381,24 @@ export default function BlockSchedulerPage() {
               required
               placeholder="Display title for this schedulable entry"
             />
-            <s-text-field
-              label="Position ID"
-              name="position_id"
-              required
-              placeholder="e.g., homepage_banner"
-            />
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Position <span style={{ color: "#d72c0d" }}>*</span></label>
+              <select
+                name="position_id"
+                required
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.875rem" }}
+              >
+                <option value="">Select position...</option>
+                {positions.map((p) => (
+                  <option key={p.id} value={p.handle}>
+                    {p.name}{p.description ? ` — ${p.description}` : ""}
+                  </option>
+                ))}
+              </select>
+              {positions.length === 0 && (
+                <p style={{ margin: "0.25rem 0 0", fontSize: "0.75rem", color: "#6d7175" }}>No positions yet. Add one in the Positions section below.</p>
+              )}
+            </div>
                   <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.8125rem", color: "#6d7175" }}>
                     Times are in store timezone ({storeTimeZone}).{userTimeZone !== storeTimeZone && (
                       <> In your timezone ({userTimeZone}): times will differ.</>
@@ -707,6 +725,29 @@ export default function BlockSchedulerPage() {
                           </select>
                         </div>
                       </div>
+                      {formBlockType === "hero" && (
+                        <>
+                          <p style={{ margin: "0.5rem 0 0.25rem 0", fontSize: "0.75rem", color: "#6d7175" }}>When content below image (mobile):</p>
+                          <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline color</label>
+                              <input type="color" name="headline_color_below" defaultValue="#2c3e50" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description color</label>
+                              <input type="color" name="description_color_below" defaultValue="#666666" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Button bg</label>
+                              <input type="color" name="button_bg_color_below" defaultValue="#667eea" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Button text</label>
+                              <input type="color" name="button_text_color_below" defaultValue="#ffffff" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                   <div style={{ marginBottom: "0.5rem", padding: "0.75rem", backgroundColor: "#f6f6f7", borderRadius: "4px" }}>
@@ -946,7 +987,7 @@ export default function BlockSchedulerPage() {
                         }}
                         onClick={() => handleSort('position_id')}
                       >
-                        Position ID {getSortDirection('position_id') && (
+                        Position {getSortDirection('position_id') && (
                           <span style={{ marginLeft: "0.5rem", fontSize: "0.75rem", color: "#667eea" }}>
                             {getSortDirection('position_id') === 'asc' ? '↑' : '↓'} {getSortOrder('position_id')}
                           </span>
@@ -1197,7 +1238,7 @@ export default function BlockSchedulerPage() {
                         {fieldMap.title || "(untitled)"}
                       </td>
                       <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5" }}>
-                        {fieldMap.position_id || "-"}
+                        {positions.find((p) => p.handle === fieldMap.position_id)?.name || fieldMap.position_id || "-"}
                       </td>
                       <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontSize: "0.8125rem" }}>
                         {blockTypes[fieldMap.block_type || "hero"]?.label || fieldMap.block_type || "Hero"}
@@ -1290,6 +1331,249 @@ export default function BlockSchedulerPage() {
         )}
       </s-section>
 
+      {/* Positions Section */}
+      <s-section>
+        <h2 style={{ fontSize: "1.2rem", lineHeight: 1.1, margin: "0 0 10px 0" }}>Positions</h2>
+        <p style={{ fontSize: "0.875rem", color: "#6d7175", margin: "0 0 1rem 0" }}>
+          Positions are placement slots for scheduled content. Create positions here, then select them when creating entries and use the <strong>handle</strong> in your theme block settings.
+        </p>
+        <div style={{ overflowX: "auto", border: "1px solid #e1e3e5", borderRadius: "8px", marginBottom: "1rem" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid #e1e3e5", backgroundColor: "#f6f6f7" }}>
+                <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600" }}>Name</th>
+                <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600" }}>Handle</th>
+                <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600" }}>Description</th>
+                <th style={{ padding: "0.75rem", textAlign: "center", fontWeight: "600", width: "120px" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {positions.map((p) => (
+                <tr key={p.id} style={{ borderBottom: "1px solid #e1e3e5" }}>
+                  <td style={{ padding: "0.75rem" }}>{p.name}</td>
+                  <td style={{ padding: "0.75rem", fontFamily: "monospace", fontSize: "0.8125rem" }}>
+                    <code style={{ backgroundColor: "#f0f0f0", padding: "2px 6px", borderRadius: "4px" }}>{p.handle}</code>
+                  </td>
+                  <td style={{ padding: "0.75rem", color: "#6d7175" }}>{p.description || "—"}</td>
+                  <td style={{ padding: "0.75rem", textAlign: "center" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPositionEditTarget(p);
+                        setPositionFormName(p.name);
+                        setPositionFormDesc(p.description || "");
+                        setPositionModalOpen(true);
+                      }}
+                      style={{ marginRight: "0.5rem", fontSize: "0.8125rem", color: "#667eea", cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPositionDeleteConfirm(p)}
+                      style={{ fontSize: "0.8125rem", color: "#d72c0d", cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setPositionEditTarget(null);
+            setPositionFormName("");
+            setPositionFormDesc("");
+            setPositionModalOpen(true);
+          }}
+          style={{
+            padding: "0.5rem 0.75rem",
+            border: "1px solid #008060",
+            borderRadius: "4px",
+            background: "#008060",
+            color: "#fff",
+            cursor: "pointer",
+            fontSize: "0.875rem",
+            fontWeight: "600",
+          }}
+        >
+          Add Position
+        </button>
+      </s-section>
+
+      {/* Position Add/Edit Modal */}
+      {positionModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+          }}
+          onClick={(e) => e.target === e.currentTarget && setPositionModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              width: "100%",
+              maxWidth: "400px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.125rem" }}>{positionEditTarget ? "Edit Position" : "Add Position"}</h3>
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Name</label>
+              <input
+                type="text"
+                value={positionFormName}
+                onChange={(e) => setPositionFormName(e.target.value)}
+                placeholder="e.g. Homepage Banner"
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.875rem", boxSizing: "border-box" }}
+              />
+            </div>
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description (optional)</label>
+              <input
+                type="text"
+                value={positionFormDesc}
+                onChange={(e) => setPositionFormDesc(e.target.value)}
+                placeholder="e.g. Main banner on homepage"
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.875rem", boxSizing: "border-box" }}
+              />
+            </div>
+            {positionEditTarget && (
+              <p style={{ fontSize: "0.75rem", color: "#6d7175", marginBottom: "1rem" }}>
+                Handle: <code style={{ backgroundColor: "#f0f0f0", padding: "2px 4px" }}>{positionEditTarget.handle}</code> (used in theme block)
+              </p>
+            )}
+            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                onClick={() => setPositionModalOpen(false)}
+                style={{ padding: "0.5rem 1rem", border: "1px solid #c9cccf", borderRadius: "4px", background: "white", cursor: "pointer", fontSize: "0.875rem" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const name = positionFormName.trim();
+                  if (!name) return;
+                  const body = positionEditTarget
+                    ? { intent: "positionUpdate", id: positionEditTarget.id, name, description: positionFormDesc.trim() || null }
+                    : { intent: "positionCreate", name, description: positionFormDesc.trim() || null };
+                  try {
+                    const res = await fetch(window.location.pathname, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(body),
+                      credentials: "include",
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setPositionModalOpen(false);
+                      revalidator.revalidate();
+                    } else {
+                      alert(data.error || "Failed");
+                    }
+                  } catch (err) {
+                    alert(err.message || "Failed");
+                  }
+                }}
+                style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", background: "#008060", color: "white", cursor: "pointer", fontSize: "0.875rem", fontWeight: "600" }}
+              >
+                {positionEditTarget ? "Save" : "Create"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Position Delete Confirmation */}
+      {positionDeleteConfirm && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+          }}
+          onClick={(e) => e.target === e.currentTarget && setPositionDeleteConfirm(null)}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              maxWidth: "400px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: "0 0 0.5rem 0" }}>Delete position?</h3>
+            <p style={{ margin: "0 0 1rem 0", color: "#6d7175", fontSize: "0.875rem" }}>
+              Delete &quot;{positionDeleteConfirm.name}&quot;? Entries using this position will need to be updated.
+            </p>
+            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                onClick={() => setPositionDeleteConfirm(null)}
+                style={{ padding: "0.5rem 1rem", border: "1px solid #c9cccf", borderRadius: "4px", background: "white", cursor: "pointer", fontSize: "0.875rem" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch(window.location.pathname, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ intent: "positionDelete", id: positionDeleteConfirm.id }),
+                      credentials: "include",
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setPositionDeleteConfirm(null);
+                      revalidator.revalidate();
+                    } else {
+                      alert(data.error || "Failed");
+                    }
+                  } catch (err) {
+                    alert(err.message || "Failed");
+                  }
+                }}
+                style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", background: "#d72c0d", color: "white", cursor: "pointer", fontSize: "0.875rem", fontWeight: "600" }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Modal */}
       {editModalOpen && selectedEntry && (
         <EditEntryModal
@@ -1297,6 +1581,7 @@ export default function BlockSchedulerPage() {
           mediaFiles={mediaFiles}
           videoFiles={loaderVideoFiles || []}
           blockTypes={blockTypes}
+          positions={positions}
           storeTimeZone={storeTimeZone}
           userTimeZone={userTimeZone}
           userTimezoneOffset={userTimezoneOffset}
@@ -1332,7 +1617,7 @@ export default function BlockSchedulerPage() {
 }
 
 // Edit Entry Modal Component
-function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = {}, onClose, onSuccess, storeTimeZone = "UTC", userTimeZone, userTimezoneOffset }) {
+function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = {}, positions = [], onClose, onSuccess, storeTimeZone = "UTC", userTimeZone, userTimezoneOffset }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [editPreviewData, setEditPreviewData] = useState({});
@@ -1415,7 +1700,13 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
       descriptionFontSize: formData.get("description_font_size") || null,
       headlineColor: formData.get("headline_color") || null,
       descriptionColor: formData.get("description_color") || null,
+      headlineColorBelow: formData.get("headline_color_below") || null,
+      descriptionColorBelow: formData.get("description_color_below") || null,
+      buttonBgColorBelow: formData.get("button_bg_color_below") || null,
+      buttonTextColorBelow: formData.get("button_text_color_below") || null,
       textAlignment: formData.get("text_alignment") || null,
+      verticalAlignment: formData.get("vertical_alignment") || null,
+      mobileContentBelow: formData.get("mobile_content_below") === "on" || formData.get("mobile_content_below") === "true",
       overlayOpacity: formData.get("overlay_opacity") != null && formData.get("overlay_opacity") !== "" ? formData.get("overlay_opacity") : null,
       overlayColor: formData.get("overlay_color") || null,
     };
@@ -1678,22 +1969,22 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
           </div>
           <div style={{ marginBottom: "1rem" }}>
             <label htmlFor={positionInputId} style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-              Position ID <span style={{ color: "#d72c0d" }}>*</span>
+              Position <span style={{ color: "#d72c0d" }}>*</span>
             </label>
-            <input
-              type="text"
+            <select
               id={positionInputId}
               name="position_id"
-              defaultValue={fieldMap.position_id || ""}
               required
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                border: "1px solid #c9cccf",
-                borderRadius: "4px",
-                boxSizing: "border-box",
-              }}
-            />
+              defaultValue={fieldMap.position_id || ""}
+              style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }}
+            >
+              <option value="">Select position...</option>
+              {positions.map((p) => (
+                <option key={p.id} value={p.handle}>
+                  {p.name}{p.description ? ` — ${p.description}` : ""}
+                </option>
+              ))}
+            </select>
           </div>
           <div style={{ marginBottom: "1rem", padding: "0.5rem", backgroundColor: "#f6f6f7", borderRadius: "4px", fontSize: "0.875rem" }}>
             Block type: <strong>{blockTypes[blockType]?.label || blockType}</strong>
@@ -2007,6 +2298,25 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                       <option value="center">Center</option>
                       <option value="right">Right</option>
                     </select>
+                  </div>
+                </div>
+                <p style={{ margin: "0.5rem 0 0.25rem 0", fontSize: "0.75rem", color: "#6d7175" }}>When content below image (mobile):</p>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline color</label>
+                    <input type="color" name="headline_color_below" defaultValue={typeConfig.headline_color_below || "#2c3e50"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description color</label>
+                    <input type="color" name="description_color_below" defaultValue={typeConfig.description_color_below || "#666666"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Button bg</label>
+                    <input type="color" name="button_bg_color_below" defaultValue={typeConfig.button_bg_color_below || "#667eea"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Button text</label>
+                    <input type="color" name="button_text_color_below" defaultValue={typeConfig.button_text_color_below || "#ffffff"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
                   </div>
                 </div>
               </div>
