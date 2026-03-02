@@ -138,10 +138,10 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
     width: 375,
     maxWidth: "100%",
     margin: "0 auto",
-    border: "8px solid #1a1a1a",
-    borderRadius: 24,
+    border: "1px solid #e1e3e5",
+    borderRadius: 0,
     overflow: "hidden",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
     minHeight: isAdaptToImage ? 0 : 400,
   };
 
