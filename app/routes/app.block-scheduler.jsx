@@ -567,10 +567,6 @@ export default function BlockSchedulerPage() {
                   <s-text-field label="Description" name="video_description" multiline={2} placeholder="Description" />
                   <s-text-field label="Button Text" name="video_button_text" placeholder="Shop Now" />
                   <s-url-field label="Button Link" name="video_button_link" placeholder="https://..." />
-                  <div style={{ marginBottom: "0.5rem" }}>
-                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Overlay Opacity (0-100)</label>
-                    <input type="number" name="video_overlay_opacity" defaultValue={50} min={0} max={100} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }} />
-                  </div>
                     </>
                   )}
                   {formBlockType === "promo_card" && (
@@ -586,6 +582,128 @@ export default function BlockSchedulerPage() {
                   <s-url-field label="CTA Link" name="promo_card_cta_url" placeholder="https://..." />
                   <s-text-field label="CTA Text" name="promo_card_cta_text" placeholder="Shop Now" />
                     </>
+                  )}
+                  {["hero", "collection_banner", "countdown_banner", "image_with_text", "background_video", "promo_card"].includes(formBlockType) && (
+                    <div style={{ marginBottom: "0.5rem", padding: "0.75rem", backgroundColor: "#f0f4f8", borderRadius: "4px" }}>
+                      <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Image / Video</p>
+                      <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Desktop)</label>
+                          <select name="image_height" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                            <option value="adapt_to_image">Adapt to image</option>
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                            <option value="full_screen">Full screen</option>
+                          </select>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Mobile)</label>
+                          <select name="image_height_mobile" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                            <option value="adapt_to_image">Adapt to image</option>
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                            <option value="full_screen">Full screen</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Fit (Desktop)</label>
+                          <select name="image_fit" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                            <option value="cover">Cover</option>
+                            <option value="contain">Contain</option>
+                            <option value="fill">Fill</option>
+                            <option value="none">None</option>
+                          </select>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Fit (Mobile)</label>
+                          <select name="image_fit_mobile" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                            <option value="cover">Cover</option>
+                            <option value="contain">Contain</option>
+                            <option value="fill">Fill</option>
+                            <option value="none">None</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px solid #e1e3e5" }}>
+                        <p style={{ margin: "0 0 0.5rem 0", fontWeight: "500", fontSize: "0.8125rem" }}>Overlay (0 = off)</p>
+                        <div className="data-field-row" style={{ display: "flex", gap: "15px" }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Opacity (0-100)</label>
+                            <input type="number" name="overlay_opacity" min={0} max={100} placeholder="70" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Color</label>
+                            <input type="color" name="overlay_color" defaultValue="#000000" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {["hero", "collection_banner", "countdown_banner", "image_with_text", "background_video", "promo_card"].includes(formBlockType) && (
+                    <div style={{ marginBottom: "0.5rem", padding: "0.75rem", backgroundColor: "#f0f4f8", borderRadius: "4px" }}>
+                      <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Button</p>
+                      <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Background</label>
+                          <input type="color" name="button_bg_color" defaultValue="#ffffff" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Text Color</label>
+                          <input type="color" name="button_text_color" defaultValue="#667eea" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                        </div>
+                      </div>
+                      <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Border radius (px)</label>
+                          <input type="number" name="button_border_radius" placeholder="6" min={0} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Padding (px)</label>
+                          <input type="number" name="button_padding" placeholder="12 24" min={0} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Font size (em)</label>
+                          <input type="number" name="button_font_size" placeholder="1" step={0.1} min={0.5} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {["hero", "collection_banner", "countdown_banner", "image_with_text", "background_video", "promo_card"].includes(formBlockType) && (
+                    <div style={{ marginBottom: "0.5rem", padding: "0.75rem", backgroundColor: "#f0f4f8", borderRadius: "4px" }}>
+                      <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Text</p>
+                      <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline size (em)</label>
+                          <input type="number" name="headline_font_size" placeholder="1.5" step={0.1} min={0.5} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description size (em)</label>
+                          <input type="number" name="description_font_size" placeholder="0.9" step={0.1} min={0.5} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                        </div>
+                      </div>
+                      <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline color</label>
+                          <input type="color" name="headline_color" defaultValue="#ffffff" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description color</label>
+                          <input type="color" name="description_color" defaultValue="#ffffff" style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Alignment</label>
+                          <select name="text_alignment" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                            <option value="left">Left</option>
+                            <option value="center">Center</option>
+                            <option value="right">Right</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   )}
                   <div style={{ marginBottom: "0.5rem", padding: "0.75rem", backgroundColor: "#f6f6f7", borderRadius: "4px" }}>
                     <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Styling</p>
@@ -1279,6 +1397,22 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
       timezoneOffset: formData.get("timezone_offset") || "",
       cssClass: formData.get("css_class") || "",
       customCss: formData.get("custom_css") || "",
+      imageHeight: formData.get("image_height") || "medium",
+      imageHeightMobile: formData.get("image_height_mobile") || "medium",
+      imageFit: formData.get("image_fit") || "cover",
+      imageFitMobile: formData.get("image_fit_mobile") || "cover",
+      buttonBgColor: formData.get("button_bg_color") || null,
+      buttonTextColor: formData.get("button_text_color") || null,
+      buttonBorderRadius: formData.get("button_border_radius") || null,
+      buttonPadding: formData.get("button_padding") || null,
+      buttonFontSize: formData.get("button_font_size") || null,
+      headlineFontSize: formData.get("headline_font_size") || null,
+      descriptionFontSize: formData.get("description_font_size") || null,
+      headlineColor: formData.get("headline_color") || null,
+      descriptionColor: formData.get("description_color") || null,
+      textAlignment: formData.get("text_alignment") || null,
+      overlayOpacity: formData.get("overlay_opacity") != null && formData.get("overlay_opacity") !== "" ? formData.get("overlay_opacity") : null,
+      overlayColor: formData.get("overlay_color") || null,
     };
     if (blockType === "hero") {
       return {
@@ -1343,7 +1477,6 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
         videoDescription: formData.get("video_description") || "",
         videoButtonText: formData.get("video_button_text") || "",
         videoButtonLink: formData.get("video_button_link") || "",
-        videoOverlayOpacity: formData.get("video_overlay_opacity") || 50,
       };
     }
     if (blockType === "promo_card") {
@@ -1727,10 +1860,6 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Button Link</label>
                 <input type="text" name="video_button_link" defaultValue={typeConfig.button_link || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
               </div>
-              <div style={{ marginBottom: "1rem" }}>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Overlay Opacity (0-100)</label>
-                <input type="number" name="video_overlay_opacity" min={0} max={100} defaultValue={typeConfig.overlay_opacity ?? 50} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }} />
-              </div>
             </>
           )}
           {blockType === "promo_card" && (
@@ -1751,6 +1880,126 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>CTA Text</label>
                 <input type="text" name="promo_card_cta_text" defaultValue={typeConfig.cta_text || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+              </div>
+            </>
+          )}
+          {["hero", "collection_banner", "countdown_banner", "image_with_text", "background_video", "promo_card"].includes(blockType) && (
+            <>
+              <div style={{ marginBottom: "1rem", padding: "0.75rem", backgroundColor: "#f0f4f8", borderRadius: "4px" }}>
+                <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Image / Video</p>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Desktop)</label>
+                    <select name="image_height" defaultValue={typeConfig.image_height || "medium"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="adapt_to_image">Adapt to image</option>
+                      <option value="small">Small</option>
+                      <option value="medium">Medium</option>
+                      <option value="large">Large</option>
+                      <option value="full_screen">Full screen</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Height (Mobile)</label>
+                    <select name="image_height_mobile" defaultValue={typeConfig.image_height_mobile || "medium"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="adapt_to_image">Adapt to image</option>
+                      <option value="small">Small</option>
+                      <option value="medium">Medium</option>
+                      <option value="large">Large</option>
+                      <option value="full_screen">Full screen</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Fit (Desktop)</label>
+                    <select name="image_fit" defaultValue={typeConfig.image_fit || "cover"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="cover">Cover</option>
+                      <option value="contain">Contain</option>
+                      <option value="fill">Fill</option>
+                      <option value="none">None</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Fit (Mobile)</label>
+                    <select name="image_fit_mobile" defaultValue={typeConfig.image_fit_mobile || "cover"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="cover">Cover</option>
+                      <option value="contain">Contain</option>
+                      <option value="fill">Fill</option>
+                      <option value="none">None</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px solid #e1e3e5" }}>
+                  <p style={{ margin: "0 0 0.5rem 0", fontWeight: "500", fontSize: "0.8125rem" }}>Overlay (0 = off)</p>
+                  <div className="data-field-row" style={{ display: "flex", gap: "15px" }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Opacity (0-100)</label>
+                      <input type="number" name="overlay_opacity" min={0} max={100} defaultValue={typeConfig.overlay_opacity ?? ""} placeholder="70" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Color</label>
+                      <input type="color" name="overlay_color" defaultValue={typeConfig.overlay_color || "#000000"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginBottom: "1rem", padding: "0.75rem", backgroundColor: "#f0f4f8", borderRadius: "4px" }}>
+                <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Button</p>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Background</label>
+                    <input type="color" name="button_bg_color" defaultValue={typeConfig.button_bg_color || "#ffffff"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Text Color</label>
+                    <input type="color" name="button_text_color" defaultValue={typeConfig.button_text_color || "#667eea"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                </div>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Border radius (px)</label>
+                    <input type="number" name="button_border_radius" defaultValue={typeConfig.button_border_radius ?? ""} placeholder="6" min={0} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Padding (px)</label>
+                    <input type="number" name="button_padding" defaultValue={typeConfig.button_padding ?? ""} placeholder="12 24" min={0} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Font size (em)</label>
+                    <input type="number" name="button_font_size" defaultValue={typeConfig.button_font_size ?? ""} placeholder="1" step={0.1} min={0.5} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginBottom: "1rem", padding: "0.75rem", backgroundColor: "#f0f4f8", borderRadius: "4px" }}>
+                <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Text</p>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline size (em)</label>
+                    <input type="number" name="headline_font_size" defaultValue={typeConfig.headline_font_size ?? ""} placeholder="1.5" step={0.1} min={0.5} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description size (em)</label>
+                    <input type="number" name="description_font_size" defaultValue={typeConfig.description_font_size ?? ""} placeholder="0.9" step={0.1} min={0.5} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline color</label>
+                    <input type="color" name="headline_color" defaultValue={typeConfig.headline_color || "#ffffff"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description color</label>
+                    <input type="color" name="description_color" defaultValue={typeConfig.description_color || "#ffffff"} style={{ width: "100%", height: "36px", border: "1px solid #c9cccf", borderRadius: "4px" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Alignment</label>
+                    <select name="text_alignment" defaultValue={typeConfig.text_alignment || "left"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </>
           )}

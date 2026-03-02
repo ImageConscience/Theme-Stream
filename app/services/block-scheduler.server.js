@@ -330,6 +330,26 @@ export const action = async ({ request }) => {
           ...c,
           css_class: (body.cssClass || "").trim() || null,
           custom_css: (body.customCss || "").trim() || null,
+          // Image/Video height & fit (for blocks with media)
+          image_height: body.imageHeight || "medium",
+          image_height_mobile: body.imageHeightMobile || "medium",
+          image_fit: body.imageFit || "cover",
+          image_fit_mobile: body.imageFitMobile || "cover",
+          // Button styling
+          button_bg_color: body.buttonBgColor || null,
+          button_text_color: body.buttonTextColor || null,
+          button_border_radius: body.buttonBorderRadius != null ? String(body.buttonBorderRadius) : null,
+          button_padding: body.buttonPadding != null ? String(body.buttonPadding) : null,
+          button_font_size: body.buttonFontSize != null ? String(body.buttonFontSize) : null,
+          // Text styling
+          headline_font_size: body.headlineFontSize != null ? String(body.headlineFontSize) : null,
+          description_font_size: body.descriptionFontSize != null ? String(body.descriptionFontSize) : null,
+          headline_color: body.headlineColor || null,
+          description_color: body.descriptionColor || null,
+          text_alignment: body.textAlignment || null,
+          // Overlay (0 = off, 1-100 = opacity %)
+          overlay_opacity: body.overlayOpacity != null ? Math.min(100, Math.max(0, Number(body.overlayOpacity))) : null,
+          overlay_color: body.overlayColor || null,
         });
         let typeConfigStr = body.typeConfig;
         if (typeConfigStr === undefined || typeof typeConfigStr !== "string") {
@@ -384,6 +404,7 @@ export const action = async ({ request }) => {
             }));
             if (body.imageWithTextImage) fields.push({ key: "desktop_banner", value: body.imageWithTextImage });
           } else if (blockType === "background_video") {
+            const vidOverlay = body.overlayOpacity != null ? Math.min(100, Math.max(0, Number(body.overlayOpacity))) : Math.min(100, Math.max(0, Number(body.videoOverlayOpacity) || 50));
             typeConfigStr = JSON.stringify(addStyling({
               video_url: body.videoUrl || null,
               video_file: body.videoFile || null,
@@ -391,7 +412,7 @@ export const action = async ({ request }) => {
               description: body.videoDescription || null,
               button_text: body.videoButtonText || null,
               button_link: body.videoButtonLink || null,
-              overlay_opacity: Math.min(100, Math.max(0, Number(body.videoOverlayOpacity) || 50)),
+              overlay_opacity: vidOverlay,
             }));
             if (body.videoFile) fields.push({ key: "desktop_banner", value: body.videoFile });
           } else if (blockType === "promo_card") {
@@ -948,7 +969,44 @@ export const action = async ({ request }) => {
 
     const cssClass = String(formData.get("css_class") || "").trim() || null;
     const customCss = String(formData.get("custom_css") || "").trim() || null;
-    const addCreateStyling = (c) => ({ ...c, css_class: cssClass, custom_css: customCss });
+    const imgHeight = String(formData.get("image_height") || "medium").trim();
+    const imgHeightMobile = String(formData.get("image_height_mobile") || "medium").trim();
+    const imgFit = String(formData.get("image_fit") || "cover").trim();
+    const imgFitMobile = String(formData.get("image_fit_mobile") || "cover").trim();
+    const btnBg = String(formData.get("button_bg_color") || "").trim() || null;
+    const btnText = String(formData.get("button_text_color") || "").trim() || null;
+    const btnRadius = formData.get("button_border_radius");
+    const btnPadding = formData.get("button_padding");
+    const btnFontSize = formData.get("button_font_size");
+    const headFontSize = formData.get("headline_font_size");
+    const descFontSize = formData.get("description_font_size");
+    const headColor = String(formData.get("headline_color") || "").trim() || null;
+    const descColor = String(formData.get("description_color") || "").trim() || null;
+    const textAlign = String(formData.get("text_alignment") || "").trim() || null;
+    const addCreateStyling = (c) => ({
+      ...c,
+      css_class: cssClass,
+      custom_css: customCss,
+      image_height: imgHeight || "medium",
+      image_height_mobile: imgHeightMobile || "medium",
+      image_fit: imgFit || "cover",
+      image_fit_mobile: imgFitMobile || "cover",
+      button_bg_color: btnBg,
+      button_text_color: btnText,
+      button_border_radius: btnRadius != null && btnRadius !== "" ? String(btnRadius) : null,
+      button_padding: btnPadding != null && btnPadding !== "" ? String(btnPadding) : null,
+      button_font_size: btnFontSize != null && btnFontSize !== "" ? String(btnFontSize) : null,
+      headline_font_size: headFontSize != null && headFontSize !== "" ? String(headFontSize) : null,
+      description_font_size: descFontSize != null && descFontSize !== "" ? String(descFontSize) : null,
+      headline_color: headColor,
+      description_color: descColor,
+      text_alignment: textAlign,
+      overlay_opacity: (() => {
+        const v = formData.get("overlay_opacity");
+        return v != null && v !== "" ? Math.min(100, Math.max(0, Number(v))) : null;
+      })(),
+      overlay_color: String(formData.get("overlay_color") || "").trim() || null,
+    });
 
     let typeConfig = "{}";
     if (blockType === "hero") {
@@ -1033,7 +1091,6 @@ export const action = async ({ request }) => {
       const vidDesc = String(formData.get("video_description") || "").trim();
       const vidBtn = String(formData.get("video_button_text") || "").trim();
       const vidLink = String(formData.get("video_button_link") || "").trim();
-      const vidOverlay = Number(formData.get("video_overlay_opacity") || 50) || 50;
       typeConfig = JSON.stringify(addCreateStyling({
         video_url: vidUrl || null,
         video_file: vidFile || null,
@@ -1041,7 +1098,6 @@ export const action = async ({ request }) => {
         description: vidDesc || null,
         button_text: vidBtn || null,
         button_link: vidLink || null,
-        overlay_opacity: Math.min(100, Math.max(0, vidOverlay)),
       }));
       if (vidFile) fields.push({ key: "desktop_banner", value: vidFile });
     } else if (blockType === "promo_card") {

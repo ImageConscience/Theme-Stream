@@ -117,6 +117,22 @@
               {% assign selected_iwt_link = tc.button_link %}
               {% assign selected_css_class = tc.css_class | default: '' %}
               {% assign selected_custom_css = tc.custom_css | default: '' %}
+              {% assign selected_image_height = tc.image_height | default: 'medium' %}
+              {% assign selected_image_height_mobile = tc.image_height_mobile | default: 'medium' %}
+              {% assign selected_image_fit = tc.image_fit | default: 'cover' %}
+              {% assign selected_image_fit_mobile = tc.image_fit_mobile | default: 'cover' %}
+              {% assign selected_button_bg = tc.button_bg_color %}
+              {% assign selected_button_text_color = tc.button_text_color %}
+              {% assign selected_button_radius = tc.button_border_radius %}
+              {% assign selected_button_padding = tc.button_padding %}
+              {% assign selected_button_font_size = tc.button_font_size %}
+              {% assign selected_headline_font_size = tc.headline_font_size %}
+              {% assign selected_desc_font_size = tc.description_font_size %}
+              {% assign selected_headline_color = tc.headline_color %}
+              {% assign selected_desc_color = tc.description_color %}
+              {% assign selected_text_alignment = tc.text_alignment %}
+              {% assign selected_overlay_opacity = tc.overlay_opacity %}
+              {% assign selected_overlay_color = tc.overlay_color %}
             {% else %}
               {% assign selected_title = entry.headline %}
               {% assign selected_description = entry.description %}
@@ -126,6 +142,22 @@
               {% assign selected_button_text = entry.button_text %}
               {% assign selected_css_class = '' %}
               {% assign selected_custom_css = '' %}
+              {% assign selected_image_height = 'medium' %}
+              {% assign selected_image_height_mobile = 'medium' %}
+              {% assign selected_image_fit = 'cover' %}
+              {% assign selected_image_fit_mobile = 'cover' %}
+              {% assign selected_button_bg = blank %}
+              {% assign selected_button_text_color = blank %}
+              {% assign selected_button_radius = blank %}
+              {% assign selected_button_padding = blank %}
+              {% assign selected_button_font_size = blank %}
+              {% assign selected_headline_font_size = blank %}
+              {% assign selected_desc_font_size = blank %}
+              {% assign selected_headline_color = blank %}
+              {% assign selected_desc_color = blank %}
+              {% assign selected_text_alignment = blank %}
+              {% assign selected_overlay_opacity = blank %}
+              {% assign selected_overlay_color = blank %}
             {% endif %}
             {% assign found_match = true %}
           {% endif %}
@@ -160,14 +192,22 @@
 {% assign show_block = false %}
 {% if show_hero or show_announcement or show_collection or show_countdown or show_iwt or show_video or show_promo %}{% assign show_block = true %}{% endif %}
 
+{% assign img_height = selected_image_height | default: 'medium' %}
+{% assign img_height_m = selected_image_height_mobile | default: 'medium' %}
+{% if img_height == 'adapt_to_image' %}{% assign banner_min_d = 'auto' %}{% elsif img_height == 'small' %}{% assign banner_min_d = '200px' %}{% elsif img_height == 'large' %}{% assign banner_min_d = '480px' %}{% elsif img_height == 'full_screen' %}{% assign banner_min_d = '100vh' %}{% else %}{% assign banner_min_d = '320px' %}{% endif %}
+{% if img_height_m == 'adapt_to_image' %}{% assign banner_min_m = 'auto' %}{% elsif img_height_m == 'small' %}{% assign banner_min_m = '180px' %}{% elsif img_height_m == 'large' %}{% assign banner_min_m = '360px' %}{% elsif img_height_m == 'full_screen' %}{% assign banner_min_m = '100vh' %}{% else %}{% assign banner_min_m = '280px' %}{% endif %}
+{% assign img_fit_d = selected_image_fit | default: 'cover' %}
+{% assign img_fit_m = selected_image_fit_mobile | default: 'cover' %}
+
 {% if selected_custom_css != blank %}
 <style>{{ selected_custom_css }}</style>
 {% endif %}
 <div class="scheduled-banner {{ selected_css_class }} {% unless show_block %}scheduled-banner--hidden{% endunless %}" style="margin-top: {{ margin_top }}px; margin-bottom: {{ margin_bottom }}px;" {{ block.shopify_attributes }}>
   {% if show_hero %}
     {% assign mobile_content_below = block.settings.mobile_content_below | default: false %}
-    {% assign overlay_color = block.settings.overlay_color | default: '#000000' %}
-    {% assign overlay_opacity = block.settings.overlay_opacity | default: 70 | divided_by: 100.0 %}
+    {% assign overlay_color = selected_overlay_color | default: block.settings.overlay_color | default: '#000000' %}
+    {% assign overlay_opacity_raw = selected_overlay_opacity | default: block.settings.overlay_opacity | default: 70 %}
+    {% assign overlay_opacity = overlay_opacity_raw | divided_by: 100.0 %}
     {% assign vertical_alignment = block.settings.vertical_alignment | default: 'bottom' %}
     {% assign content_alignment_desktop = block.settings.content_alignment_desktop | default: 'left' %}
     {% assign content_alignment_mobile = block.settings.content_alignment_mobile | default: 'left' %}
@@ -190,11 +230,21 @@
     {% assign button_text_overlay = block.settings.button_text_overlay | default: '#667eea' %}
     {% assign button_bg_below = block.settings.button_bg_below | default: '#667eea' %}
     {% assign button_text_below = block.settings.button_text_below | default: '#ffffff' %}
+    {% if selected_headline_font_size != blank %}{% assign headline_font_size = selected_headline_font_size %}{% endif %}
+    {% if selected_desc_font_size != blank %}{% assign description_font_size = selected_desc_font_size %}{% endif %}
+    {% if selected_button_font_size != blank %}{% assign button_font_size = selected_button_font_size %}{% endif %}
+    {% if selected_button_radius != blank %}{% assign button_border_radius = selected_button_radius %}{% endif %}
+    {% if selected_button_padding != blank %}{% assign button_padding_top = selected_button_padding %}{% assign button_padding_bottom = selected_button_padding %}{% assign button_padding_left = selected_button_padding %}{% assign button_padding_right = selected_button_padding %}{% endif %}
+    {% if selected_headline_color != blank %}{% assign title_color_overlay = selected_headline_color %}{% endif %}
+    {% if selected_desc_color != blank %}{% assign description_color_overlay = selected_desc_color %}{% endif %}
+    {% if selected_button_bg != blank %}{% assign button_bg_overlay = selected_button_bg %}{% endif %}
+    {% if selected_button_text_color != blank %}{% assign button_text_overlay = selected_button_text_color %}{% endif %}
+    {% if selected_text_alignment != blank %}{% assign content_alignment_desktop = selected_text_alignment %}{% assign content_alignment_mobile = selected_text_alignment %}{% endif %}
     
     <a href="{{ selected_target_url }}" class="scheduled-banner__link scheduled-banner__hero-link" style="--headline-size: {{ headline_font_size }}em; --desc-size: {{ description_font_size }}em; --btn-size: {{ button_font_size }}em; --btn-radius: {{ button_border_radius }}px; --btn-pad-t: {{ button_padding_top }}px; --btn-pad-r: {{ button_padding_right }}px; --btn-pad-b: {{ button_padding_bottom }}px; --btn-pad-l: {{ button_padding_left }}px; --title-overlay: {{ title_color_overlay }}; --desc-overlay: {{ description_color_overlay }}; --btn-bg-overlay: {{ button_bg_overlay }}; --btn-text-overlay: {{ button_text_overlay }}; --title-below: {{ title_color_below }}; --desc-below: {{ description_color_below }}; --btn-bg-below: {{ button_bg_below }}; --btn-text-below: {{ button_text_below }}; --headline-below-size: {{ headline_font_size | times: 0.8 }}em;{% if title_font != blank %} --title-font: {{ title_font.family }}, {{ title_font.fallback_families }}; --title-weight: {{ title_font.weight }}; --title-style: {{ title_font.style }};{% endif %}{% if description_font != blank %} --desc-font: {{ description_font.family }}, {{ description_font.fallback_families }}; --desc-weight: {{ description_font.weight }}; --desc-style: {{ description_font.style }};{% endif %}{% if button_text_uppercase %} --btn-uppercase: uppercase;{% else %} --btn-uppercase: none;{% endif %}">
       <div class="scheduled-banner__banner-container {% if mobile_content_below %}scheduled-banner__banner-container--mobile-below{% endif %}">
         {% if selected_desktop_banner != blank %}
-          <div class="scheduled-banner__banner scheduled-banner__banner--desktop">
+          <div class="scheduled-banner__banner scheduled-banner__banner--desktop{% if banner_min_d != 'auto' %} scheduled-banner__banner--fixed-height{% endif %}"{% if banner_min_d != 'auto' %} style="min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};"{% endif %}>
             {{ selected_desktop_banner | image_url: width: 1920 | image_tag: alt: selected_title, class: 'scheduled-banner__banner-img', loading: 'lazy' }}
             <div class="scheduled-banner__banner-content scheduled-banner__banner-content--desktop scheduled-banner__banner-content--v-{{ vertical_alignment }} scheduled-banner__banner-content--align-{{ content_alignment_desktop }}" style="--overlay-color: {{ overlay_color }}; --overlay-opacity: {{ overlay_opacity }};">
               <div class="scheduled-banner__content-inner">
@@ -213,7 +263,7 @@
         {% endif %}
         
         {% if selected_mobile_banner != blank %}
-          <div class="scheduled-banner__banner scheduled-banner__banner--mobile">
+          <div class="scheduled-banner__banner scheduled-banner__banner--mobile{% if banner_min_m != 'auto' %} scheduled-banner__banner--fixed-height{% endif %}"{% if banner_min_m != 'auto' %} style="min-height: {{ banner_min_m }}; --banner-fit: {{ img_fit_m }};"{% endif %}>
             {{ selected_mobile_banner | image_url: width: 768 | image_tag: alt: selected_title, class: 'scheduled-banner__banner-img', loading: 'lazy' }}
             {% if mobile_content_below == false %}
               <div class="scheduled-banner__banner-content scheduled-banner__banner-content--mobile scheduled-banner__banner-content--v-{{ vertical_alignment }} scheduled-banner__banner-content--align-{{ content_alignment_mobile }}" style="--overlay-color: {{ overlay_color }}; --overlay-opacity: {{ overlay_opacity }};">
@@ -261,11 +311,13 @@
     {% assign coll_img = selected_collection_image | default: collections[selected_collection_handle].image %}
     {% assign coll_title = selected_title | default: collections[selected_collection_handle].title %}
     <a href="{{ coll_url }}" class="scheduled-banner__link">
-      <div class="scheduled-banner__collection scheduled-banner__collection--banner">
+      <div class="scheduled-banner__collection scheduled-banner__collection--banner{% if banner_min_d != 'auto' %} scheduled-banner__banner--fixed-height{% endif %}"{% if banner_min_d != 'auto' %} style="min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};"{% endif %}>
         {% if coll_img != blank %}
           {{ coll_img | image_url: width: 1200 | image_tag: alt: coll_title, class: 'scheduled-banner__banner-img', loading: 'lazy' }}
         {% endif %}
-        <div class="scheduled-banner__banner-content" style="--overlay-color: #000; --overlay-opacity: 0.5;">
+        {% assign coll_overlay_color = selected_overlay_color | default: '#000000' %}
+        {% assign coll_overlay_opacity = selected_overlay_opacity | default: 50 | divided_by: 100.0 %}
+        <div class="scheduled-banner__banner-content" style="--overlay-color: {{ coll_overlay_color }}; --overlay-opacity: {{ coll_overlay_opacity }};">
           <h2 class="scheduled-banner__title">{{ coll_title }}</h2>
           {% if selected_description != blank %}<p class="scheduled-banner__description">{{ selected_description }}</p>{% endif %}
           {% if selected_button_text != blank %}<span class="scheduled-banner__button">{{ selected_button_text }}</span>{% endif %}
@@ -275,9 +327,10 @@
   {% elsif show_countdown %}
     {% assign countdown_link = selected_countdown_link | default: '#' %}
     <a href="{{ countdown_link }}" class="scheduled-banner__link">
-      <div id="countdown-{{ block.id | default: 'main' }}" class="scheduled-banner__countdown scheduled-banner__countdown--bar" style="background-color: {{ selected_countdown_bg }}; color: {{ selected_countdown_text_color }};">
+      <div id="countdown-{{ block.id | default: 'main' }}" class="scheduled-banner__countdown scheduled-banner__countdown--bar{% if banner_min_d != 'auto' %} scheduled-banner__countdown--fixed-height{% endif %}" style="background-color: {{ selected_countdown_bg }}; color: {{ selected_countdown_text_color }};{% if banner_min_d != 'auto' %} min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};{% endif %}">
         {% if selected_countdown_bg_img != blank %}
-          <div class="scheduled-banner__countdown-bg">
+          {% assign cd_bg_opacity = selected_overlay_opacity | default: 30 | divided_by: 100.0 %}
+          <div class="scheduled-banner__countdown-bg" style="opacity: {{ cd_bg_opacity }};">
             {{ selected_countdown_bg_img | image_url: width: 1200 | image_tag: alt: '', loading: 'lazy', class: 'scheduled-banner__countdown-bg-img' }}
           </div>
         {% endif %}
@@ -321,7 +374,7 @@
       {% endif %}
     {% endif %}
     {% if vid_src != blank %}
-      <div class="scheduled-banner__video-wrap">
+      <div class="scheduled-banner__video-wrap"{% if banner_min_d != 'auto' %} style="min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};"{% endif %}>
         <video class="scheduled-banner__video" autoplay muted loop playsinline>
           <source src="{{ vid_src }}" type="video/mp4">
         </video>
@@ -335,7 +388,9 @@
   {% elsif show_promo %}
     <a href="{{ selected_promo_url | default: '#' }}" class="scheduled-banner__link">
       <div class="scheduled-banner__promo scheduled-banner__promo--card">
-        {{ selected_promo_image | image_url: width: 600 | image_tag: alt: selected_promo_title, loading: 'lazy', class: 'scheduled-banner__promo-img' }}
+        <div class="scheduled-banner__promo-img-wrap{% if banner_min_d != 'auto' %} scheduled-banner__promo-img-wrap--fixed{% endif %}"{% if banner_min_d != 'auto' %} style="min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};"{% endif %}>
+          {{ selected_promo_image | image_url: width: 600 | image_tag: alt: selected_promo_title, loading: 'lazy', class: 'scheduled-banner__promo-img' }}
+        </div>
         <div class="scheduled-banner__promo-body">
           {% if selected_promo_title != blank %}<h3 class="scheduled-banner__promo-title">{{ selected_promo_title }}</h3>{% endif %}
           {% if selected_promo_desc != blank %}<p class="scheduled-banner__promo-desc">{{ selected_promo_desc }}</p>{% endif %}
@@ -380,6 +435,14 @@
     width: 100%;
     height: auto;
     object-fit: cover;
+  }
+  
+  .scheduled-banner__banner--fixed-height .scheduled-banner__banner-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--banner-fit, cover);
   }
   
   .scheduled-banner__banner-content {
@@ -729,7 +792,16 @@
   .scheduled-banner__countdown-bg-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: var(--banner-fit, cover);
+  }
+
+  .scheduled-banner__countdown--fixed-height .scheduled-banner__countdown-bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .scheduled-banner__collection--banner.scheduled-banner__banner--fixed-height {
+    position: relative;
   }
 
   .scheduled-banner__countdown-inner {
@@ -789,7 +861,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: var(--banner-fit, cover);
   }
 
   .scheduled-banner__video-overlay {
@@ -815,6 +887,19 @@
     border: 1px solid #e1e3e5;
     border-radius: 8px;
     overflow: hidden;
+  }
+
+  .scheduled-banner__promo-img-wrap--fixed {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scheduled-banner__promo-img-wrap--fixed .scheduled-banner__promo-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--banner-fit, cover);
   }
 
   .scheduled-banner__promo-img {
