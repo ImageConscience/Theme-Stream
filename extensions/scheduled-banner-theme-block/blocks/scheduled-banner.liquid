@@ -214,7 +214,11 @@
   {% if show_hero %}
     {% assign mobile_content_below = selected_mobile_content_below | default: false %}
     {% assign overlay_color = selected_overlay_color | default: '#000000' %}
-    {% assign overlay_opacity_raw = selected_overlay_opacity | default: 70 %}
+    {% if selected_overlay_opacity != blank %}
+      {% assign overlay_opacity_raw = selected_overlay_opacity %}
+    {% else %}
+      {% assign overlay_opacity_raw = 70 %}
+    {% endif %}
     {% assign overlay_opacity = overlay_opacity_raw | divided_by: 100.0 %}
     {% assign vertical_alignment = selected_vertical_alignment | default: 'bottom' %}
     {% assign content_alignment_desktop = selected_text_alignment | default: 'left' %}
