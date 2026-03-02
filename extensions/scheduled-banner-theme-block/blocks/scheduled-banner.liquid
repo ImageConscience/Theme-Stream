@@ -5,13 +5,7 @@
 
 {% comment %} Store-owned metaobjects. Use metaobjects.type.values to loop all entries. {% endcomment %}
 {% assign all_entries = metaobjects.schedulable_entity.values %}
-{% comment %} position_id: metaobject picker returns full metaobject; we need the handle for matching. Fallback to text if block was configured before metaobject picker. {% endcomment %}
-{% assign position_ref = block.settings.position_id %}
-{% if position_ref != blank and position_ref.system != blank %}
-  {% assign position_id = position_ref.system.handle | default: '' | strip %}
-{% else %}
-  {% assign position_id = block.settings.position_id | default: '' | strip %}
-{% endif %}
+{% assign position_id = block.settings.position_id | default: 'homepage_banner' | strip %}
 {% comment %} All block types allowed when scheduled for this position {% endcomment %}
 {% assign now_ts = 'now' | date: '%s' | plus: 0 %}
 
@@ -992,11 +986,11 @@
   "target": "section",
   "settings": [
     {
-      "type": "metaobject",
+      "type": "text",
       "id": "position_id",
-      "label": "Position",
-      "metaobject_type": "app.scheduler_position",
-      "info": "Choose a position from Block Scheduler > Positions. Content is shown when a scheduled entry matches this position."
+      "label": "Position Handle",
+      "default": "homepage_banner",
+      "info": "Use the handle from Block Scheduler > Positions (e.g. homepage_banner). Copy from the app."
     },
     {
       "type": "number",
