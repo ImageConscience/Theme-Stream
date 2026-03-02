@@ -326,38 +326,43 @@ export const action = async ({ request }) => {
 
         // Build type_config from type-specific fields
         const blockType = body.blockType || "hero";
+        const addStyling = (c) => ({
+          ...c,
+          css_class: (body.cssClass || "").trim() || null,
+          custom_css: (body.customCss || "").trim() || null,
+        });
         let typeConfigStr = body.typeConfig;
         if (typeConfigStr === undefined || typeof typeConfigStr !== "string") {
           if (blockType === "hero") {
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               headline: body.headline || "",
               description: body.description || "",
               desktop_banner: body.desktopBanner || null,
               mobile_banner: body.mobileBanner || null,
               target_url: body.targetUrl || null,
               button_text: body.buttonText || null,
-            });
+            }));
           } else if (blockType === "announcement_bar") {
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               text: body.announcementText || "",
               link: body.announcementLink || null,
               bg_color: body.announcementBgColor || "#000000",
               text_color: body.announcementTextColor || "#ffffff",
-            });
+            }));
           } else if (blockType === "collection_banner") {
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               collection_handle: body.collectionHandle || "",
               image: body.collectionBannerImage || null,
               headline: body.collectionHeadline || null,
               description: body.collectionDescription || null,
               button_text: body.collectionButtonText || null,
-            });
+            }));
             if (body.collectionBannerImage) fields.push({ key: "desktop_banner", value: body.collectionBannerImage });
           } else if (blockType === "countdown_banner") {
             const targetDateUtc = body.countdownTargetDate
               ? parseLocalDateTimeToUTC(body.countdownTargetDate, storeTimeZone, fallbackOffset)
               : null;
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               target_date: targetDateUtc,
               headline: body.countdownHeadline || null,
               subtext: body.countdownSubtext || null,
@@ -366,20 +371,20 @@ export const action = async ({ request }) => {
               text_color: body.countdownTextColor || "#ffffff",
               target_url: body.countdownTargetUrl || null,
               button_text: body.countdownButtonText || null,
-            });
+            }));
             if (body.countdownBgImage) fields.push({ key: "desktop_banner", value: body.countdownBgImage });
           } else if (blockType === "image_with_text") {
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               image: body.imageWithTextImage || null,
               headline: body.imageWithTextHeadline || null,
               description: body.imageWithTextDescription || null,
               button_text: body.imageWithTextButtonText || null,
               button_link: body.imageWithTextButtonLink || null,
               layout: body.imageWithTextLayout || "image_left",
-            });
+            }));
             if (body.imageWithTextImage) fields.push({ key: "desktop_banner", value: body.imageWithTextImage });
           } else if (blockType === "background_video") {
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               video_url: body.videoUrl || null,
               video_file: body.videoFile || null,
               headline: body.videoHeadline || null,
@@ -387,16 +392,16 @@ export const action = async ({ request }) => {
               button_text: body.videoButtonText || null,
               button_link: body.videoButtonLink || null,
               overlay_opacity: Math.min(100, Math.max(0, Number(body.videoOverlayOpacity) || 50)),
-            });
+            }));
             if (body.videoFile) fields.push({ key: "desktop_banner", value: body.videoFile });
           } else if (blockType === "promo_card") {
-            typeConfigStr = JSON.stringify({
+            typeConfigStr = JSON.stringify(addStyling({
               image: body.promoCardImage || null,
               title: body.promoCardTitle || null,
               description: body.promoCardDescription || null,
               cta_url: body.promoCardCtaUrl || null,
               cta_text: body.promoCardCtaText || null,
-            });
+            }));
             if (body.promoCardImage) fields.push({ key: "desktop_banner", value: body.promoCardImage });
           } else {
             typeConfigStr = "{}";
@@ -941,40 +946,44 @@ export const action = async ({ request }) => {
       return json({ error: defResult.error || "Failed to ensure metaobject definition", success: false });
     }
 
+    const cssClass = String(formData.get("css_class") || "").trim() || null;
+    const customCss = String(formData.get("custom_css") || "").trim() || null;
+    const addCreateStyling = (c) => ({ ...c, css_class: cssClass, custom_css: customCss });
+
     let typeConfig = "{}";
     if (blockType === "hero") {
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         headline,
         description,
         desktop_banner: desktopBanner || null,
         mobile_banner: mobileBanner || null,
         target_url: targetUrl || null,
         button_text: buttonText || null,
-      });
+      }));
     } else if (blockType === "announcement_bar") {
       const annText = String(formData.get("announcement_text") || "").trim();
       const annLink = String(formData.get("announcement_link") || "").trim();
       const annBg = String(formData.get("announcement_bg_color") || "#000000").trim();
       const annColor = String(formData.get("announcement_text_color") || "#ffffff").trim();
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         text: annText,
         link: annLink || null,
         bg_color: annBg,
         text_color: annColor,
-      });
+      }));
     } else if (blockType === "collection_banner") {
       const collHandle = String(formData.get("collection_handle") || "").trim();
       const collImage = String(formData.get("collection_banner_image") || "").trim();
       const collHeadline = String(formData.get("collection_headline") || "").trim();
       const collDesc = String(formData.get("collection_description") || "").trim();
       const collBtn = String(formData.get("collection_button_text") || "").trim();
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         collection_handle: collHandle,
         image: collImage || null,
         headline: collHeadline || null,
         description: collDesc || null,
         button_text: collBtn || null,
-      });
+      }));
       if (collImage) {
         fields.push({ key: "desktop_banner", value: collImage });
       }
@@ -990,7 +999,7 @@ export const action = async ({ request }) => {
       const cdTextColor = String(formData.get("countdown_text_color") || "#ffffff").trim();
       const cdLink = String(formData.get("countdown_target_url") || "").trim();
       const cdBtn = String(formData.get("countdown_button_text") || "").trim();
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         target_date: targetDateUtc,
         headline: cdHeadline || null,
         subtext: cdSubtext || null,
@@ -999,7 +1008,7 @@ export const action = async ({ request }) => {
         text_color: cdTextColor,
         target_url: cdLink || null,
         button_text: cdBtn || null,
-      });
+      }));
       if (cdBgImg) fields.push({ key: "desktop_banner", value: cdBgImg });
     } else if (blockType === "image_with_text") {
       const iwtImage = String(formData.get("image_with_text_image") || "").trim();
@@ -1008,14 +1017,14 @@ export const action = async ({ request }) => {
       const iwtBtn = String(formData.get("image_with_text_button_text") || "").trim();
       const iwtLink = String(formData.get("image_with_text_button_link") || "").trim();
       const iwtLayout = String(formData.get("image_with_text_layout") || "image_left").trim();
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         image: iwtImage,
         headline: iwtHeadline || null,
         description: iwtDesc || null,
         button_text: iwtBtn || null,
         button_link: iwtLink || null,
         layout: iwtLayout,
-      });
+      }));
       if (iwtImage) fields.push({ key: "desktop_banner", value: iwtImage });
     } else if (blockType === "background_video") {
       const vidUrl = String(formData.get("video_url") || "").trim();
@@ -1025,7 +1034,7 @@ export const action = async ({ request }) => {
       const vidBtn = String(formData.get("video_button_text") || "").trim();
       const vidLink = String(formData.get("video_button_link") || "").trim();
       const vidOverlay = Number(formData.get("video_overlay_opacity") || 50) || 50;
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         video_url: vidUrl || null,
         video_file: vidFile || null,
         headline: vidHeadline || null,
@@ -1033,7 +1042,7 @@ export const action = async ({ request }) => {
         button_text: vidBtn || null,
         button_link: vidLink || null,
         overlay_opacity: Math.min(100, Math.max(0, vidOverlay)),
-      });
+      }));
       if (vidFile) fields.push({ key: "desktop_banner", value: vidFile });
     } else if (blockType === "promo_card") {
       const promoImg = String(formData.get("promo_card_image") || "").trim();
@@ -1041,13 +1050,13 @@ export const action = async ({ request }) => {
       const promoDesc = String(formData.get("promo_card_description") || "").trim();
       const promoUrl = String(formData.get("promo_card_cta_url") || "").trim();
       const promoBtn = String(formData.get("promo_card_cta_text") || "").trim();
-      typeConfig = JSON.stringify({
+      typeConfig = JSON.stringify(addCreateStyling({
         image: promoImg,
         title: promoTitle || null,
         description: promoDesc || null,
         cta_url: promoUrl || null,
         cta_text: promoBtn || null,
-      });
+      }));
       if (promoImg) fields.push({ key: "desktop_banner", value: promoImg });
     }
 

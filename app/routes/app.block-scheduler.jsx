@@ -587,6 +587,14 @@ export default function BlockSchedulerPage() {
                   <s-text-field label="CTA Text" name="promo_card_cta_text" placeholder="Shop Now" />
                     </>
                   )}
+                  <div style={{ marginBottom: "0.5rem", padding: "0.75rem", backgroundColor: "#f6f6f7", borderRadius: "4px" }}>
+                    <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Styling</p>
+                    <s-text-field label="CSS Class" name="css_class" placeholder="e.g. my-custom-banner" />
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Custom CSS</label>
+                      <textarea name="custom_css" placeholder=".my-custom-banner .scheduled-banner__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
+                    </div>
+                  </div>
                   <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <label htmlFor="start_at" style={{ display: "block", marginBottom: "0", fontWeight: "500", fontSize: "0.8125rem" }}>
@@ -1269,6 +1277,8 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
       store_timezone: storeTimeZone,
       timezone: formData.get("timezone") || "",
       timezoneOffset: formData.get("timezone_offset") || "",
+      cssClass: formData.get("css_class") || "",
+      customCss: formData.get("custom_css") || "",
     };
     if (blockType === "hero") {
       return {
@@ -1744,6 +1754,17 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               </div>
             </>
           )}
+          <div style={{ marginBottom: "1rem", padding: "0.75rem", backgroundColor: "#f6f6f7", borderRadius: "4px" }}>
+            <p style={{ margin: "0 0 0.5rem 0", fontWeight: "600", fontSize: "0.875rem" }}>Styling</p>
+            <div style={{ marginBottom: "0.5rem" }}>
+              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>CSS Class</label>
+              <input type="text" name="css_class" defaultValue={typeConfig.css_class || ""} placeholder="e.g. my-custom-banner" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Custom CSS</label>
+              <textarea name="custom_css" defaultValue={typeConfig.custom_css || ""} placeholder=".my-custom-banner .scheduled-banner__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
+            </div>
+          </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1.5rem" }}>
             <button
               type="button"

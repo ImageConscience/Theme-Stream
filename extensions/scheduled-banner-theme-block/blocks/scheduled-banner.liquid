@@ -44,6 +44,8 @@
 {% assign selected_promo_url = blank %}
 {% assign selected_promo_btn = blank %}
 {% assign selected_iwt_link = blank %}
+{% assign selected_css_class = '' %}
+{% assign selected_custom_css = '' %}
 {% assign found_match = false %}
 
 {% if all_entries != blank %}
@@ -113,6 +115,8 @@
               {% assign selected_promo_url = tc.cta_url %}
               {% assign selected_promo_btn = tc.cta_text %}
               {% assign selected_iwt_link = tc.button_link %}
+              {% assign selected_css_class = tc.css_class | default: '' %}
+              {% assign selected_custom_css = tc.custom_css | default: '' %}
             {% else %}
               {% assign selected_title = entry.headline %}
               {% assign selected_description = entry.description %}
@@ -120,6 +124,8 @@
               {% assign selected_mobile_banner = entry.mobile_banner %}
               {% assign selected_target_url = entry.target_url %}
               {% assign selected_button_text = entry.button_text %}
+              {% assign selected_css_class = '' %}
+              {% assign selected_custom_css = '' %}
             {% endif %}
             {% assign found_match = true %}
           {% endif %}
@@ -154,7 +160,10 @@
 {% assign show_block = false %}
 {% if show_hero or show_announcement or show_collection or show_countdown or show_iwt or show_video or show_promo %}{% assign show_block = true %}{% endif %}
 
-<div class="scheduled-banner {% unless show_block %}scheduled-banner--hidden{% endunless %}" style="margin-top: {{ margin_top }}px; margin-bottom: {{ margin_bottom }}px;" {{ block.shopify_attributes }}>
+{% if selected_custom_css != blank %}
+<style>{{ selected_custom_css }}</style>
+{% endif %}
+<div class="scheduled-banner {{ selected_css_class }} {% unless show_block %}scheduled-banner--hidden{% endunless %}" style="margin-top: {{ margin_top }}px; margin-bottom: {{ margin_bottom }}px;" {{ block.shopify_attributes }}>
   {% if show_hero %}
     {% assign mobile_content_below = block.settings.mobile_content_below | default: false %}
     {% assign overlay_color = block.settings.overlay_color | default: '#000000' %}
