@@ -651,7 +651,7 @@ export default function BlockSchedulerPage() {
                         <div className="data-field-row" style={{ display: "flex", gap: "15px" }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Opacity (0-100)</label>
-                            <input type="number" name="overlay_opacity" min={0} max={100} placeholder="70" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                            <input type="number" name="overlay_opacity" min={0} max={100} defaultValue={70} placeholder="70" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Color</label>
@@ -724,6 +724,24 @@ export default function BlockSchedulerPage() {
                             <option value="right">Right</option>
                           </select>
                         </div>
+                        {formBlockType === "hero" && (
+                          <>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Content position</label>
+                              <select name="vertical_alignment" defaultValue="bottom" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                                <option value="top">Top</option>
+                                <option value="center">Center</option>
+                                <option value="bottom">Bottom</option>
+                              </select>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-end", paddingBottom: "0.5rem" }}>
+                              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: "500", fontSize: "0.8125rem" }}>
+                                <input type="checkbox" name="mobile_content_below" value="on" style={{ width: "18px", height: "18px" }} />
+                                Show content below image on mobile
+                              </label>
+                            </div>
+                          </>
+                        )}
                       </div>
                       {formBlockType === "hero" && (
                         <>
@@ -2299,6 +2317,24 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
                       <option value="right">Right</option>
                     </select>
                   </div>
+                  {blockType === "hero" && (
+                    <>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Content position</label>
+                        <select name="vertical_alignment" defaultValue={typeConfig.vertical_alignment || "bottom"} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px" }}>
+                          <option value="top">Top</option>
+                          <option value="center">Center</option>
+                          <option value="bottom">Bottom</option>
+                        </select>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-end", paddingBottom: "0.5rem" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: "500", fontSize: "0.8125rem" }}>
+                          <input type="checkbox" name="mobile_content_below" value="on" defaultChecked={typeConfig.mobile_content_below === true || typeConfig.mobile_content_below === "true"} style={{ width: "18px", height: "18px" }} />
+                          Show content below image on mobile
+                        </label>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <p style={{ margin: "0.5rem 0 0.25rem 0", fontSize: "0.75rem", color: "#6d7175" }}>When content below image (mobile):</p>
                 <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0" }}>
