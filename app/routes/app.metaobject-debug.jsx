@@ -22,6 +22,7 @@ export const loader = async ({ request }) => {
 
   const typeFormats = [
     "$app:scheduler_position",
+    "app--294624854017--scheduler_position",
     "app--" + CLIENT_ID + "-scheduler_position",
     "app--" + CLIENT_ID + "--scheduler_position",
     "app.scheduler_position",
@@ -83,17 +84,18 @@ export const loader = async ({ request }) => {
 
 export default function MetaobjectDebug() {
   const results = useLoaderData() ?? {};
-  const schedulerDef = (results.allDefinitions || []).find((d) => (d.type || "").includes("scheduler_position"));
+  const schedulerType = results.typeFormats?.["$app:scheduler_position"]?.type
+    || (results.allDefinitions || []).find((d) => (d.type || "").includes("scheduler_position"))?.type;
   return (
     <div style={{ fontFamily: "monospace", padding: "1rem", fontSize: "0.875rem", whiteSpace: "pre-wrap", maxWidth: "800px" }}>
       <h2>Metaobject Debug</h2>
-      <p>Use this to diagnose theme block Position picker. Check <code>allDefinitions</code> for the actual <code>type</code> value.</p>
-      {schedulerDef && (
+      <p>Use this to diagnose theme block Position picker. Check <code>typeFormats</code> or <code>allDefinitions</code> for the actual <code>type</code> value.</p>
+      {schedulerType && (
         <p style={{ background: "#e8f5e9", padding: "0.5rem", borderRadius: "4px", marginBottom: "1rem" }}>
-          <strong>scheduler_position type:</strong> <code>{schedulerDef.type}</code> — use this exact value for <code>metaobject_type</code> in the theme block schema.
+          <strong>scheduler_position type:</strong> <code>{schedulerType}</code> — use this exact value for <code>metaobject_type</code> in the theme block schema.
         </p>
       )}
-      {!schedulerDef && results.allDefinitions?.length > 0 && (
+      {!schedulerType && results.typeFormats && (
         <p style={{ background: "#fff3e0", padding: "0.5rem", borderRadius: "4px", marginBottom: "1rem" }}>
           No scheduler_position definition found. Open Block Scheduler and ensure positions exist. The definition is created on app load.
         </p>
