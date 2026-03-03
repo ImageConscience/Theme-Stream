@@ -1178,6 +1178,7 @@ export const action = async ({ request }) => {
       overlay_color: String(formData.get("overlay_color") || "").trim() || null,
     });
 
+    const fields = [];
     let typeConfig = "{}";
     if (blockType === "hero") {
       typeConfig = JSON.stringify(addCreateStyling({
@@ -1286,7 +1287,7 @@ export const action = async ({ request }) => {
       if (promoImg) fields.push({ key: "desktop_banner", value: promoImg });
     }
 
-    const fields = [
+    fields.push(
       { key: "title", value: title },
       { key: "position_id", value: positionId },
       { key: "block_type", value: blockType },
@@ -1298,7 +1299,7 @@ export const action = async ({ request }) => {
       { key: "target_url", value: targetUrl },
       { key: "button_text", value: buttonText },
       { key: "sort_order", value: "0" },
-    ];
+    );
 
     if (desktopBanner) {
       fields.push({ key: "desktop_banner", value: desktopBanner });
