@@ -917,13 +917,8 @@ export default function ThemeStreamPage() {
       )}
 
       <s-section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
-          <div>
-            <h2 style={{ fontSize: "1.2rem", lineHeight: 1.1, margin: "0 0 4px 0" }}>Streams</h2>
-            <p style={{ fontSize: "0.875rem", color: "#6d7175", margin: 0 }}>
-              Create Streams and place them in your theme. Then schedule events into the streams to update your site content on schedule.
-            </p>
-          </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h2 style={{ fontSize: "1.2rem", lineHeight: 1.1, margin: 0 }}>Streams</h2>
           <button
             type="button"
             onClick={() => {
