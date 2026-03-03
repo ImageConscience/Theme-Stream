@@ -441,6 +441,7 @@ export const action = async ({ request }) => {
           } else if (blockType === "collection_banner") {
             typeConfigStr = JSON.stringify(addStyling({
               collection_handle: body.collectionHandle || "",
+              use_closest_collection: !!body.useClosestCollection,
               image: body.collectionBannerImage || null,
               headline: body.collectionHeadline || null,
               description: body.collectionDescription || null,
@@ -1055,9 +1056,10 @@ export const action = async ({ request }) => {
       }
     }
     if (blockType === "collection_banner") {
+      const useClosest = formData.get("use_closest_collection") === "1" || formData.get("use_closest_collection") === "on";
       const collHandle = String(formData.get("collection_handle") || "").trim();
-      if (!collHandle) {
-        return json({ error: "Collection handle is required for Collection Banner", success: false }, { status: 400 });
+      if (!useClosest && !collHandle) {
+        return json({ error: "Collection handle is required, or check 'Use current collection' for dynamic collection pages", success: false }, { status: 400 });
       }
     }
     if (blockType === "countdown_banner") {
@@ -1201,6 +1203,7 @@ export const action = async ({ request }) => {
         text_color: annColor,
       }));
     } else if (blockType === "collection_banner") {
+      const useClosest = formData.get("use_closest_collection") === "1" || formData.get("use_closest_collection") === "on";
       const collHandle = String(formData.get("collection_handle") || "").trim();
       const collImage = String(formData.get("collection_banner_image") || "").trim();
       const collHeadline = String(formData.get("collection_headline") || "").trim();
@@ -1208,6 +1211,7 @@ export const action = async ({ request }) => {
       const collBtn = String(formData.get("collection_button_text") || "").trim();
       typeConfig = JSON.stringify(addCreateStyling({
         collection_handle: collHandle,
+        use_closest_collection: useClosest,
         image: collImage || null,
         headline: collHeadline || null,
         description: collDesc || null,

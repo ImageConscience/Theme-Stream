@@ -32,7 +32,8 @@ export const BLOCK_TYPES = {
     label: "Collection Banner",
     description: "Banner featuring a collection with image, title, and link",
     fields: [
-      { key: "collection_handle", type: "text", label: "Collection Handle", required: true },
+      { key: "collection_handle", type: "text", label: "Collection Handle", required: false },
+      { key: "use_closest_collection", type: "checkbox", label: "Use current collection (dynamic on collection pages)", required: false },
       { key: "image", type: "media", label: "Banner Image (optional override)", required: false },
       { key: "headline", type: "text", label: "Headline Override", required: false },
       { key: "description", type: "text", label: "Description", required: false, multiline: true },

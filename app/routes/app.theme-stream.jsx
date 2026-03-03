@@ -475,9 +475,12 @@ export default function ThemeStreamPage() {
             <s-text-field
                     label="Collection Handle"
                     name="collection_handle"
-              required
                     placeholder="e.g. summer-collection"
                   />
+                  <div style={{ marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <input type="checkbox" id="use_closest_collection" name="use_closest_collection" value="1" />
+                    <label htmlFor="use_closest_collection" style={{ fontSize: "0.8125rem", fontWeight: "500" }}>Use current collection (dynamic on collection pages)</label>
+                  </div>
                   <MediaLibraryPicker
                     name="collection_banner_image"
                     label="Banner Image (optional override)"
@@ -1382,6 +1385,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
       return {
         ...base,
         collectionHandle: formData.get("collection_handle") || "",
+        useClosestCollection: formData.get("use_closest_collection") === "1" || formData.get("use_closest_collection") === "on",
         collectionBannerImage: formData.get("collection_banner_image") || "",
         collectionHeadline: formData.get("collection_headline") || "",
         collectionDescription: formData.get("collection_description") || "",
@@ -1701,7 +1705,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             <>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Collection Handle</label>
-                <input type="text" name="collection_handle" required defaultValue={typeConfig.collection_handle || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <input type="text" name="collection_handle" defaultValue={typeConfig.collection_handle || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <input type="checkbox" id="edit_use_closest_collection" name="use_closest_collection" value="1" defaultChecked={!!typeConfig.use_closest_collection} />
+                <label htmlFor="edit_use_closest_collection" style={{ fontSize: "0.8125rem", fontWeight: "500" }}>Use current collection (dynamic on collection pages)</label>
               </div>
               <MediaLibraryPicker name="collection_banner_image" label="Banner Image (optional)" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>

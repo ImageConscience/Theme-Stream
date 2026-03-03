@@ -28,6 +28,7 @@
 {% assign selected_announcement_bg = blank %}
 {% assign selected_announcement_color = blank %}
 {% assign selected_collection_handle = blank %}
+{% assign selected_use_closest_collection = false %}
 {% assign selected_collection_image = blank %}
 {% assign selected_countdown_target = blank %}
 {% assign selected_countdown_headline = blank %}
@@ -56,7 +57,7 @@
 {% if all_entries != blank %}
   {% for entry in all_entries %}
     {% assign entry_pos = entry.position_id.value | default: entry.position_id | strip %}
-    {% assign entry_block_type = entry.block_type | default: 'hero' | strip %}
+    {% assign entry_block_type = entry.block_type.value | default: entry.block_type | default: 'hero' | strip %}
     {% if entry_pos == position_id %}
       {% assign start_at_value = entry.start_at %}
       {% assign end_at_value = entry.end_at %}
@@ -70,7 +71,7 @@
           {% if start_ts > latest_start_ts or latest_start_ts == 0 %}
             {% assign latest_start_ts = start_ts %}
             {% assign selected_block_type = entry_block_type %}
-            {% assign tc_raw = entry.type_config | default: '' %}
+            {% assign tc_raw = entry.type_config.value | default: entry.type_config | default: '' %}
             {% assign tc = blank %}
             {% if tc_raw != blank %}
               {% # theme-check-disable-next-line UnknownFilter %}
@@ -79,8 +80,9 @@
             {% if tc != blank %}
               {% assign selected_title = tc.headline | default: entry.headline %}
               {% assign selected_description = tc.description | default: entry.description %}
-              {% assign selected_desktop_banner = tc.desktop_banner | default: entry.desktop_banner %}
-              {% assign selected_mobile_banner = tc.mobile_banner | default: entry.mobile_banner %}
+              {% comment %} Prefer entry (file reference) over tc (GID string) - image_url needs the object {% endcomment %}
+              {% assign selected_desktop_banner = entry.desktop_banner | default: tc.desktop_banner %}
+              {% assign selected_mobile_banner = entry.mobile_banner | default: tc.mobile_banner %}
               {% assign selected_target_url = tc.target_url | default: entry.target_url %}
               {% assign selected_button_text = tc.button_text | default: entry.button_text %}
               {% assign selected_announcement_text = tc.text %}
@@ -88,6 +90,7 @@
               {% assign selected_announcement_bg = tc.bg_color | default: '#000000' %}
               {% assign selected_announcement_color = tc.text_color | default: '#ffffff' %}
               {% assign selected_collection_handle = tc.collection_handle %}
+              {% assign selected_use_closest_collection = tc.use_closest_collection | default: false %}
               {% if tc.image != blank %}{% assign selected_collection_image = entry.desktop_banner %}{% endif %}
               {% assign selected_countdown_target = tc.target_date %}
               {% assign selected_countdown_headline = tc.headline %}
@@ -194,7 +197,10 @@
     {% if selected_desktop_banner != blank or selected_mobile_banner != blank %}{% assign show_hero = true %}{% endif %}
   {% endif %}
   {% if selected_block_type == 'announcement_bar' and selected_announcement_text != blank %}{% assign show_announcement = true %}{% endif %}
-  {% if selected_block_type == 'collection_banner' and selected_collection_handle != blank %}{% assign show_collection = true %}{% endif %}
+  {% if selected_block_type == 'collection_banner' %}
+    {% if selected_use_closest_collection and collection != blank %}{% assign show_collection = true %}{% endif %}
+    {% if selected_collection_handle != blank %}{% assign show_collection = true %}{% endif %}
+  {% endif %}
   {% if selected_block_type == 'countdown_banner' and selected_countdown_target != blank %}{% assign show_countdown = true %}{% endif %}
   {% if selected_block_type == 'image_with_text' and selected_iwt_image != blank %}{% assign show_iwt = true %}{% endif %}
   {% if selected_block_type == 'background_video' %}
@@ -332,10 +338,28 @@
       {% endif %}
     </div>
   {% elsif show_collection %}
-    {% assign coll_url = '/collections/' | append: selected_collection_handle %}
-    {% assign coll_img = selected_collection_image | default: collections[selected_collection_handle].image %}
-    {% assign coll_title = selected_title | default: collections[selected_collection_handle].title %}
-    <a href="{{ coll_url }}" class="theme-stream__link">
+    {% if selected_use_closest_collection and collection != blank %}
+      {% assign coll_url = collection.url %}
+      {% assign coll_img = selected_collection_image | default: collection.image %}
+      {% assign coll_title = selected_title | default: collection.title %}
+    {% else %}
+      {% assign coll_url = '/collections/' | append: selected_collection_handle %}
+      {% assign coll_img = selected_collection_image | default: collections[selected_collection_handle].image %}
+      {% assign coll_title = selected_title | default: collections[selected_collection_handle].title %}
+    {% endif %}
+    {% assign coll_headline_size = selected_headline_font_size | default: 2.5 %}
+    {% assign coll_desc_size = selected_desc_font_size | default: 0.9 %}
+    {% assign coll_btn_size = selected_button_font_size | default: 1.0 %}
+    {% assign coll_btn_radius = selected_button_radius | default: 6 %}
+    {% assign coll_btn_pad = selected_button_padding_vertical | default: 12 %}
+    {% assign coll_btn_pad_h = selected_button_padding_horizontal | default: 30 %}
+    {% assign coll_title_color = selected_headline_color | default: '#ffffff' %}
+    {% assign coll_desc_color = selected_desc_color | default: '#ffffff' %}
+    {% assign coll_btn_bg = selected_button_bg | default: '#ffffff' %}
+    {% assign coll_btn_text = selected_button_text_color | default: '#667eea' %}
+    {% assign coll_content_align = selected_text_alignment | default: 'left' %}
+    {% assign coll_vertical_alignment = selected_vertical_alignment | default: 'bottom' %}
+    <a href="{{ coll_url }}" class="theme-stream__link theme-stream__collection-link" style="--headline-size: {{ coll_headline_size }}em; --desc-size: {{ coll_desc_size }}em; --btn-size: {{ coll_btn_size }}em; --btn-radius: {{ coll_btn_radius }}px; --btn-pad-t: {{ coll_btn_pad }}px; --btn-pad-r: {{ coll_btn_pad_h }}px; --btn-pad-b: {{ coll_btn_pad }}px; --btn-pad-l: {{ coll_btn_pad_h }}px; --title-overlay: {{ coll_title_color }}; --desc-overlay: {{ coll_desc_color }}; --btn-bg-overlay: {{ coll_btn_bg }}; --btn-text-overlay: {{ coll_btn_text }};">
       <div class="theme-stream__collection theme-stream__collection--banner{% if banner_min_d != 'auto' %} theme-stream__banner--fixed-height{% endif %}"{% if banner_min_d != 'auto' %} style="min-height: {{ banner_min_d }}; --banner-fit: {{ img_fit_d }};"{% endif %}>
         {% if coll_img != blank %}
           {{ coll_img | image_url: width: 1200 | image_tag: alt: coll_title, class: 'theme-stream__banner-img', loading: 'lazy' }}
@@ -343,10 +367,10 @@
         {% assign coll_overlay_color = selected_overlay_color | default: '#000000' %}
         {% if selected_overlay_opacity == nil or selected_overlay_opacity == '' %}{% assign coll_overlay_raw = 50 %}{% else %}{% assign coll_overlay_raw = selected_overlay_opacity %}{% endif %}
         {% assign coll_overlay_opacity = coll_overlay_raw | divided_by: 100.0 %}
-        <div class="theme-stream__banner-content{% if coll_overlay_opacity == 0 %} theme-stream__banner-content--no-overlay{% endif %}" style="--overlay-color: {{ coll_overlay_color }}; --overlay-opacity: {{ coll_overlay_opacity }};">
-          <h2 class="theme-stream__title">{{ coll_title }}</h2>
-          {% if selected_description != blank %}<p class="theme-stream__description">{{ selected_description }}</p>{% endif %}
-          {% if selected_button_text != blank %}<span class="theme-stream__button">{{ selected_button_text }}</span>{% endif %}
+        <div class="theme-stream__banner-content theme-stream__banner-content--v-{{ coll_vertical_alignment }} theme-stream__banner-content--align-{{ coll_content_align }}{% if coll_overlay_opacity == 0 %} theme-stream__banner-content--no-overlay{% endif %}" style="--overlay-color: {{ coll_overlay_color }}; --overlay-opacity: {{ coll_overlay_opacity }};">
+          <h2 class="theme-stream__title theme-stream__title--overlay">{{ coll_title }}</h2>
+          {% if selected_description != blank %}<p class="theme-stream__description theme-stream__description--overlay">{{ selected_description }}</p>{% endif %}
+          {% if selected_button_text != blank %}<span class="theme-stream__button theme-stream__button--overlay">{{ selected_button_text }}</span>{% endif %}
         </div>
       </div>
     </a>
@@ -432,7 +456,7 @@
 <style>
 .shopify-app-block:has(.theme-stream) {
     width: 100%;
-    margin:0px;
+    margin: 0;
   }
   body:has(>#header-group>.header-section>#header-component[transparent]):not(:has(>#header-group>.header-section+.shopify-section))>main>.section-wrapper:first-child .shopify-app-block:has(.theme-stream) {
   margin-top: calc(var(--header-group-height, 0px) * -1);
@@ -661,13 +685,24 @@
     font-style: var(--desc-style, normal);
   }
 
-  .theme-stream__hero-link .theme-stream__button--overlay {
+  .theme-stream__hero-link .theme-stream__button--overlay,
+  .theme-stream__collection-link .theme-stream__button--overlay {
     padding: var(--btn-pad-t, 12px) var(--btn-pad-r, 30px) var(--btn-pad-b, 12px) var(--btn-pad-l, 30px);
     font-size: var(--btn-size, 1em);
     border-radius: var(--btn-radius, 6px);
     background-color: var(--btn-bg-overlay, #fff);
     color: var(--btn-text-overlay, #667eea);
     text-transform: var(--btn-uppercase, none);
+  }
+
+  .theme-stream__collection-link .theme-stream__title--overlay {
+    font-size: var(--headline-size, 2.5em);
+    color: var(--title-overlay, #fff);
+  }
+
+  .theme-stream__collection-link .theme-stream__description--overlay {
+    font-size: var(--desc-size, 0.9em);
+    color: var(--desc-overlay, #fff);
   }
   
   .theme-stream__title--below {
@@ -994,9 +1029,9 @@
     {
       "type": "metaobject",
       "id": "position_id",
-      "label": "Position",
-      "metaobject_type": "app--current--theme_stream_position",
-      "info": "Choose a position from Theme Stream > Positions. Open the app first to ensure positions are available."
+      "label": "Stream",
+      "metaobject_type": "app--329706766337--theme_stream_position",
+      "info": "Choose a stream from Theme Stream > Streams. Open the app first to ensure streams are available."
     },
     {
       "type": "number",
