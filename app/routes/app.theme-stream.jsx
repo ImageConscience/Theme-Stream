@@ -6,6 +6,7 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import PropTypes from "prop-types";
 import { formatUTCForDateTimeInput, formatUTCForDisplay } from "../components/ThemeStream/utils";
 import BlockPreview from "../components/BlockPreview";
+import PositionsWithEntriesTree from "../components/PositionsWithEntriesTree";
 export { loader, action } from "../services/theme-stream.server";
 
 /** "two-column" = preview left, data right. "stacked" = preview on top, data below. */
@@ -36,7 +37,6 @@ export default function ThemeStreamPage() {
   const [showForm, setShowForm] = useState(false);
   const [formStatusActive, setFormStatusActive] = useState(false);
   const handledResponseRef = useRef(null);
-  const [sortConfig, setSortConfig] = useState([]); // Array of {column: string, direction: 'asc'|'desc'}
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -930,484 +930,10 @@ export default function ThemeStreamPage() {
       )}
 
       <s-section>
-        <h2 style={{ fontSize: "1.2rem", lineHeight: 1.1, margin: "0 0 10px 0" }}>Existing Entries</h2>
-        {initialEntries.length === 0 ? (
-          <s-text>No entries yet. Create your first schedulable entry above.</s-text>
-        ) : (
-          <div style={{ overflowX: "auto", width: "100%" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
-              <thead>
-                {(() => {
-                  // Sort handler function
-                  const handleSort = (column) => {
-                    setSortConfig((prev) => {
-                      const existingIndex = prev.findIndex((s) => s.column === column);
-                      
-                      if (existingIndex >= 0) {
-                        // Column already in sort - toggle direction
-                        const updated = [...prev];
-                        if (updated[existingIndex].direction === 'asc') {
-                          updated[existingIndex] = { column, direction: 'desc' };
-                        } else {
-                          // Remove from sort if going from desc to nothing
-                          updated.splice(existingIndex, 1);
-                        }
-                        return updated;
-                      } else {
-                        // New column - add with ascending
-                        return [...prev, { column, direction: 'asc' }];
-                      }
-                    });
-                  };
-                  
-                  // Get sort direction for a column
-                  const getSortDirection = (column) => {
-                    const sort = sortConfig.find((s) => s.column === column);
-                    return sort ? sort.direction : null;
-                  };
-                  
-                  // Get sort order (priority) for a column
-                  const getSortOrder = (column) => {
-                    const index = sortConfig.findIndex((s) => s.column === column);
-                    return index >= 0 ? index + 1 : null;
-                  };
-                  
-                  return (
-                    <tr style={{ borderBottom: "2px solid #e1e3e5", backgroundColor: "#f6f6f7" }}>
-                      <th style={{ padding: "0.75rem", textAlign: "center", fontWeight: "600", borderRight: "1px solid #e1e3e5", width: "60px" }}>
-                        Active
-                      </th>
-                      <th 
-                        style={{ 
-                          padding: "0.75rem", 
-                          textAlign: "left", 
-                          fontWeight: "600", 
-                          borderRight: "1px solid #e1e3e5",
-                          cursor: "pointer",
-                          userSelect: "none",
-                          position: "relative"
-                        }}
-                        onClick={() => handleSort('title')}
-                      >
-                        Title {getSortDirection('title') && (
-                          <span style={{ marginLeft: "0.5rem", fontSize: "0.75rem", color: "#667eea" }}>
-                            {getSortDirection('title') === 'asc' ? '↑' : '↓'} {getSortOrder('title')}
-                          </span>
-                        )}
-                      </th>
-                      <th 
-                        style={{ 
-                          padding: "0.75rem", 
-                          textAlign: "left", 
-                          fontWeight: "600", 
-                          borderRight: "1px solid #e1e3e5",
-                          cursor: "pointer",
-                          userSelect: "none"
-                        }}
-                        onClick={() => handleSort('position_id')}
-                      >
-                        Position {getSortDirection('position_id') && (
-                          <span style={{ marginLeft: "0.5rem", fontSize: "0.75rem", color: "#667eea" }}>
-                            {getSortDirection('position_id') === 'asc' ? '↑' : '↓'} {getSortOrder('position_id')}
-                          </span>
-                        )}
-                      </th>
-                      <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600", borderRight: "1px solid #e1e3e5" }}>
-                        Block Type
-                      </th>
-                      <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600", borderRight: "1px solid #e1e3e5" }}>
-                        Desktop Banner
-                      </th>
-                      <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600", borderRight: "1px solid #e1e3e5" }}>
-                        Mobile Banner
-                      </th>
-                      <th 
-                        style={{ 
-                          padding: "0.75rem", 
-                          textAlign: "left", 
-                          fontWeight: "600", 
-                          borderRight: "1px solid #e1e3e5",
-                          cursor: "pointer",
-                          userSelect: "none"
-                        }}
-                        onClick={() => handleSort('start_at')}
-                      >
-                        Start At {getSortDirection('start_at') && (
-                          <span style={{ marginLeft: "0.5rem", fontSize: "0.75rem", color: "#667eea" }}>
-                            {getSortDirection('start_at') === 'asc' ? '↑' : '↓'} {getSortOrder('start_at')}
-                          </span>
-                        )}
-                      </th>
-                      <th 
-                        style={{ 
-                          padding: "0.75rem", 
-                          textAlign: "left", 
-                          fontWeight: "600", 
-                          borderRight: "1px solid #e1e3e5",
-                          cursor: "pointer",
-                          userSelect: "none"
-                        }}
-                        onClick={() => handleSort('end_at')}
-                      >
-                        End At {getSortDirection('end_at') && (
-                          <span style={{ marginLeft: "0.5rem", fontSize: "0.75rem", color: "#667eea" }}>
-                            {getSortDirection('end_at') === 'asc' ? '↑' : '↓'} {getSortOrder('end_at')}
-                          </span>
-                        )}
-                      </th>
-                      <th style={{ padding: "0.75rem", textAlign: "center", fontWeight: "600", borderRight: "1px solid #e1e3e5", width: "80px" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0.75rem", textAlign: "center", fontWeight: "600", width: "80px" }}>
-                        Delete
-                      </th>
-                    </tr>
-                  );
-                })()}
-              </thead>
-              <tbody>
-                {(() => {
-                  // Sort entries based on sortConfig
-                  const sortedEntries = [...initialEntries].sort((a, b) => {
-                    // Pre-compute field maps once per comparison
-                    const fieldMapA = Object.fromEntries((a.fields || []).map((f) => [f.key, f.value]));
-                    const fieldMapB = Object.fromEntries((b.fields || []).map((f) => [f.key, f.value]));
-                    
-                    // Apply all active sorts in order
-                    for (const sort of sortConfig) {
-                      let valueA = fieldMapA[sort.column];
-                      let valueB = fieldMapB[sort.column];
-                      
-                      // Handle date fields
-                      if (sort.column === 'start_at' || sort.column === 'end_at') {
-                        valueA = valueA ? new Date(valueA).getTime() : 0;
-                        valueB = valueB ? new Date(valueB).getTime() : 0;
-                      } else if (typeof valueA === 'string') {
-                        valueA = valueA.toLowerCase();
-                      }
-                      if (typeof valueB === 'string') {
-                        valueB = valueB.toLowerCase();
-                      }
-                      
-                      // Handle null/undefined
-                      if (valueA == null || valueA === '') valueA = '';
-                      if (valueB == null || valueB === '') valueB = '';
-                      
-                      // Compare
-                      let comparison = 0;
-                      if (valueA < valueB) {
-                        comparison = -1;
-                      } else if (valueA > valueB) {
-                        comparison = 1;
-                      }
-                      
-                      // Apply direction - if values differ, return the comparison
-                      // Otherwise continue to next sort criterion
-                      if (comparison !== 0) {
-                        return sort.direction === 'asc' ? comparison : -comparison;
-                      }
-                    }
-                    // All sorts matched - items are equal
-                    return 0;
-                  });
-                  
-                  return sortedEntries.map((e) => {
-                  const fieldMap = Object.fromEntries(
-                    (e.fields || []).map((f) => [f.key, f.value]),
-                  );
-                  const referenceMap = Object.fromEntries(
-                    (e.fields || []).map((f) => [f.key, f.reference]),
-                  );
-                  
-                  let startDate = "Not set";
-                  let endDate = "Not set";
-                  let startDateUserTz = "";
-                  let endDateUserTz = "";
-                  try {
-                    if (fieldMap.start_at) {
-                      startDate = formatUTCForDisplay(fieldMap.start_at, storeTimeZone);
-                      if (userTimeZone !== storeTimeZone) {
-                        startDateUserTz = formatUTCForDisplay(fieldMap.start_at, userTimeZone);
-                      }
-                    }
-                  } catch (e) {
-                    console.error("Error parsing start date:", e);
-                  }
-                  try {
-                    if (fieldMap.end_at) {
-                      endDate = formatUTCForDisplay(fieldMap.end_at, storeTimeZone);
-                      if (userTimeZone !== storeTimeZone) {
-                        endDateUserTz = formatUTCForDisplay(fieldMap.end_at, userTimeZone);
-                      }
-                    }
-                  } catch (e) {
-                    console.error("Error parsing end date:", e);
-                  }
-                  
-                  const desktopBanner = referenceMap.desktop_banner;
-                  const mobileBanner = referenceMap.mobile_banner;
-                  const desktopBannerUrl = desktopBanner?.image?.url || null;
-                  const mobileBannerUrl = mobileBanner?.image?.url || null;
-                  
-                  // Get publishable status
-                  const isActive = e.capabilities?.publishable?.status === "ACTIVE";
-                  const toggleId = `${e.id}-status-toggle`;
-                  
-                  // Handler for toggle status
-                  const handleToggleStatus = async () => {
-                    const newStatus = isActive ? "DRAFT" : "ACTIVE";
-                    try {
-                      const response = await fetch(window.location.pathname, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          intent: "toggleStatus",
-                          id: e.id,
-                          status: newStatus,
-                        }),
-                        credentials: "include",
-                      });
-                      
-                      const result = await response.json();
-                      
-                      if (result.success) {
-                        revalidator.revalidate();
-                      } else {
-                        console.error("Failed to toggle status:", result.error);
-                      }
-                    } catch (err) {
-                      console.error("Error toggling status:", err);
-                    }
-                  };
-                  
-                  return (
-                    <tr key={e.id} style={{ borderBottom: "1px solid #e1e3e5" }}>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", textAlign: "center" }}>
-                        <label 
-                          htmlFor={toggleId}
-                          style={{ 
-                            display: "inline-flex", 
-                            alignItems: "center", 
-                            justifyContent: "center", 
-                            cursor: "pointer",
-                            position: "relative",
-                            width: "44px",
-                            height: "24px",
-                          }}
-                        >
-                          <input
-                            id={toggleId}
-                            type="checkbox"
-                            checked={isActive}
-                            onChange={handleToggleStatus}
-                            aria-label={isActive ? "Set entry to draft status" : "Set entry to active status"}
-                            style={{
-                              opacity: 0,
-                              width: 0,
-                              height: 0,
-                              position: "absolute",
-                            }}
-                          />
-                          <span
-                            style={{
-                              position: "absolute",
-                              cursor: "pointer",
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              backgroundColor: isActive ? "#667eea" : "#c9cccf",
-                              borderRadius: "24px",
-                              transition: "background-color 0.2s",
-                            }}
-                          >
-                            <span
-                              style={{
-                                position: "absolute",
-                                width: "1px",
-                                height: "1px",
-                                padding: 0,
-                                margin: "-1px",
-                                overflow: "hidden",
-                                clip: "rect(0, 0, 0, 0)",
-                                whiteSpace: "nowrap",
-                                border: 0,
-                              }}
-                            >
-                              {isActive ? "Set entry to draft" : "Set entry to active"}
-                            </span>
-                            <span
-                              style={{
-                                position: "absolute",
-                                content: '""',
-                                height: "18px",
-                                width: "18px",
-                                left: isActive ? "22px" : "3px",
-                                bottom: "3px",
-                                backgroundColor: "white",
-                                borderRadius: "50%",
-                                transition: "left 0.2s",
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                              }}
-                            />
-                          </span>
-                        </label>
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontWeight: "500" }}>
-                        {fieldMap.title || "(untitled)"}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5" }}>
-                        {positions.find((p) => p.handle === fieldMap.position_id)?.name || fieldMap.position_id || "-"}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontSize: "0.8125rem" }}>
-                        {blockTypes[fieldMap.block_type || "hero"]?.label || fieldMap.block_type || "Hero"}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontSize: "0.8125rem", textAlign: "center" }}>
-                        {desktopBannerUrl ? (
-                          <img 
-                            src={desktopBannerUrl} 
-                            alt="Desktop banner" 
-                            style={{ maxWidth: "100px", maxHeight: "60px", objectFit: "contain", border: "1px solid #e1e3e5", borderRadius: "4px" }}
-                          />
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontSize: "0.8125rem", textAlign: "center" }}>
-                        {mobileBannerUrl ? (
-                          <img 
-                            src={mobileBannerUrl} 
-                            alt="Mobile banner" 
-                            style={{ maxWidth: "100px", maxHeight: "60px", objectFit: "contain", border: "1px solid #e1e3e5", borderRadius: "4px" }}
-                          />
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontSize: "0.8125rem", color: "#666" }}>
-                        <div>{startDate}</div>
-                        {startDateUserTz && (
-                          <div style={{ fontSize: "0.75rem", color: "#6d7175", marginTop: "2px" }}>
-                            In your timezone: {startDateUserTz}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", fontSize: "0.8125rem", color: "#666" }}>
-                        <div>{endDate}</div>
-                        {endDateUserTz && (
-                          <div style={{ fontSize: "0.75rem", color: "#6d7175", marginTop: "2px" }}>
-                            In your timezone: {endDateUserTz}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "0.75rem", borderRight: "1px solid #e1e3e5", textAlign: "center" }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedEntry(e);
-                            setEditModalOpen(true);
-                          }}
-                          style={{
-                            fontSize: "0.8125rem",
-                            color: "#667eea",
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                      <td style={{ padding: "0.75rem", textAlign: "center" }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedEntry(e);
-                            setDeleteModalOpen(true);
-                          }}
-                          style={{
-                            fontSize: "0.8125rem",
-                            color: "#d72c0d",
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                  });
-                })()}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </s-section>
-
-      {/* Positions Section */}
-      <s-section>
-        <h2 style={{ fontSize: "1.2rem", lineHeight: 1.1, margin: "0 0 10px 0" }}>Positions</h2>
-            <p style={{ fontSize: "0.875rem", color: "#6d7175", margin: "0 0 1rem 0" }}>
-          Positions are placement slots for scheduled content. <strong>Uncategorized</strong> is the default bucket for entries not assigned to a specific position. Create additional positions, then select them when creating entries and use the <strong>handle</strong> in your theme block settings.
+        <h2 style={{ fontSize: "1.2rem", lineHeight: 1.1, margin: "0 0 10px 0" }}>Positions & Entries</h2>
+        <p style={{ fontSize: "0.875rem", color: "#6d7175", margin: "0 0 1rem 0" }}>
+          Positions are placement slots for scheduled content. <strong>Uncategorized</strong> is the default bucket. Drag to reorder; expand/collapse to show entries. Both positions and entries support full CRUD.
         </p>
-        <div style={{ overflowX: "auto", border: "1px solid #e1e3e5", borderRadius: "8px", marginBottom: "1rem" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
-            <thead>
-              <tr style={{ borderBottom: "2px solid #e1e3e5", backgroundColor: "#f6f6f7" }}>
-                <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600" }}>Name</th>
-                <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600" }}>Handle</th>
-                <th style={{ padding: "0.75rem", textAlign: "left", fontWeight: "600" }}>Description</th>
-                <th style={{ padding: "0.75rem", textAlign: "center", fontWeight: "600", width: "120px" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {positions.map((p) => {
-                const isDefault = p.handle === "uncategorized";
-                return (
-                  <tr key={p.id} style={{ borderBottom: "1px solid #e1e3e5" }}>
-                    <td style={{ padding: "0.75rem" }}>{p.name}</td>
-                    <td style={{ padding: "0.75rem", fontFamily: "monospace", fontSize: "0.8125rem" }}>
-                      <code style={{ backgroundColor: "#f0f0f0", padding: "2px 6px", borderRadius: "4px" }}>{p.handle}</code>
-                    </td>
-                    <td style={{ padding: "0.75rem", color: "#6d7175" }}>{p.description || "—"}</td>
-                    <td style={{ padding: "0.75rem", textAlign: "center" }}>
-                      {!isDefault && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setPositionEditTarget(p);
-                              setPositionFormName(p.name);
-                              setPositionFormDesc(p.description || "");
-                              setPositionModalOpen(true);
-                            }}
-                            style={{ marginRight: "0.5rem", fontSize: "0.8125rem", color: "#667eea", cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPositionDeleteConfirm(p)}
-                            style={{ fontSize: "0.8125rem", color: "#d72c0d", cursor: "pointer", background: "none", border: "none", textDecoration: "underline" }}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                      {isDefault && <span style={{ fontSize: "0.8125rem", color: "#6d7175" }}>Default bucket</span>}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
         <button
           type="button"
           onClick={() => {
@@ -1417,6 +943,7 @@ export default function ThemeStreamPage() {
             setPositionModalOpen(true);
           }}
           style={{
+            marginBottom: "1rem",
             padding: "0.5rem 0.75rem",
             border: "1px solid #008060",
             borderRadius: "4px",
@@ -1429,12 +956,85 @@ export default function ThemeStreamPage() {
         >
           Add Position
         </button>
-        <p style={{ marginTop: "1rem", fontSize: "0.75rem", color: "#6d7175" }}>
-          <a href="/app/metaobject-debug" target="_blank" rel="noopener noreferrer" style={{ color: "#667eea" }}>
-            Metaobject debug (theme block Position picker)
-          </a>
-        </p>
+        {(positions.length === 0 && initialEntries.length === 0) ? (
+          <s-text>No positions or entries yet. Create a position above, then create entries above.</s-text>
+        ) : (
+          <PositionsWithEntriesTree
+            positions={positions}
+            entries={initialEntries}
+            blockTypes={blockTypes}
+            storeTimeZone={storeTimeZone}
+            isDefaultPosition={(p) => p.handle === "uncategorized"}
+            onPositionReorder={async (ids) => {
+              try {
+                const res = await fetch(window.location.pathname, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ intent: "positionReorder", ids }),
+                  credentials: "include",
+                });
+                const data = await res.json();
+                if (data.success) revalidator.revalidate();
+                else console.error("Position reorder failed:", data.error);
+              } catch (err) {
+                console.error("Position reorder error:", err);
+              }
+            }}
+            onEntryReorder={async (positionHandle, entryIds) => {
+              try {
+                const res = await fetch(window.location.pathname, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ intent: "entryReorder", entryIds }),
+                  credentials: "include",
+                });
+                const data = await res.json();
+                if (data.success) revalidator.revalidate();
+                else console.error("Entry reorder failed:", data.error);
+              } catch (err) {
+                console.error("Entry reorder error:", err);
+              }
+            }}
+            onPositionEdit={(p) => {
+              setPositionEditTarget(p);
+              setPositionFormName(p.name);
+              setPositionFormDesc(p.description || "");
+              setPositionModalOpen(true);
+            }}
+            onPositionDelete={(p) => setPositionDeleteConfirm(p)}
+            onEntryEdit={(e) => {
+              setSelectedEntry(e);
+              setEditModalOpen(true);
+            }}
+            onEntryDelete={(e) => {
+              setSelectedEntry(e);
+              setDeleteModalOpen(true);
+            }}
+            onEntryToggleStatus={async (entry, isActive) => {
+              const newStatus = isActive ? "DRAFT" : "ACTIVE";
+              try {
+                const res = await fetch(window.location.pathname, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ intent: "toggleStatus", id: entry.id, status: newStatus }),
+                  credentials: "include",
+                });
+                const data = await res.json();
+                if (data.success) revalidator.revalidate();
+                else console.error("Toggle failed:", data.error);
+              } catch (err) {
+                console.error("Toggle error:", err);
+              }
+            }}
+          />
+        )}
       </s-section>
+
+      <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "#6d7175" }}>
+        <a href="/app/metaobject-debug" target="_blank" rel="noopener noreferrer" style={{ color: "#667eea" }}>
+          Metaobject debug (theme block Position picker)
+        </a>
+      </p>
 
       {/* Position Add/Edit Modal */}
       {positionModalOpen && (

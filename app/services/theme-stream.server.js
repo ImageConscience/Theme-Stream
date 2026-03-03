@@ -643,6 +643,49 @@ export const action = async ({ request }) => {
         await deletePositionMetaobject(admin, deleted.handle);
         return json({ success: true, message: "Position deleted!" });
       }
+
+      if (body.intent === "positionReorder") {
+        const { session } = await authenticate.admin(request);
+        const shop = session?.shop;
+        if (!shop) return json({ error: "Invalid session", success: false });
+        const ids = body.ids;
+        if (!Array.isArray(ids) || ids.length === 0) return json({ error: "ids array required", success: false });
+        const { reorderPositions } = await import("./positions.server.js");
+        await reorderPositions(shop, ids);
+        return json({ success: true, message: "Positions reordered!" });
+      }
+
+      if (body.intent === "entryReorder") {
+        const { admin } = await authenticate.admin(request);
+        const entryIds = body.entryIds;
+        if (!Array.isArray(entryIds) || entryIds.length === 0) return json({ error: "entryIds array required", success: false });
+        for (let i = 0; i < entryIds.length; i++) {
+          const id = entryIds[i];
+          const res = await admin.graphql(
+            `#graphql
+            mutation UpdateEntrySortOrder($id: ID!, $metaobject: MetaobjectUpdateInput!) {
+              metaobjectUpdate(id: $id, metaobject: $metaobject) {
+                metaobject { id }
+                userErrors { field message }
+              }
+            }
+          `,
+            {
+              variables: {
+                id,
+                metaobject: {
+                  fields: [{ key: "sort_order", value: String(i) }],
+                },
+              },
+            },
+          );
+          const resJson = await res.json();
+          if (resJson?.data?.metaobjectUpdate?.userErrors?.length) {
+            logger.warn("[entryReorder] Failed to update entry", id, resJson.data.metaobjectUpdate.userErrors);
+          }
+        }
+        return json({ success: true, message: "Entries reordered!" });
+      }
     }
 
     const formData = await request.formData();
@@ -1254,6 +1297,7 @@ export const action = async ({ request }) => {
       { key: "end_at", value: formattedEndAt },
       { key: "target_url", value: targetUrl },
       { key: "button_text", value: buttonText },
+      { key: "sort_order", value: "0" },
     ];
 
     if (desktopBanner) {

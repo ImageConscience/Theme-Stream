@@ -33,13 +33,14 @@ model Session {
 
 /// Block positions: reference name + internal id. Entries and theme blocks use the id.
 model BlockPosition {
-  id          String   @id @default(cuid())
-  shop        String
-  name        String   /// Display name for dropdowns
+  id        String   @id @default(cuid())
+  shop      String
+  name      String   /// Display name for dropdowns
   description String?  /// Optional description
-  handle      String   /// Internal id (URL-safe, used in metaobject position_id and theme block)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  handle    String   /// Internal id (URL-safe, used in metaobject position_id and theme block)
+  sortOrder Int      @default(0) /// For drag-and-drop ordering
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([shop, handle])
   @@index([shop])

@@ -69,7 +69,7 @@ export async function listPositions(shop) {
   await ensureDefaultPosition(shop);
   return prisma.blockPosition.findMany({
     where: { shop },
-    orderBy: { name: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   });
 }
 
@@ -84,8 +84,13 @@ export async function getPositionByHandle(shop, handle) {
 export async function createPosition(shop, { name, description }) {
   const baseHandle = handleize(name || "Position");
   const handle = await getUniqueHandle(shop, baseHandle);
+  const maxOrder = await prisma.blockPosition.aggregate({
+    where: { shop },
+    _max: { sortOrder: true },
+  });
+  const sortOrder = (maxOrder._max.sortOrder ?? -1) + 1;
   return prisma.blockPosition.create({
-    data: { shop, name: (name || "Position").trim(), description: description || null, handle },
+    data: { shop, name: (name || "Position").trim(), description: description || null, handle, sortOrder },
   });
 }
 
@@ -109,4 +114,23 @@ export async function deletePosition(shop, id) {
   if (!existing) return null;
   if (existing.handle === DEFAULT_POSITION_HANDLE) return null;
   return prisma.blockPosition.delete({ where: { id } });
+}
+
+/** Reorder positions. ids = ordered array of position ids. */
+export async function reorderPositions(shop, ids) {
+  if (!Array.isArray(ids) || ids.length === 0) return;
+  const positions = await prisma.blockPosition.findMany({
+    where: { shop, id: { in: ids } },
+    select: { id: true },
+  });
+  const validIds = new Set(positions.map((p) => p.id));
+  const orderedIds = ids.filter((id) => validIds.has(id));
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.blockPosition.update({
+        where: { id },
+        data: { sortOrder: index },
+      }),
+    ),
+  );
 }

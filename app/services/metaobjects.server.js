@@ -20,6 +20,7 @@ const FIELD_DEFINITIONS = [
   { name: "Target URL", key: "target_url", type: "url", required: false },
   { name: "Headline", key: "headline", type: "single_line_text_field", required: false },
   { name: "Button Text", key: "button_text", type: "single_line_text_field", required: false },
+  { name: "Sort Order", key: "sort_order", type: "number_integer", required: false },
 ];
 
 /**
@@ -61,6 +62,7 @@ export async function ensureMetaobjectDefinition(admin) {
       const existingKeys = (def.fieldDefinitions || []).map((f) => f.key);
       const needsBlockType = !existingKeys.includes("block_type");
       const needsTypeConfig = !existingKeys.includes("type_config");
+      const needsSortOrder = !existingKeys.includes("sort_order");
       const positionField = (def.fieldDefinitions || []).find((f) => f.key === "position_id");
       const needsPositionNameUpdate = positionField && positionField.name !== "Position";
 
@@ -97,7 +99,7 @@ export async function ensureMetaobjectDefinition(admin) {
         }
       }
 
-      if (needsBlockType || needsTypeConfig) {
+      if (needsBlockType || needsTypeConfig || needsSortOrder) {
         const fieldDefinitions = [];
         if (needsBlockType) {
           fieldDefinitions.push({
@@ -114,6 +116,15 @@ export async function ensureMetaobjectDefinition(admin) {
               key: "type_config",
               name: "Type Config",
               type: "json",
+            },
+          });
+        }
+        if (needsSortOrder) {
+          fieldDefinitions.push({
+            create: {
+              key: "sort_order",
+              name: "Sort Order",
+              type: "number_integer",
             },
           });
         }
