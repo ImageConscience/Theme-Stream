@@ -35,7 +35,7 @@ const shopify = shopifyApp({
           const { ensureSchedulerPositionDefinition, syncAllPositionsToMetaobjects } = await import("./services/positions-metaobject.server.js");
           const defResult = await ensureSchedulerPositionDefinition(admin);
           if (!defResult.ok) {
-            logger.warn("[afterAuth] scheduler_position definition:", defResult.error);
+            logger.warn("[afterAuth] theme_stream_position definition:", defResult.error);
           }
           const { listPositions } = await import("./services/positions.server.js");
           const positions = await listPositions(shop);

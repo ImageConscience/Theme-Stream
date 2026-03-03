@@ -7,7 +7,7 @@ import { json } from "../utils/responses.server";
 import { useLoaderData } from "react-router";
 import { authenticate } from "../shopify.server";
 
-const CLIENT_ID = "6f5b5ea5d134b8cea5be5397d5cae070";
+const CLIENT_ID = process.env.SHOPIFY_API_KEY || "";
 
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
@@ -21,12 +21,12 @@ export const loader = async ({ request }) => {
   };
 
   const typeFormats = [
-    "$app:scheduler_position",
-    "app--294624854017--scheduler_position",
-    "app--" + CLIENT_ID + "-scheduler_position",
-    "app--" + CLIENT_ID + "--scheduler_position",
-    "app.scheduler_position",
-    "scheduler_position",
+    "$app:theme_stream_position",
+    "app--294624854017--theme_stream_position",
+    "app--" + CLIENT_ID + "-theme_stream_position",
+    "app--" + CLIENT_ID + "--theme_stream_position",
+    "app.theme_stream_position",
+    "theme_stream_position",
   ];
 
   for (const type of typeFormats) {
@@ -84,20 +84,20 @@ export const loader = async ({ request }) => {
 
 export default function MetaobjectDebug() {
   const results = useLoaderData() ?? {};
-  const schedulerType = results.typeFormats?.["$app:scheduler_position"]?.type
-    || (results.allDefinitions || []).find((d) => (d.type || "").includes("scheduler_position"))?.type;
+  const themeStreamType = results.typeFormats?.["$app:theme_stream_position"]?.type
+    || (results.allDefinitions || []).find((d) => (d.type || "").includes("theme_stream_position"))?.type;
   return (
     <div style={{ fontFamily: "monospace", padding: "1rem", fontSize: "0.875rem", whiteSpace: "pre-wrap", maxWidth: "800px" }}>
       <h2>Metaobject Debug</h2>
       <p>Use this to diagnose theme block Position picker. Check <code>typeFormats</code> or <code>allDefinitions</code> for the actual <code>type</code> value.</p>
-      {schedulerType && (
+      {themeStreamType && (
         <p style={{ background: "#e8f5e9", padding: "0.5rem", borderRadius: "4px", marginBottom: "1rem" }}>
-          <strong>scheduler_position type:</strong> <code>{schedulerType}</code> — use this exact value for <code>metaobject_type</code> in the theme block schema.
+          <strong>theme_stream_position type:</strong> <code>{themeStreamType}</code> — use this exact value for <code>metaobject_type</code> in the theme block schema.
         </p>
       )}
-      {!schedulerType && results.typeFormats && (
+      {!themeStreamType && results.typeFormats && (
         <p style={{ background: "#fff3e0", padding: "0.5rem", borderRadius: "4px", marginBottom: "1rem" }}>
-          No scheduler_position definition found. Open Block Scheduler and ensure positions exist. The definition is created on app load.
+          No theme_stream_position definition found. Open Theme Stream and ensure positions exist. The definition is created on app load.
         </p>
       )}
       <pre>{JSON.stringify(results, null, 2)}</pre>

@@ -16,7 +16,7 @@ async function fetchAllMetaobjects(admin) {
   let after = null;
   const query = `#graphql
     query ListSchedulableEntities($first: Int!, $after: String) {
-      metaobjects(type: "schedulable_entity", first: $first, after: $after) {
+      metaobjects(type: "theme_stream_schedulable_entity", first: $first, after: $after) {
           nodes {
             id
             handle
@@ -59,7 +59,7 @@ async function fetchAllMetaobjects(admin) {
 const LEGACY_POSITION_HANDLE = "homepage_banner";
 const DEFAULT_POSITION_HANDLE = "uncategorized";
 
-/** Migrate schedulable_entity entries with position_id "homepage_banner" to "uncategorized". */
+/** Migrate theme_stream_schedulable_entity entries with position_id "homepage_banner" to "uncategorized". */
 async function migratePositionIdInEntries(admin, nodes) {
   const toMigrate = (nodes || []).filter((n) => {
     const posField = (n.fields || []).find((f) => f.key === "position_id");
@@ -1286,7 +1286,7 @@ export const action = async ({ request }) => {
       {
         variables: {
           metaobject: {
-            type: "schedulable_entity",
+            type: "theme_stream_schedulable_entity",
             fields,
             capabilities: {
               publishable: {

@@ -141,9 +141,9 @@ When you reach the step for [setting up environment variables](https://shopify.d
 
 - `SHOPIFY_API_KEY` = your Shopify app Client ID
 - `SHOPIFY_API_SECRET` = your Shopify app Client Secret
-- `SHOPIFY_APP_URL` = your Railway HTTPS URL (e.g., `https://block-scheduler-production.up.railway.app`)
+- `SHOPIFY_APP_URL` = your Railway HTTPS URL (e.g., `https://theme-stream-production.up.railway.app`)
 - `SCOPES` = `read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects,write_products,unauthenticated_read_metaobjects,read_files,write_files,read_content,write_content`
-- `BILLING_PLAN_NAME` = Plan label shown to merchants (e.g., `Block Scheduler Pro`)
+- `BILLING_PLAN_NAME` = Plan label shown to merchants (e.g., `Theme Stream Pro`)
 - `BILLING_PRICE` = Recurring price to charge (e.g., `14.99`)
 - `BILLING_CURRENCY` = ISO currency code for billing (e.g., `USD`)
 - `BILLING_TRIAL_DAYS` = Number of trial days (set to `7` for a one-week trial)
@@ -151,7 +151,7 @@ When you reach the step for [setting up environment variables](https://shopify.d
 - `DATABASE_URL` = Railway Postgres connection URL
 - `NODE_ENV` = `production`
 - Optional: `SHOP_CUSTOM_DOMAIN`
-- Optional: `BILLING_ENABLED` (defaults to `true`) and `BILLING_RETURN_URL` (defaults to `SHOPIFY_APP_URL/app/block-scheduler`)
+- Optional: `BILLING_ENABLED` (defaults to `true`) and `BILLING_RETURN_URL` (defaults to `SHOPIFY_APP_URL/app/theme-stream`)
 
 ### Debug logging toggles
 
@@ -180,12 +180,12 @@ Before enabling **App Store** distribution and turning off `BILLING_TEST`, run t
 4. Theme extension deploy (once per shop/theme)
 
 ```
-shopify extension deploy --directory=extensions/scheduled-banner-theme-block
+shopify extension deploy --directory=extensions/theme-stream
 ```
 
-Then add the “Scheduled Banner” app block in the Theme Editor.
+Then add the “Theme Stream” app block in the Theme Editor.
 
-For configuration guidance, see [`extensions/scheduled-banner-theme-block/README.md`](extensions/scheduled-banner-theme-block/README.md).
+For configuration guidance, see [`extensions/theme-stream/README.md`](extensions/theme-stream/README.md).
 
 
 ## Gotchas / Troubleshooting

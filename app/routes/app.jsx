@@ -16,7 +16,7 @@ export default function App() {
   return (
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
-        <s-link href="/app/block-scheduler">Entries</s-link>
+        <s-link href="/app/theme-stream">Entries</s-link>
         <s-link href="/app/metaobject-debug">Metaobject Debug</s-link>
       </s-app-nav>
       <Outlet />

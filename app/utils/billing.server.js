@@ -1,5 +1,5 @@
 const BILLING_ENABLED = process.env.BILLING_ENABLED !== "false";
-const PLAN_NAME = process.env.BILLING_PLAN_NAME || "Block Scheduler Pro";
+const PLAN_NAME = process.env.BILLING_PLAN_NAME || "Theme Stream Pro";
 const RAW_AMOUNT = process.env.BILLING_PRICE ?? "9.99";
 const AMOUNT = Number.parseFloat(RAW_AMOUNT);
 const CURRENCY_CODE = (process.env.BILLING_CURRENCY || "USD").toUpperCase();
@@ -19,7 +19,7 @@ const SHOP_PLAN_QUERY = `#graphql
 `;
 
 const CHECK_SUBSCRIPTION_QUERY = `#graphql
-  query CheckBlockSchedulerSubscription {
+  query CheckThemeStreamSubscription {
     currentAppInstallation {
       activeSubscriptions {
         id
@@ -44,7 +44,7 @@ const CHECK_SUBSCRIPTION_QUERY = `#graphql
 `;
 
 const CREATE_SUBSCRIPTION_MUTATION = `#graphql
-  mutation CreateBlockSchedulerSubscription(
+  mutation CreateThemeStreamSubscription(
     $name: String!
     $trialDays: Int
     $amount: Decimal!
@@ -138,7 +138,7 @@ export async function ensureActiveSubscription(admin, request) {
     request.headers.get("x-shopify-shop-domain") ||
     undefined;
 
-  const returnUrl = new URL("/app/block-scheduler", APP_BASE_URL);
+  const returnUrl = new URL("/app/theme-stream", APP_BASE_URL);
   if (hostParam) {
     returnUrl.searchParams.set("host", hostParam);
   }

@@ -4,9 +4,9 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { Redirect } from "@shopify/app-bridge/actions";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import PropTypes from "prop-types";
-import { formatUTCForDateTimeInput, formatUTCForDisplay } from "../components/BlockScheduler/utils";
+import { formatUTCForDateTimeInput, formatUTCForDisplay } from "../components/ThemeStream/utils";
 import BlockPreview from "../components/BlockPreview";
-export { loader, action } from "../services/block-scheduler.server";
+export { loader, action } from "../services/theme-stream.server";
 
 /** "two-column" = preview left, data right. "stacked" = preview on top, data below. */
 const MODAL_LAYOUT = "two-column";
@@ -19,7 +19,7 @@ const debugLog = (...args) => {
   }
 };
 
-export default function BlockSchedulerPage() {
+export default function ThemeStreamPage() {
   const loaderData = useLoaderData();
   const initialEntries = loaderData?.entries ?? [];
   const loaderMediaFiles = loaderData?.mediaFiles ?? [];
@@ -205,7 +205,7 @@ export default function BlockSchedulerPage() {
   const isLoading = navigation.state === "submitting" || fetcher.state === "submitting";
 
   return (
-    <s-page heading="Block Scheduler | Entries">
+    <s-page heading="Theme Stream | Entries">
       {(loaderError || fetcher.data?.error) && (
         <s-banner tone="critical" title="Error">
           {loaderError || fetcher.data?.error}
@@ -774,7 +774,7 @@ export default function BlockSchedulerPage() {
                     <s-text-field label="CSS Class" name="css_class" placeholder="e.g. my-custom-banner" />
                     <div style={{ marginTop: "0.5rem" }}>
                       <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Custom CSS</label>
-                      <textarea name="custom_css" placeholder=".my-custom-banner .scheduled-banner__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
+                      <textarea name="custom_css" placeholder=".my-custom-banner .theme-stream__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
                     </div>
                   </div>
                   <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "0.5rem" }}>
@@ -2380,7 +2380,7 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             </div>
             <div>
               <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Custom CSS</label>
-              <textarea name="custom_css" defaultValue={typeConfig.custom_css || ""} placeholder=".my-custom-banner .scheduled-banner__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
+              <textarea name="custom_css" defaultValue={typeConfig.custom_css || ""} placeholder=".my-custom-banner .theme-stream__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1.5rem" }}>

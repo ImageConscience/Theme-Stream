@@ -4,7 +4,7 @@ import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
-  throw redirect("/app/block-scheduler");
+  throw redirect("/app/theme-stream");
 };
 
 export const headers = (headersArgs) => {

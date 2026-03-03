@@ -150,7 +150,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
 
   const content = (
     <div
-      className={`scheduled-banner${cssClass ? ` ${cssClass}` : ""}`}
+      className={`theme-stream${cssClass ? ` ${cssClass}` : ""}`}
       style={{
         ...previewStyles.container,
         ...(isMobileFrame ? { borderRadius: 0, width: "100%", minWidth: 0, boxSizing: "border-box" } : {}),
@@ -173,7 +173,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
                 {data.headline && <div style={previewStyles.headline}>{data.headline}</div>}
                 {data.description && <div style={previewStyles.description}>{data.description}</div>}
                 {data.button_text && (
-                  <span className="scheduled-banner__button" style={previewStyles.button}>{data.button_text}</span>
+                  <span className="theme-stream__button" style={previewStyles.button}>{data.button_text}</span>
                 )}
               </>
             )}
@@ -200,7 +200,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px", background: overlayOpacity > 0 ? `linear-gradient(transparent, rgba(${hexToRgb(overlayColor)},${overlayOpacity}))` : "transparent", color: "#fff", textAlign }}>
             <div style={previewStyles.headline}>{data.collection_headline || `Collection: ${data.collection_handle || "..."}`}</div>
             {data.collection_description && <div style={previewStyles.description}>{data.collection_description}</div>}
-            {data.collection_button_text && <span className="scheduled-banner__button" style={previewStyles.button}>{data.collection_button_text}</span>}
+            {data.collection_button_text && <span className="theme-stream__button" style={previewStyles.button}>{data.collection_button_text}</span>}
           </div>
         </div>
       )}
@@ -225,7 +225,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
               <span>0</span>d <span>0</span>h <span>0</span>m <span>0</span>s
             </div>
             {data.countdown_subtext && <div style={previewStyles.description}>{data.countdown_subtext}</div>}
-            {data.countdown_button_text && <span className="scheduled-banner__button" style={{ ...previewStyles.button, backgroundColor: btnBg || "rgba(255,255,255,0.2)", color: btnColor || "#fff" }}>{data.countdown_button_text}</span>}
+            {data.countdown_button_text && <span className="theme-stream__button" style={{ ...previewStyles.button, backgroundColor: btnBg || "rgba(255,255,255,0.2)", color: btnColor || "#fff" }}>{data.countdown_button_text}</span>}
           </div>
         </div>
       )}
@@ -244,7 +244,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
           <div style={{ flex: 1, minWidth: 0, textAlign }}>
             {data.image_with_text_headline && <div style={{ ...previewStyles.headline, color: headColor || "#333" }}>{data.image_with_text_headline}</div>}
             {data.image_with_text_description && <div style={{ ...previewStyles.description, color: descColor || "#6d7175" }}>{data.image_with_text_description}</div>}
-            {data.image_with_text_button_text && <span className="scheduled-banner__button" style={previewStyles.button}>{data.image_with_text_button_text}</span>}
+            {data.image_with_text_button_text && <span className="theme-stream__button" style={previewStyles.button}>{data.image_with_text_button_text}</span>}
           </div>
         </div>
       )}
@@ -271,7 +271,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
           >
             {data.video_headline && <div style={previewStyles.headline}>{data.video_headline}</div>}
             {data.video_description && <div style={previewStyles.description}>{data.video_description}</div>}
-            {data.video_button_text && <span className="scheduled-banner__button" style={previewStyles.button}>{data.video_button_text}</span>}
+            {data.video_button_text && <span className="theme-stream__button" style={previewStyles.button}>{data.video_button_text}</span>}
           </div>
         </div>
       )}
@@ -285,7 +285,7 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
           <div style={{ ...previewStyles.promoBody, textAlign }}>
             {data.promo_card_title && <div style={{ ...previewStyles.headline, color: headColor || "#333" }}>{data.promo_card_title}</div>}
             {data.promo_card_description && <div style={{ ...previewStyles.description, color: descColor || "#6d7175" }}>{data.promo_card_description}</div>}
-            {data.promo_card_cta_text && <span className="scheduled-banner__button" style={previewStyles.button}>{data.promo_card_cta_text}</span>}
+            {data.promo_card_cta_text && <span className="theme-stream__button" style={previewStyles.button}>{data.promo_card_cta_text}</span>}
           </div>
         </div>
       )}

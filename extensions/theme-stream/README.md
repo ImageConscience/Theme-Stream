@@ -1,6 +1,6 @@
-# Scheduled Banner Theme Block
+# Theme Stream Theme Block
 
-This theme app extension renders a single scheduled banner selected from Block Scheduler metaobjects. Merchants can control layout and styling via theme settings.
+This theme app extension renders a single scheduled banner selected from Theme Stream metaobjects. Merchants can control layout and styling via theme settings.
 
 ## Configuration tips
 
@@ -11,6 +11,6 @@ This theme app extension renders a single scheduled banner selected from Block S
 
 ## Developer notes
 
-- The block reads metaobjects with type `schedulable_entity`. Ensure the app has created the definition and assigned entries before adding the block to a theme.
-- All overlay logic now lives in CSS (`scheduled-banner__banner-content::before`), so there are no Liquid filters that depend on Shopify-specific helpers.
-- Run `shopify extension serve --directory=extensions/scheduled-banner-theme-block` during development and `shopify extension deploy ...` when ready for production.
+- The block reads metaobjects with type `theme_stream_schedulable_entity`. Ensure the app has created the definition and assigned entries before adding the block to a theme.
+- All overlay logic now lives in CSS (`theme-stream__banner-content::before`), so there are no Liquid filters that depend on Shopify-specific helpers.
+- Run `shopify extension serve --directory=extensions/theme-stream` during development and `shopify extension deploy ...` when ready for production.

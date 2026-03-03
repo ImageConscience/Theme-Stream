@@ -1,5 +1,5 @@
 {
-  "name": "block-scheduler",
+  "name": "theme-stream",
   "private": true,
   "scripts": {
     "build": "react-router build",

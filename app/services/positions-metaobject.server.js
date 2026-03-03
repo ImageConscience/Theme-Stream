@@ -1,13 +1,13 @@
 /**
- * Sync BlockPosition records to scheduler_position metaobject entries.
+ * Sync BlockPosition records to theme_stream_position metaobject entries.
  * Enables the theme block to use a metaobject picker for position selection.
  */
 import { logger } from "../utils/logger.server";
 
-/** Type matches TOML [metaobjects.app.scheduler_position] -> $app:scheduler_position */
-const METAOBJECT_TYPE = "$app:scheduler_position";
+/** Type matches TOML [metaobjects.app.theme_stream_position] -> $app:theme_stream_position */
+const METAOBJECT_TYPE = "$app:theme_stream_position";
 
-/** Ensure scheduler_position metaobject definition exists on the shop. Creates via GraphQL if TOML deploy didn't. */
+/** Ensure theme_stream_position metaobject definition exists on the shop. Creates via GraphQL if TOML deploy didn't. */
 export async function ensureSchedulerPositionDefinition(admin) {
   try {
     const checkRes = await admin.graphql(
@@ -25,11 +25,11 @@ export async function ensureSchedulerPositionDefinition(admin) {
     const checkJson = await checkRes.json();
     const def = checkJson?.data?.metaobjectDefinitionByType;
     if (def?.id) {
-      logger.info("[scheduler_position] metaobject definition exists: type=%s id=%s", def.type, def.id);
+      logger.info("[theme_stream_position] metaobject definition exists: type=%s id=%s", def.type, def.id);
       return { ok: true };
     }
-    logger.warn("[scheduler_position] metaobject definition NOT found for type=%s. checkJson=%s", METAOBJECT_TYPE, JSON.stringify(checkJson));
-    logger.info("Creating scheduler_position metaobject definition");
+    logger.warn("[theme_stream_position] metaobject definition NOT found for type=%s. checkJson=%s", METAOBJECT_TYPE, JSON.stringify(checkJson));
+    logger.info("Creating theme_stream_position metaobject definition");
     const createRes = await admin.graphql(
       `#graphql
       mutation CreateSchedulerPositionDefinition($definition: MetaobjectDefinitionCreateInput!) {
@@ -43,7 +43,7 @@ export async function ensureSchedulerPositionDefinition(admin) {
         variables: {
           definition: {
             type: METAOBJECT_TYPE,
-            name: "Scheduler Position",
+            name: "Theme Stream Position",
             fieldDefinitions: [
               { key: "name", name: "Name", type: "single_line_text_field" },
               { key: "description", name: "Description", type: "multi_line_text_field" },
@@ -58,13 +58,13 @@ export async function ensureSchedulerPositionDefinition(admin) {
     if (errs?.length) {
       const msg = errs.map((e) => e.message).join(", ");
       if (msg.includes("taken") || msg.includes("TAKEN") || msg.includes("already exists")) {
-        logger.debug("scheduler_position definition already exists (from TOML or prior create)");
+        logger.debug("theme_stream_position definition already exists (from TOML or prior create)");
         return { ok: true };
       }
       logger.warn("ensureSchedulerPositionDefinition errors:", errs);
       return { ok: false, error: msg };
     }
-    logger.info("Created scheduler_position metaobject definition");
+    logger.info("Created theme_stream_position metaobject definition");
     return { ok: true };
   } catch (e) {
     logger.error("ensureSchedulerPositionDefinition error:", e);

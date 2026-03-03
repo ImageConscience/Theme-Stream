@@ -2,7 +2,7 @@
 
 These items are outside the scope of the current deployment but worth capturing for future sprints.
 
-- **Break down `app/services/block-scheduler.server.js`.**
+- **Break down `app/services/theme-stream.server.js`.**
   - Extract metaobject helpers (definition ensure, field builders) into `app/services/metaobjects.server.js`.
   - Split upload helpers into a dedicated module with unit tests around the staged upload flow.
 - **Add automated tests.**
@@ -12,7 +12,7 @@ These items are outside the scope of the current deployment but worth capturing 
   - Replace ad-hoc debug logging with a structured logger (e.g., pino) backed by an env-driven log level.
   - Forward webhook execution metrics to a dashboard (duration, success/failure).
 - **Theme extension hardening.**
-  - Consider adding visual regression tests (Storybook/Chromatic) for the scheduled banner block.
+  - Consider adding visual regression tests (Storybook/Chromatic) for the Theme Stream block.
   - Document recommended image sizes and responsive behaviour in the extension schema or README.
 - **Deployment hygiene.**
   - Automate the Railway deploy (GitHub Actions) with lint/build/test steps.

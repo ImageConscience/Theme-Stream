@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "6f5b5ea5d134b8cea5be5397d5cae070"
-name = "Block Scheduler"
-application_url = "https://block-scheduler-production.up.railway.app/app/block-scheduler"
+client_id = "3f5bfc4ab3e08d0a20f721cb45e7cdea"
+name = "Theme Stream"
+application_url = "https://theme-stream-production.up.railway.app/app/theme-stream"
 embedded = true
 
 [build]
@@ -25,21 +25,21 @@ scopes = "read_content,read_files,read_metaobject_definitions,read_metaobjects,u
 optional_scopes = [ ]
 use_legacy_install_flow = false
 
-[metaobjects.app.scheduler_position]
-name = "Scheduler Position"
+[metaobjects.app.theme_stream_position]
+name = "Theme Stream Position"
 access.admin = "merchant_read_write"
 access.storefront = "public_read"
 
-[metaobjects.app.scheduler_position.fields.name]
+[metaobjects.app.theme_stream_position.fields.name]
 name = "Name"
 type = "single_line_text_field"
 
-[metaobjects.app.scheduler_position.fields.description]
+[metaobjects.app.theme_stream_position.fields.description]
 name = "Description"
 type = "multi_line_text_field"
 
 [auth]
 redirect_urls = [
-  "https://block-scheduler-production.up.railway.app/auth",
-  "https://block-scheduler-production.up.railway.app/auth/callback"
+  "https://theme-stream-production.up.railway.app/auth",
+  "https://theme-stream-production.up.railway.app/auth/callback"
 ]

@@ -1,6 +1,6 @@
 import { logger } from "../utils/logger.server";
 
-const METAOBJECT_TYPE = "schedulable_entity";
+const METAOBJECT_TYPE = "theme_stream_schedulable_entity";
 
 /**
  * Field definitions for the universal schedulable entity.
@@ -163,7 +163,7 @@ export async function ensureMetaobjectDefinition(admin) {
               id: def.id,
               definition: {
                 capabilities: {
-                  onlineStore: { enabled: true, data: { urlHandle: "schedulable-entity" } },
+                  onlineStore: { enabled: true, data: { urlHandle: "theme-stream-schedulable-entity" } },
                   renderable: {
                     enabled: true,
                     data: { metaTitleKey: "title", metaDescriptionKey: "description" },
@@ -194,12 +194,12 @@ export async function ensureMetaobjectDefinition(admin) {
         variables: {
           definition: {
             type: METAOBJECT_TYPE,
-            name: "Schedulable Entity",
+            name: "Theme Stream Schedulable Entity",
             fieldDefinitions: FIELD_DEFINITIONS,
             access: { storefront: "PUBLIC_READ" },
             capabilities: {
               publishable: { enabled: true },
-              onlineStore: { enabled: true, data: { urlHandle: "schedulable-entity" } },
+              onlineStore: { enabled: true, data: { urlHandle: "theme-stream-schedulable-entity" } },
               renderable: {
                 enabled: true,
                 data: { metaTitleKey: "title", metaDescriptionKey: "description" },
