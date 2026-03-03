@@ -55,6 +55,11 @@ export default function ThemeStreamPage() {
   const blockTypes = loaderData?.blockTypes ?? {};
   const defaultBlockType = loaderData?.defaultBlockType ?? "hero";
   const positions = loaderData?.positions ?? [];
+  const [clientMounted, setClientMounted] = useState(false);
+
+  useEffect(() => {
+    setClientMounted(true);
+  }, []);
 
   const performRedirect = useCallback(
     (url, source) => {
@@ -958,6 +963,10 @@ export default function ThemeStreamPage() {
         </button>
         {(positions.length === 0 && initialEntries.length === 0) ? (
           <s-text>No positions or entries yet. Create a position above, then create entries above.</s-text>
+        ) : !clientMounted ? (
+          <div style={{ padding: "1rem", color: "#6d7175", fontSize: "0.875rem" }}>
+            Loading positions and entries…
+          </div>
         ) : (
           <PositionsWithEntriesTree
             positions={positions}
