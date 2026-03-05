@@ -153,8 +153,8 @@ export async function checkSubscriptionStatus(admin) {
     result.partnerDevelopment = shopPlan.partnerDevelopment ?? false;
     result.shopifyPlus = shopPlan.shopifyPlus ?? false;
 
-    if (result.partnerDevelopment) {
-      console.log("[billing] Development store; skipping billing.");
+    if (result.partnerDevelopment && !TEST_MODE) {
+      console.log("[billing] Development store; skipping billing (use BILLING_TEST=true to test billing on dev stores).");
       result.hasActive = true;
       return result;
     }
@@ -231,8 +231,8 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
     const shopifyPlus = planJson?.data?.shop?.plan?.shopifyPlus ?? false;
     const partnerDevelopment = planJson?.data?.shop?.plan?.partnerDevelopment ?? false;
 
-    if (partnerDevelopment) {
-      console.log("[billing] Development store; skipping subscription creation.");
+    if (partnerDevelopment && !TEST_MODE) {
+      console.log("[billing] Development store; skipping subscription creation (use BILLING_TEST=true to test).");
       return null;
     }
 
