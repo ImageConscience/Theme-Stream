@@ -2,15 +2,6 @@ import { useState, useCallback } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { formatUTCForDisplay } from "./ThemeStream/utils";
 
-const DRAG_HANDLE_STYLE = {
-  cursor: "grab",
-  padding: "0.25rem 0.5rem",
-  color: "#6d7175",
-  display: "inline-flex",
-  alignItems: "center",
-  userSelect: "none",
-};
-
 /** Position row (parent) - used inside Draggable */
 function PositionRow({
   position,
@@ -28,6 +19,8 @@ function PositionRow({
   onEntryEdit,
   onEntryDelete,
   onEntryToggleStatus,
+  dragType,
+  draggingEntryPositionId,
 }) {
   return (
     <div>
@@ -36,7 +29,7 @@ function PositionRow({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "0.5rem",
+          gap: "1rem",
           padding: "0.5rem 0.75rem",
           border: "1px solid #e1e3e5",
           borderRadius: "6px",
@@ -113,7 +106,13 @@ function PositionRow({
       </div>
       {isExpanded &&
         (positionEntries.length > 0 ? (
-          <Droppable droppableId={`entries-${position.id}`}>
+          <Droppable
+            droppableId={`entries-${position.id}`}
+            isDropDisabled={
+              dragType === "position" ||
+              (dragType === "entry" && draggingEntryPositionId !== position.id)
+            }
+          >
             {(provided) => (
               <div
                 ref={provided.innerRef}
@@ -134,7 +133,6 @@ function PositionRow({
                         onEdit={onEntryEdit}
                         onDelete={onEntryDelete}
                         onToggleStatus={onEntryToggleStatus}
-                        dragHandleProps={entProvided.dragHandleProps}
                         provided={entProvided}
                       />
                     )}
@@ -168,7 +166,6 @@ function EntryRow({
   onEdit,
   onDelete,
   onToggleStatus,
-  dragHandleProps,
   provided,
 }) {
   const fieldMap = Object.fromEntries(
@@ -191,11 +188,12 @@ function EntryRow({
     <div
       ref={provided.innerRef}
       {...provided.draggableProps}
+      {...provided.dragHandleProps}
       style={{
         ...provided.draggableProps.style,
         display: "flex",
         alignItems: "center",
-        gap: "0.5rem",
+        gap: "1rem",
         padding: "0.4rem 0.75rem",
         marginLeft: "2rem",
         marginBottom: "0.2rem",
@@ -203,14 +201,15 @@ function EntryRow({
         borderRadius: "4px",
         backgroundColor: "white",
         fontSize: "0.8125rem",
+        cursor: "grab",
       }}
     >
-      <span {...dragHandleProps} style={DRAG_HANDLE_STYLE} title="Drag to reorder">
-        ⋮⋮
-      </span>
       <button
         type="button"
-        onClick={() => onToggleStatus(entry, isActive)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleStatus(entry, isActive);
+        }}
         title={isActive ? "Click to pause" : "Click to activate"}
         style={{
           padding: "0.15rem 0.5rem",
@@ -241,11 +240,17 @@ function EntryRow({
       <span style={{ color: "#6d7175", fontSize: "0.75rem" }}>
         {blockTypes[fieldMap.block_type || "hero"]?.label || "Hero"}
       </span>
-      <span style={{ color: "#666", fontSize: "0.75rem" }}>{startDate}</span>
-      <span style={{ color: "#666", fontSize: "0.75rem" }}>{endDate}</span>
+      <span style={{ display: "flex", gap: "0.35rem", color: "#666", fontSize: "0.75rem" }}>
+        <span>{startDate}</span>
+        <span>{endDate}</span>
+      </span>
       <button
         type="button"
-        onClick={() => onEdit(entry)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit(entry);
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
         style={{
           fontSize: "0.75rem",
           color: "#667eea",
@@ -259,7 +264,11 @@ function EntryRow({
       </button>
       <button
         type="button"
-        onClick={() => onDelete(entry)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(entry);
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
         style={{
           fontSize: "0.75rem",
           color: "#d72c0d",
@@ -306,12 +315,28 @@ export default function PositionsWithEntriesTree({
     setExpanded((prev) => ({ ...prev, [positionId]: !prev[positionId] }));
   }, []);
 
+  const [dragType, setDragType] = useState(null);
+  const [draggingEntryPositionId, setDraggingEntryPositionId] = useState(null);
+
+  const handleDragStart = useCallback((result) => {
+    if (result.source.droppableId === "positions") {
+      setDragType("position");
+      setDraggingEntryPositionId(null);
+    } else if (result.source.droppableId.startsWith("entries-")) {
+      setDragType("entry");
+      setDraggingEntryPositionId(result.source.droppableId.replace("entries-", ""));
+    }
+  }, []);
+
   const handleDragEnd = useCallback(
     (result) => {
+      setDragType(null);
+      setDraggingEntryPositionId(null);
       const { source, destination } = result;
       if (!destination || source.index === destination.index) return;
 
       if (source.droppableId === "positions") {
+        if (destination.droppableId !== "positions") return;
         const reordered = [...positions];
         const [removed] = reordered.splice(source.index, 1);
         reordered.splice(destination.index, 0, removed);
@@ -320,6 +345,7 @@ export default function PositionsWithEntriesTree({
       }
 
       if (source.droppableId.startsWith("entries-")) {
+        if (destination.droppableId !== source.droppableId) return;
         const positionId = source.droppableId.replace("entries-", "");
         const position = positions.find((p) => p.id === positionId);
         if (!position) return;
@@ -352,8 +378,8 @@ export default function PositionsWithEntriesTree({
   );
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="positions">
+    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <Droppable droppableId="positions" isDropDisabled={dragType === "entry"}>
         {(provided) => (
           <div style={{ minHeight: 50 }} ref={provided.innerRef} {...provided.droppableProps}>
             {positions.map((position, idx) => {
@@ -407,6 +433,8 @@ export default function PositionsWithEntriesTree({
                         onEntryEdit={onEntryEdit}
                         onEntryDelete={onEntryDelete}
                         onEntryToggleStatus={onEntryToggleStatus}
+                        dragType={dragType}
+                        draggingEntryPositionId={draggingEntryPositionId}
                       />
                     </div>
                   )}
