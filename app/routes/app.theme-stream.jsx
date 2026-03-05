@@ -1754,25 +1754,43 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
             .edit-modal-dialog .edit-modal-preview { flex: 0 0 auto; border-right: none; border-bottom: 1px solid #e1e3e5; }
           }
         `}</style>
-        <div style={{ padding: "1.5rem", borderBottom: "1px solid #e1e3e5", flexShrink: 0 }}>
+        <div style={{ padding: "1.5rem", borderBottom: "1px solid #e1e3e5", flexShrink: 0, position: "sticky", top: 0, backgroundColor: "white", zIndex: 1 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}>Edit Event</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                background: "transparent",
-                border: "none",
-                fontSize: "1.5rem",
-                cursor: "pointer",
-                color: "#666",
-              }}
-            >
-              ×
-            </button>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                style={{
+                  padding: "0.5rem 1rem",
+                  border: "1px solid #c9cccf",
+                  borderRadius: "4px",
+                  backgroundColor: "white",
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="edit-event-form"
+                disabled={isSubmitting}
+                style={{
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  backgroundColor: "#667eea",
+                  color: "white",
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                }}
+              >
+                {isSubmitting ? "Updating..." : "Update Event"}
+              </button>
+            </div>
           </div>
         </div>
-        <form ref={editFormRef} onSubmit={handleSubmit} onInput={handleEditFormInput} style={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}>
+        <form id="edit-event-form" ref={editFormRef} onSubmit={handleSubmit} onInput={handleEditFormInput} style={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}>
           <div className="edit-modal-body">
             <div className="edit-modal-preview">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.5rem 1.5rem 0.75rem 1.5rem" }}>
@@ -2260,36 +2278,6 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Custom CSS</label>
               <textarea name="custom_css" defaultValue={typeConfig.custom_css || ""} placeholder=".my-custom-banner .theme-stream__button { border-radius: 20px; }" rows={4} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", fontSize: "0.8125rem", fontFamily: "monospace", boxSizing: "border-box" }} />
             </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1.5rem" }}>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              style={{
-                padding: "0.5rem 1rem",
-                border: "1px solid #c9cccf",
-                borderRadius: "4px",
-                backgroundColor: "white",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              style={{
-                padding: "0.5rem 1rem",
-                border: "none",
-                borderRadius: "4px",
-                backgroundColor: "#667eea",
-                color: "white",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-              }}
-            >
-              {isSubmitting ? "Updating..." : "Update Event"}
-            </button>
           </div>
             </div>
           </div>
