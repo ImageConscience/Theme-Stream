@@ -215,7 +215,9 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
 
   if (!isBillingConfigured) {
     if (BILLING_ENABLED) {
-      console.warn("[billing] Config incomplete; cannot create subscription.");
+      throw new Error(
+        "Billing is not fully configured. Please set BILLING_PRICE_* and related environment variables.",
+      );
     }
     return null;
   }
@@ -232,8 +234,9 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
     const partnerDevelopment = planJson?.data?.shop?.plan?.partnerDevelopment ?? false;
 
     if (partnerDevelopment && !TEST_MODE) {
-      console.log("[billing] Development store; skipping subscription creation (use BILLING_TEST=true to test).");
-      return null;
+      throw new Error(
+        "Billing is disabled for development stores. Set BILLING_TEST=true to test billing on dev stores.",
+      );
     }
 
     if (planKey === "streamer_plus" && !shopifyPlus) {
@@ -276,6 +279,11 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
 
     if (creationJson?.errors?.length) {
       const message = creationJson.errors.map((e) => e.message).join(", ");
+      if (message.includes("Apps without a public distribution cannot use the Billing API")) {
+        throw new Error(
+          "Billing requires the app to be listed in the App Store. Submit your app for review in the Shopify Partner Dashboard to enable billing.",
+        );
+      }
       throw new Error(`[billing] Failed to create subscription: ${message}`);
     }
 
@@ -284,8 +292,9 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
     if (userErrors.length > 0) {
       const message = userErrors.map((e) => e.message).join(", ");
       if (message.includes("Apps without a public distribution cannot use the Billing API")) {
-        console.warn("[billing] App not public yet; skipping.");
-        return null;
+        throw new Error(
+          "Billing requires the app to be listed in the App Store. Submit your app for review in the Shopify Partner Dashboard to enable billing.",
+        );
       }
       throw new Error(`[billing] Subscription creation errors: ${message}`);
     }
@@ -302,8 +311,9 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
       error instanceof Error &&
       error.message.includes("Apps without a public distribution cannot use the Billing API")
     ) {
-      console.warn("[billing] App not public yet; skipping.");
-      return null;
+      throw new Error(
+        "Billing requires the app to be listed in the App Store. Submit your app for review in the Shopify Partner Dashboard to enable billing.",
+      );
     }
     throw error;
   }

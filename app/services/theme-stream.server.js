@@ -305,7 +305,7 @@ export const action = async ({ request }) => {
           if (confirmationUrl) {
             return json({ redirectUrl: confirmationUrl });
           }
-          return json({ error: "Could not create subscription", success: false });
+          throw new Error("Subscription could not be created. Billing may be disabled or not configured.");
         } catch (err) {
           logger.error("[ACTION] createSubscription error:", err);
           return json({ error: err.message || "Failed to create subscription", success: false });
