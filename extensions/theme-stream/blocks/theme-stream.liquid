@@ -280,10 +280,10 @@
             <div class="theme-stream__banner-content theme-stream__banner-content--desktop theme-stream__banner-content--v-{{ vertical_alignment }} theme-stream__banner-content--align-{{ content_alignment_desktop }}{% if overlay_opacity == 0 %} theme-stream__banner-content--no-overlay{% endif %}" style="--overlay-color: {{ overlay_color }}; --overlay-opacity: {{ overlay_opacity }};">
               <div class="theme-stream__content-inner">
                 {% if selected_title != blank %}
-                  <h2 class="theme-stream__title theme-stream__title--overlay">{{ selected_title }}</h2>
+                  <h2 class="theme-stream__title theme-stream__title--overlay" data-html="{{ selected_title | escape }}"></h2>
                 {% endif %}
                 {% if selected_description != blank %}
-                  <p class="theme-stream__description theme-stream__description--overlay">{{ selected_description }}</p>
+                  <p class="theme-stream__description theme-stream__description--overlay" data-html="{{ selected_description | escape }}"></p>
                 {% endif %}
                 {% if selected_button_text != blank %}
                   <span class="theme-stream__button theme-stream__button--overlay">{{ selected_button_text }}</span>
@@ -300,10 +300,10 @@
               <div class="theme-stream__banner-content theme-stream__banner-content--mobile theme-stream__banner-content--v-{{ vertical_alignment }} theme-stream__banner-content--align-{{ content_alignment_mobile }}{% if overlay_opacity == 0 %} theme-stream__banner-content--no-overlay{% endif %}" style="--overlay-color: {{ overlay_color }}; --overlay-opacity: {{ overlay_opacity }};">
                 <div class="theme-stream__content-inner">
                   {% if selected_title != blank %}
-                    <h2 class="theme-stream__title theme-stream__title--overlay">{{ selected_title }}</h2>
+                    <h2 class="theme-stream__title theme-stream__title--overlay" data-html="{{ selected_title | escape }}"></h2>
                   {% endif %}
                   {% if selected_description != blank %}
-                    <p class="theme-stream__description theme-stream__description--overlay">{{ selected_description }}</p>
+                    <p class="theme-stream__description theme-stream__description--overlay" data-html="{{ selected_description | escape }}"></p>
                   {% endif %}
                   {% if selected_button_text != blank %}
                     <span class="theme-stream__button theme-stream__button--overlay">{{ selected_button_text }}</span>
@@ -317,10 +317,10 @@
         {% if mobile_content_below %}
           <div class="theme-stream__content-below theme-stream__content-below--mobile-only theme-stream__content-below--align-{{ content_alignment_mobile }}">
             {% if selected_title != blank %}
-              <h2 class="theme-stream__title theme-stream__title--below">{{ selected_title }}</h2>
+              <h2 class="theme-stream__title theme-stream__title--below" data-html="{{ selected_title | escape }}"></h2>
             {% endif %}
             {% if selected_description != blank %}
-              <p class="theme-stream__description theme-stream__description--below">{{ selected_description }}</p>
+              <p class="theme-stream__description theme-stream__description--below" data-html="{{ selected_description | escape }}"></p>
             {% endif %}
             {% if selected_button_text != blank %}
               <span class="theme-stream__button theme-stream__button--below">{{ selected_button_text }}</span>
@@ -368,8 +368,8 @@
         {% if selected_overlay_opacity == nil or selected_overlay_opacity == '' %}{% assign coll_overlay_raw = 50 %}{% else %}{% assign coll_overlay_raw = selected_overlay_opacity %}{% endif %}
         {% assign coll_overlay_opacity = coll_overlay_raw | divided_by: 100.0 %}
         <div class="theme-stream__banner-content theme-stream__banner-content--v-{{ coll_vertical_alignment }} theme-stream__banner-content--align-{{ coll_content_align }}{% if coll_overlay_opacity == 0 %} theme-stream__banner-content--no-overlay{% endif %}" style="--overlay-color: {{ coll_overlay_color }}; --overlay-opacity: {{ coll_overlay_opacity }};">
-          <h2 class="theme-stream__title theme-stream__title--overlay">{{ coll_title }}</h2>
-          {% if selected_description != blank %}<p class="theme-stream__description theme-stream__description--overlay">{{ selected_description }}</p>{% endif %}
+          <h2 class="theme-stream__title theme-stream__title--overlay" data-html="{{ coll_title | escape }}"></h2>
+          {% if selected_description != blank %}<p class="theme-stream__description theme-stream__description--overlay" data-html="{{ selected_description | escape }}"></p>{% endif %}
           {% if selected_button_text != blank %}<span class="theme-stream__button theme-stream__button--overlay">{{ selected_button_text }}</span>{% endif %}
         </div>
       </div>
@@ -386,11 +386,11 @@
           </div>
         {% endif %}
         <div class="theme-stream__countdown-inner">
-          {% if selected_countdown_headline != blank %}<h2 class="theme-stream__countdown-headline">{{ selected_countdown_headline }}</h2>{% endif %}
+          {% if selected_countdown_headline != blank %}<h2 class="theme-stream__countdown-headline" data-html="{{ selected_countdown_headline | escape }}"></h2>{% endif %}
           <div class="theme-stream__countdown-timer" data-target="{{ selected_countdown_target }}">
             <span data-days>0</span>d <span data-hours>0</span>h <span data-mins>0</span>m <span data-secs>0</span>s
           </div>
-          {% if selected_countdown_subtext != blank %}<p class="theme-stream__countdown-subtext">{{ selected_countdown_subtext }}</p>{% endif %}
+          {% if selected_countdown_subtext != blank %}<p class="theme-stream__countdown-subtext" data-html="{{ selected_countdown_subtext | escape }}"></p>{% endif %}
           {% if selected_countdown_btn != blank %}<span class="theme-stream__button">{{ selected_countdown_btn }}</span>{% endif %}
         </div>
       </div>
@@ -400,8 +400,8 @@
     <div class="theme-stream__iwt theme-stream__iwt--{{ selected_iwt_layout }}">
       {% if selected_iwt_layout == 'image_right' %}
         <div class="theme-stream__iwt-text">
-          {% if selected_title != blank %}<h2 class="theme-stream__title">{{ selected_title }}</h2>{% endif %}
-          {% if selected_description != blank %}<p class="theme-stream__description">{{ selected_description }}</p>{% endif %}
+          {% if selected_title != blank %}<h2 class="theme-stream__title" data-html="{{ selected_title | escape }}"></h2>{% endif %}
+          {% if selected_description != blank %}<p class="theme-stream__description" data-html="{{ selected_description | escape }}"></p>{% endif %}
           {% if selected_button_text != blank %}<a href="{{ iwt_link }}" class="theme-stream__button">{{ selected_button_text }}</a>{% endif %}
         </div>
       {% endif %}
@@ -410,8 +410,8 @@
       </div>
       {% if selected_iwt_layout == 'image_left' %}
         <div class="theme-stream__iwt-text">
-          {% if selected_title != blank %}<h2 class="theme-stream__title">{{ selected_title }}</h2>{% endif %}
-          {% if selected_description != blank %}<p class="theme-stream__description">{{ selected_description }}</p>{% endif %}
+          {% if selected_title != blank %}<h2 class="theme-stream__title" data-html="{{ selected_title | escape }}"></h2>{% endif %}
+          {% if selected_description != blank %}<p class="theme-stream__description" data-html="{{ selected_description | escape }}"></p>{% endif %}
           {% if selected_button_text != blank %}<a href="{{ iwt_link }}" class="theme-stream__button">{{ selected_button_text }}</a>{% endif %}
         </div>
       {% endif %}
@@ -430,8 +430,8 @@
           <source src="{{ vid_src }}" type="video/mp4">
         </video>
         <div class="theme-stream__video-overlay" style="background-color: rgba(0,0,0,{{ selected_video_overlay | divided_by: 100.0 }});">
-          {% if selected_title != blank %}<h2 class="theme-stream__video-title">{{ selected_title }}</h2>{% endif %}
-          {% if selected_description != blank %}<p class="theme-stream__video-desc">{{ selected_description }}</p>{% endif %}
+          {% if selected_title != blank %}<h2 class="theme-stream__video-title" data-html="{{ selected_title | escape }}"></h2>{% endif %}
+          {% if selected_description != blank %}<p class="theme-stream__video-desc" data-html="{{ selected_description | escape }}"></p>{% endif %}
           {% if selected_button_text != blank and selected_target_url != blank %}<a href="{{ selected_target_url }}" class="theme-stream__button">{{ selected_button_text }}</a>{% endif %}
         </div>
       </div>
@@ -443,8 +443,8 @@
           {{ selected_promo_image | image_url: width: 600 | image_tag: alt: selected_promo_title, loading: 'lazy', class: 'theme-stream__promo-img' }}
         </div>
         <div class="theme-stream__promo-body">
-          {% if selected_promo_title != blank %}<h3 class="theme-stream__promo-title">{{ selected_promo_title }}</h3>{% endif %}
-          {% if selected_promo_desc != blank %}<p class="theme-stream__promo-desc">{{ selected_promo_desc }}</p>{% endif %}
+          {% if selected_promo_title != blank %}<h3 class="theme-stream__promo-title" data-html="{{ selected_promo_title | escape }}"></h3>{% endif %}
+          {% if selected_promo_desc != blank %}<p class="theme-stream__promo-desc" data-html="{{ selected_promo_desc | escape }}"></p>{% endif %}
           {% if selected_promo_btn != blank %}<span class="theme-stream__button">{{ selected_promo_btn }}</span>{% endif %}
         </div>
       </div>
@@ -992,6 +992,14 @@
     }
   }
 </style>
+<script>
+(function() {
+  document.querySelectorAll('.theme-stream [data-html]').forEach(function(el) {
+    var html = el.getAttribute('data-html');
+    if (html) { el.innerHTML = html; el.removeAttribute('data-html'); }
+  });
+})();
+</script>
 {% if show_countdown %}
 <script>
 (function() {

@@ -6,6 +6,7 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import PropTypes from "prop-types";
 import { formatUTCForDateTimeInput, formatUTCForDisplay } from "../components/ThemeStream/utils";
 import BlockPreview from "../components/BlockPreview";
+import RichTextEditor from "../components/RichTextEditor";
 import PositionsWithEntriesTree from "../components/PositionsWithEntriesTree";
 export { loader, action } from "../services/theme-stream.server";
 
@@ -412,17 +413,14 @@ export default function ThemeStreamPage() {
                       />
                     </div>
                   </div>
-                  <s-text-field
-                    label="Headline"
-                    name="headline"
-                    placeholder="Headline text"
-                  />
-                  <s-text-field
-                    label="Description"
-                    name="description"
-                    multiline={3}
-                    placeholder="Short description or summary"
-                  />
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline</label>
+                    <RichTextEditor name="headline" placeholder="Headline text" onChange={handleFormInput} minHeight={60} />
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description</label>
+                    <RichTextEditor name="description" placeholder="Short description or summary" onChange={handleFormInput} minHeight={80} />
+                  </div>
                   <s-url-field
                     label="Target URL"
                     name="target_url"
@@ -487,17 +485,14 @@ export default function ThemeStreamPage() {
                     mediaFiles={loaderMediaFiles || []}
                     onSelect={() => setTimeout(updatePreview, 50)}
             />
-            <s-text-field
-                    label="Headline Override"
-                    name="collection_headline"
-                    placeholder="Leave blank to use collection title"
-                  />
-                  <s-text-field
-                    label="Description"
-                    name="collection_description"
-                    multiline={2}
-                    placeholder="Short description"
-                  />
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline Override</label>
+                    <RichTextEditor name="collection_headline" placeholder="Leave blank to use collection title" onChange={handleFormInput} minHeight={50} />
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description</label>
+                    <RichTextEditor name="collection_description" placeholder="Short description" onChange={handleFormInput} minHeight={60} />
+                  </div>
                   <s-text-field
                     label="Button Text"
                     name="collection_button_text"
@@ -516,8 +511,14 @@ export default function ThemeStreamPage() {
                       style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }}
                     />
                   </div>
-                  <s-text-field label="Headline" name="countdown_headline" placeholder="Sale ends in" />
-                  <s-text-field label="Subtext" name="countdown_subtext" placeholder="Don't miss out!" />
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline</label>
+                    <RichTextEditor name="countdown_headline" placeholder="Sale ends in" onChange={handleFormInput} minHeight={50} />
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Subtext</label>
+                    <RichTextEditor name="countdown_subtext" placeholder="Don't miss out!" onChange={handleFormInput} minHeight={50} />
+                  </div>
                   <MediaLibraryPicker
                     name="countdown_bg_image"
                     label="Background Image"
@@ -546,8 +547,14 @@ export default function ThemeStreamPage() {
                     mediaFiles={loaderMediaFiles || []}
                     onSelect={() => setTimeout(updatePreview, 50)}
                   />
-                  <s-text-field label="Headline" name="image_with_text_headline" placeholder="Headline" />
-                  <s-text-field label="Description" name="image_with_text_description" multiline={3} placeholder="Description" />
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline</label>
+                    <RichTextEditor name="image_with_text_headline" placeholder="Headline" onChange={handleFormInput} minHeight={50} />
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description</label>
+                    <RichTextEditor name="image_with_text_description" placeholder="Description" onChange={handleFormInput} minHeight={80} />
+                  </div>
                   <s-text-field label="Button Text" name="image_with_text_button_text" placeholder="Learn More" />
                   <s-url-field label="Button Link" name="image_with_text_button_link" placeholder="https://..." />
                   <div style={{ marginBottom: "0.5rem" }}>
@@ -572,8 +579,14 @@ export default function ThemeStreamPage() {
                     mediaFiles={loaderVideoFiles || []}
                     onSelect={() => setTimeout(updatePreview, 50)}
                   />
-                  <s-text-field label="Headline" name="video_headline" placeholder="Headline" />
-                  <s-text-field label="Description" name="video_description" multiline={2} placeholder="Description" />
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Headline</label>
+                    <RichTextEditor name="video_headline" placeholder="Headline" onChange={handleFormInput} minHeight={50} />
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description</label>
+                    <RichTextEditor name="video_description" placeholder="Description" onChange={handleFormInput} minHeight={60} />
+                  </div>
                   <s-text-field label="Button Text" name="video_button_text" placeholder="Shop Now" />
                   <s-url-field label="Button Link" name="video_button_link" placeholder="https://..." />
                     </>
@@ -586,8 +599,14 @@ export default function ThemeStreamPage() {
                     mediaFiles={loaderMediaFiles || []}
                     onSelect={() => setTimeout(updatePreview, 50)}
                   />
-                  <s-text-field label="Title" name="promo_card_title" placeholder="Promo title" />
-                  <s-text-field label="Description" name="promo_card_description" multiline={2} placeholder="Short description" />
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Title</label>
+                    <RichTextEditor name="promo_card_title" placeholder="Promo title" onChange={handleFormInput} minHeight={50} />
+                  </div>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "500", fontSize: "0.8125rem" }}>Description</label>
+                    <RichTextEditor name="promo_card_description" placeholder="Short description" onChange={handleFormInput} minHeight={60} />
+                  </div>
                   <s-url-field label="CTA Link" name="promo_card_cta_url" placeholder="https://..." />
                   <s-text-field label="CTA Text" name="promo_card_cta_text" placeholder="Shop Now" />
                     </>
@@ -1663,11 +1682,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
           </div>
           <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
-                <input type="text" name="headline" defaultValue={fieldMap.headline || typeConfig.headline || ""} placeholder="Headline" style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="headline" value={fieldMap.headline || typeConfig.headline || ""} placeholder="Headline" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={60} />
           </div>
           <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description</label>
-                <input type="text" name="description" defaultValue={fieldMap.description || typeConfig.description || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="description" value={fieldMap.description || typeConfig.description || ""} placeholder="Description" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={80} />
           </div>
           <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Target URL</label>
@@ -1714,11 +1733,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               <MediaLibraryPicker name="collection_banner_image" label="Banner Image (optional)" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline Override</label>
-                <input type="text" name="collection_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="collection_headline" value={typeConfig.headline || ""} placeholder="Headline override" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={50} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description</label>
-                <input type="text" name="collection_description" defaultValue={typeConfig.description || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="collection_description" value={typeConfig.description || ""} placeholder="Description" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={60} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Button Text</label>
@@ -1734,11 +1753,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
-                <input type="text" name="countdown_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="countdown_headline" value={typeConfig.headline || ""} placeholder="Headline" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={50} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Subtext</label>
-                <input type="text" name="countdown_subtext" defaultValue={typeConfig.subtext || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="countdown_subtext" value={typeConfig.subtext || ""} placeholder="Subtext" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={50} />
               </div>
               <MediaLibraryPicker name="countdown_bg_image" label="Background Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div className="data-field-row" style={{ display: "flex", gap: "15px", marginBottom: "1rem" }}>
@@ -1766,11 +1785,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               <MediaLibraryPicker name="image_with_text_image" label="Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
-                <input type="text" name="image_with_text_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="image_with_text_headline" value={typeConfig.headline || ""} placeholder="Headline" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={50} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description</label>
-                <input type="text" name="image_with_text_description" defaultValue={typeConfig.description || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="image_with_text_description" value={typeConfig.description || ""} placeholder="Description" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={80} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Button Text</label>
@@ -1798,11 +1817,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               <MediaLibraryPicker name="video_file" label="Or video from Shopify" mediaFiles={videoFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Headline</label>
-                <input type="text" name="video_headline" defaultValue={typeConfig.headline || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="video_headline" value={typeConfig.headline || ""} placeholder="Headline" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={50} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description</label>
-                <input type="text" name="video_description" defaultValue={typeConfig.description || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="video_description" value={typeConfig.description || ""} placeholder="Description" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={60} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Button Text</label>
@@ -1819,11 +1838,11 @@ function EditEntryModal({ entry, mediaFiles = [], videoFiles = [], blockTypes = 
               <MediaLibraryPicker name="promo_card_image" label="Image" mediaFiles={mediaFiles} defaultValue={fieldMap.desktop_banner || ""} onSelect={() => setTimeout(updateEditPreview, 50)} />
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Title</label>
-                <input type="text" name="promo_card_title" defaultValue={typeConfig.title || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="promo_card_title" value={typeConfig.title || ""} placeholder="Promo title" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={50} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>Description</label>
-                <input type="text" name="promo_card_description" defaultValue={typeConfig.description || ""} style={{ width: "100%", padding: "0.5rem", border: "1px solid #c9cccf", borderRadius: "4px", boxSizing: "border-box" }} />
+                <RichTextEditor name="promo_card_description" value={typeConfig.description || ""} placeholder="Description" onChange={() => setTimeout(updateEditPreview, 50)} minHeight={60} />
               </div>
               <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>CTA Link</label>

@@ -45,6 +45,11 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
   const headColor = data.headline_color || "#ffffff";
   const descColor = data.description_color || "rgba(255,255,255,0.9)";
   const textAlign = data.text_alignment || "left";
+  const verticalAlign = data.vertical_alignment || "bottom";
+  const justifyContentMap = { top: "flex-start", center: "center", bottom: "flex-end" };
+  const overlayJustify = justifyContentMap[verticalAlign] || "flex-end";
+  const lineHeightHead = 1.2;
+  const lineHeightDesc = 1.5;
   const overlayDefault = blockType === "countdown_banner" ? 0.3 : blockType === "background_video" ? 0.5 : 0.7;
   const overlayOpacity = data.overlay_opacity != null && data.overlay_opacity !== "" ? Number(data.overlay_opacity) / 100 : overlayDefault;
   const overlayColor = data.overlay_color || "#000000";
@@ -127,8 +132,8 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
       backgroundColor: btnBg,
       color: btnColor,
     },
-    headline: { fontSize: headSize, fontWeight: "bold", color: headColor, marginBottom: "4px", textAlign },
-    description: { fontSize: descSize, color: descColor, marginBottom: "4px", textAlign },
+    headline: { fontSize: headSize, fontWeight: "bold", color: headColor, marginBottom: "4px", textAlign, lineHeight: lineHeightHead },
+    description: { fontSize: descSize, color: descColor, marginBottom: "4px", textAlign, lineHeight: lineHeightDesc },
   };
 
   if (!blockType) return null;
@@ -148,14 +153,30 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
   const cssClass = (data.css_class || "").trim();
   const customCss = (data.custom_css || "").trim();
 
+  const renderHtml = (str) => {
+    if (!str) return null;
+    if (/<[a-z][\s\S]*>/i.test(str)) {
+      return <div dangerouslySetInnerHTML={{ __html: str }} style={{ margin: 0 }} />;
+    }
+    return str;
+  };
+
   const content = (
     <div
-      className={`theme-stream${cssClass ? ` ${cssClass}` : ""}`}
+      className={`theme-stream theme-stream-preview${cssClass ? ` ${cssClass}` : ""}`}
       style={{
         ...previewStyles.container,
         ...(isMobileFrame ? { borderRadius: 0, width: "100%", minWidth: 0, boxSizing: "border-box" } : {}),
       }}
     >
+      <style>{`
+        .theme-stream-preview * { box-sizing: border-box; }
+        .theme-stream-preview .preview-isolated {
+          all: revert;
+          font-size: inherit;
+          line-height: inherit;
+        }
+      `}</style>
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
       {variant !== "pane" && <div style={previewStyles.label}>Preview</div>}
       {blockType === "hero" && (
@@ -167,11 +188,11 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
               <img src={heroImgUrl || imgUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: imgFit }} />
             )
           )}
-          <div style={{ ...previewStyles.heroOverlay, alignItems: textAlign === "center" ? "center" : textAlign === "right" ? "flex-end" : "flex-start", textAlign }}>
+          <div style={{ ...previewStyles.heroOverlay, justifyContent: overlayJustify, alignItems: textAlign === "center" ? "center" : textAlign === "right" ? "flex-end" : "flex-start", textAlign }} className="preview-isolated">
             {(data.headline || data.description || data.button_text) && (
               <>
-                {data.headline && <div style={previewStyles.headline}>{data.headline}</div>}
-                {data.description && <div style={previewStyles.description}>{data.description}</div>}
+                {data.headline && <div style={previewStyles.headline}>{renderHtml(data.headline)}</div>}
+                {data.description && <div style={previewStyles.description}>{renderHtml(data.description)}</div>}
                 {data.button_text && (
                   <span className="theme-stream__button" style={previewStyles.button}>{data.button_text}</span>
                 )}
@@ -197,9 +218,9 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
       {blockType === "collection_banner" && (
         <div style={{ position: "relative", minHeight: isAdaptToImage ? undefined : (bannerMinHeight ?? 200), borderRadius: variant === "pane" ? 0 : "6px", overflow: "hidden", backgroundColor: "#e1e3e5" }}>
           {imgUrl && (isAdaptToImage ? <img src={imgUrl} alt="" style={{ display: "block", width: "100%", height: "auto", verticalAlign: "top" }} /> : <img src={imgUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: imgFit }} />)}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px", background: overlayOpacity > 0 ? `linear-gradient(transparent, rgba(${hexToRgb(overlayColor)},${overlayOpacity}))` : "transparent", color: "#fff", textAlign }}>
-            <div style={previewStyles.headline}>{data.collection_headline || `Collection: ${data.collection_handle || "..."}`}</div>
-            {data.collection_description && <div style={previewStyles.description}>{data.collection_description}</div>}
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: overlayJustify, padding: "12px", background: overlayOpacity > 0 ? `linear-gradient(transparent, rgba(${hexToRgb(overlayColor)},${overlayOpacity}))` : "transparent", color: "#fff", textAlign }} className="preview-isolated">
+            <div style={previewStyles.headline}>{renderHtml(data.collection_headline || `Collection: ${data.collection_handle || "..."}`)}</div>
+            {data.collection_description && <div style={previewStyles.description}>{renderHtml(data.collection_description)}</div>}
             {data.collection_button_text && <span className="theme-stream__button" style={previewStyles.button}>{data.collection_button_text}</span>}
           </div>
         </div>
@@ -220,11 +241,11 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
             </div>
           )}
           <div style={{ position: "relative", zIndex: 1, textAlign }}>
-            {data.countdown_headline && <div style={previewStyles.headline}>{data.countdown_headline}</div>}
+            {data.countdown_headline && <div style={previewStyles.headline}>{renderHtml(data.countdown_headline)}</div>}
             <div style={previewStyles.countdownTimer}>
               <span>0</span>d <span>0</span>h <span>0</span>m <span>0</span>s
             </div>
-            {data.countdown_subtext && <div style={previewStyles.description}>{data.countdown_subtext}</div>}
+            {data.countdown_subtext && <div style={previewStyles.description}>{renderHtml(data.countdown_subtext)}</div>}
             {data.countdown_button_text && <span className="theme-stream__button" style={{ ...previewStyles.button, backgroundColor: btnBg || "rgba(255,255,255,0.2)", color: btnColor || "#fff" }}>{data.countdown_button_text}</span>}
           </div>
         </div>
@@ -242,8 +263,8 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
             )}
           </div>
           <div style={{ flex: 1, minWidth: 0, textAlign }}>
-            {data.image_with_text_headline && <div style={{ ...previewStyles.headline, color: headColor || "#333" }}>{data.image_with_text_headline}</div>}
-            {data.image_with_text_description && <div style={{ ...previewStyles.description, color: descColor || "#6d7175" }}>{data.image_with_text_description}</div>}
+            {data.image_with_text_headline && <div style={{ ...previewStyles.headline, color: headColor || "#333" }}>{renderHtml(data.image_with_text_headline)}</div>}
+            {data.image_with_text_description && <div style={{ ...previewStyles.description, color: descColor || "#6d7175" }}>{renderHtml(data.image_with_text_description)}</div>}
             {data.image_with_text_button_text && <span className="theme-stream__button" style={previewStyles.button}>{data.image_with_text_button_text}</span>}
           </div>
         </div>
@@ -269,8 +290,8 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
               textAlign,
             }}
           >
-            {data.video_headline && <div style={previewStyles.headline}>{data.video_headline}</div>}
-            {data.video_description && <div style={previewStyles.description}>{data.video_description}</div>}
+            {data.video_headline && <div style={previewStyles.headline}>{renderHtml(data.video_headline)}</div>}
+            {data.video_description && <div style={previewStyles.description}>{renderHtml(data.video_description)}</div>}
             {data.video_button_text && <span className="theme-stream__button" style={previewStyles.button}>{data.video_button_text}</span>}
           </div>
         </div>
@@ -283,8 +304,8 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
             <div style={{ width: "100%", height: isMobile ? 140 : 100, backgroundColor: "#e1e3e5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem", color: "#6d7175" }}>Image</div>
           )}
           <div style={{ ...previewStyles.promoBody, textAlign }}>
-            {data.promo_card_title && <div style={{ ...previewStyles.headline, color: headColor || "#333" }}>{data.promo_card_title}</div>}
-            {data.promo_card_description && <div style={{ ...previewStyles.description, color: descColor || "#6d7175" }}>{data.promo_card_description}</div>}
+            {data.promo_card_title && <div style={{ ...previewStyles.headline, color: headColor || "#333" }}>{renderHtml(data.promo_card_title)}</div>}
+            {data.promo_card_description && <div style={{ ...previewStyles.description, color: descColor || "#6d7175" }}>{renderHtml(data.promo_card_description)}</div>}
             {data.promo_card_cta_text && <span className="theme-stream__button" style={previewStyles.button}>{data.promo_card_cta_text}</span>}
           </div>
         </div>
