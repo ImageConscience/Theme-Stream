@@ -170,11 +170,14 @@ export default function BlockPreview({ blockType, data = {}, mediaFiles = [], vi
       }}
     >
       <style>{`
-        .theme-stream-preview * { box-sizing: border-box; }
+        .theme-stream-preview,
+        .theme-stream-preview * {
+          box-sizing: border-box !important;
+        }
         .theme-stream-preview .preview-isolated {
-          all: revert;
-          font-size: inherit;
-          line-height: inherit;
+          all: revert !important;
+          font-size: inherit !important;
+          line-height: inherit !important;
         }
       `}</style>
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}

@@ -669,17 +669,23 @@
     line-height: 1.2;
   }
 
+  .theme-stream .theme-stream__title,
+  .theme-stream .theme-stream__description {
+    display: block !important;
+    visibility: visible !important;
+  }
+
   .theme-stream__hero-link .theme-stream__title--overlay {
-    font-size: var(--headline-size, 2.5em);
-    color: var(--title-overlay, #fff);
+    font-size: var(--headline-size, 2.5em) !important;
+    color: var(--title-overlay, #fff) !important;
     font-family: var(--title-font, inherit);
     font-weight: var(--title-weight, bold);
     font-style: var(--title-style, normal);
   }
 
   .theme-stream__hero-link .theme-stream__description--overlay {
-    font-size: var(--desc-size, 0.9em);
-    color: var(--desc-overlay, #fff);
+    font-size: var(--desc-size, 0.9em) !important;
+    color: var(--desc-overlay, #fff) !important;
     font-family: var(--desc-font, inherit);
     font-weight: var(--desc-weight, normal);
     font-style: var(--desc-style, normal);
@@ -696,13 +702,13 @@
   }
 
   .theme-stream__collection-link .theme-stream__title--overlay {
-    font-size: var(--headline-size, 2.5em);
-    color: var(--title-overlay, #fff);
+    font-size: var(--headline-size, 2.5em) !important;
+    color: var(--title-overlay, #fff) !important;
   }
 
   .theme-stream__collection-link .theme-stream__description--overlay {
-    font-size: var(--desc-size, 0.9em);
-    color: var(--desc-overlay, #fff);
+    font-size: var(--desc-size, 0.9em) !important;
+    color: var(--desc-overlay, #fff) !important;
   }
   
   .theme-stream__title--below {
@@ -994,10 +1000,26 @@
 </style>
 <script>
 (function() {
-  document.querySelectorAll('.theme-stream [data-html]').forEach(function(el) {
-    var html = el.getAttribute('data-html');
-    if (html) { el.innerHTML = html; el.removeAttribute('data-html'); }
-  });
+  function decodeAndInject() {
+    var els = document.querySelectorAll('.theme-stream [data-html]');
+    els.forEach(function(el) {
+      var html = el.getAttribute('data-html');
+      if (!html) return;
+      var decoded = html;
+      if (/&[#\w]+;|&lt;|&gt;|&amp;|&quot;/.test(html)) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        decoded = tmp.innerHTML;
+      }
+      el.innerHTML = decoded;
+      el.removeAttribute('data-html');
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', decodeAndInject);
+  } else {
+    decodeAndInject();
+  }
 })();
 </script>
 {% if show_countdown %}

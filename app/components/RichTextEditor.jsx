@@ -28,6 +28,20 @@ export default function RichTextEditor({ name, value = "", placeholder, onChange
     }
   }, [value]);
 
+  useEffect(() => {
+    const form = editorRef.current?.closest("form");
+    if (!form) return;
+    const syncBeforeSubmit = () => {
+      const el = editorRef.current;
+      const hidden = hiddenRef.current;
+      if (el && hidden) {
+        hidden.value = el.innerHTML;
+      }
+    };
+    form.addEventListener("submit", syncBeforeSubmit);
+    return () => form.removeEventListener("submit", syncBeforeSubmit);
+  }, []);
+
   const handleInput = () => {
     const el = editorRef.current;
     const hidden = hiddenRef.current;
