@@ -208,56 +208,23 @@ function EntryRow({
       <span {...dragHandleProps} style={DRAG_HANDLE_STYLE} title="Drag to reorder">
         ⋮⋮
       </span>
-      <label
+      <button
+        type="button"
+        onClick={() => onToggleStatus(entry, isActive)}
+        title={isActive ? "Click to pause" : "Click to activate"}
         style={{
-          display: "inline-flex",
-          alignItems: "center",
+          padding: "0.15rem 0.5rem",
+          fontSize: "0.6875rem",
+          fontWeight: 500,
+          border: "none",
+          borderRadius: "4px",
           cursor: "pointer",
-          minWidth: "44px",
-          height: "24px",
-          position: "relative",
+          backgroundColor: isActive ? "#d4edda" : "#e9ecef",
+          color: isActive ? "#155724" : "#6c757d",
         }}
-        title={isActive ? "Active (published) – click to set draft" : "Draft – click to publish"}
       >
-        <input
-          type="checkbox"
-          checked={isActive}
-          onChange={() => onToggleStatus(entry, isActive)}
-          style={{
-            opacity: 0,
-            width: 0,
-            height: 0,
-            position: "absolute",
-          }}
-        />
-        <span
-          style={{
-            position: "absolute",
-            cursor: "pointer",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: isActive ? "#008060" : "#c9cccf",
-            borderRadius: "24px",
-            transition: "background-color 0.2s",
-          }}
-        >
-          <span
-            style={{
-              position: "absolute",
-              width: "18px",
-              height: "18px",
-              left: isActive ? "22px" : "3px",
-              bottom: "3px",
-              backgroundColor: "white",
-              borderRadius: "50%",
-              transition: "left 0.2s",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-            }}
-          />
-        </span>
-      </label>
+        {isActive ? "Active" : "Paused"}
+      </button>
       {desktopBannerUrl && (
         <img
           src={desktopBannerUrl}
@@ -274,9 +241,8 @@ function EntryRow({
       <span style={{ color: "#6d7175", fontSize: "0.75rem" }}>
         {blockTypes[fieldMap.block_type || "hero"]?.label || "Hero"}
       </span>
-      <span style={{ color: "#666", fontSize: "0.75rem" }}>
-        {startDate} – {endDate}
-      </span>
+      <span style={{ color: "#666", fontSize: "0.75rem" }}>{startDate}</span>
+      <span style={{ color: "#666", fontSize: "0.75rem" }}>{endDate}</span>
       <button
         type="button"
         onClick={() => onEdit(entry)}

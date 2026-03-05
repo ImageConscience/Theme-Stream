@@ -61,10 +61,26 @@ export default function ThemeStreamPage() {
   const positions = loaderData?.positions ?? [];
   const [clientMounted, setClientMounted] = useState(false);
   const [createFormStreamHandle, setCreateFormStreamHandle] = useState(null);
+  const WIZARD_STORAGE_KEY = "theme-stream-getting-started-dismissed";
+  const [wizardDismissed, setWizardDismissed] = useState(true);
+  const [wizardCollapsed, setWizardCollapsed] = useState(false);
 
   useEffect(() => {
     setClientMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!clientMounted || typeof localStorage === "undefined") return;
+    const dismissed = localStorage.getItem(WIZARD_STORAGE_KEY) === "true";
+    setWizardDismissed(dismissed);
+  }, [clientMounted, WIZARD_STORAGE_KEY]);
+
+  const dismissWizard = useCallback(() => {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(WIZARD_STORAGE_KEY, "true");
+    }
+    setWizardDismissed(true);
+  }, [WIZARD_STORAGE_KEY]);
 
   const performRedirect = useCallback(
     (url, source) => {
@@ -362,6 +378,74 @@ export default function ThemeStreamPage() {
         <s-banner tone="critical" title="Error">
           {loaderError || fetcher.data?.error}
         </s-banner>
+      )}
+
+      {/* Getting Started Wizard */}
+      {clientMounted && !wizardDismissed && (
+        <div
+          style={{
+            margin: "0 1rem 1rem",
+            border: "1px solid #e1e3e5",
+            borderRadius: "8px",
+            backgroundColor: "#f9fafb",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setWizardCollapsed((c) => !c)}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setWizardCollapsed((c) => !c)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0.75rem 1rem",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "0.9375rem",
+            }}
+          >
+            <span>Getting started</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  dismissWizard();
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  padding: "0.25rem",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  color: "#6d7175",
+                }}
+              >
+                Dismiss
+              </button>
+              <span style={{ fontSize: "0.875rem", color: "#6d7175" }} aria-hidden="true">
+                {wizardCollapsed ? "+" : "−"}
+              </span>
+            </div>
+          </div>
+          {!wizardCollapsed && (
+            <div style={{ padding: "0 1rem 1rem", borderTop: "1px solid #e1e3e5" }}>
+              <ol style={{ margin: "0.75rem 0 0", paddingLeft: "1.25rem", lineHeight: 1.6, color: "#4d5156" }}>
+                <li style={{ marginBottom: "0.5rem" }}>
+                  <strong>Create your streams.</strong> Add a stream for every position on your shop you want to schedule.
+                </li>
+                <li style={{ marginBottom: "0.5rem" }}>
+                  <strong>Add your Theme Stream blocks</strong> in the positions. Don&apos;t worry, when empty they won&apos;t show!
+                </li>
+                <li>
+                  <strong>Build your events.</strong> Start with a &apos;fallback&apos; and then schedule your future content to update your site on schedule.
+                </li>
+              </ol>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Modal Overlay */}
@@ -995,12 +1079,11 @@ export default function ThemeStreamPage() {
                     </p>
                     <label
                       htmlFor={statusInputId}
-                      style={{ 
-                        display: "inline-flex", 
-                        alignItems: "center", 
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
                         gap: "0.5rem",
                         cursor: "pointer",
-                        position: "relative",
                       }}
                     >
                       <input
@@ -1019,60 +1102,15 @@ export default function ThemeStreamPage() {
                       />
                       <span
                         style={{
-                          position: "relative",
-                          cursor: "pointer",
-                          width: "44px",
-                          height: "24px",
+                          padding: "0.15rem 0.5rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 500,
+                          borderRadius: "4px",
+                          backgroundColor: formStatusActive ? "#d4edda" : "#e9ecef",
+                          color: formStatusActive ? "#155724" : "#6c757d",
                         }}
                       >
-                        <span
-                          style={{
-                            position: "absolute",
-                            width: "1px",
-                            height: "1px",
-                            padding: 0,
-                            margin: "-1px",
-                            overflow: "hidden",
-                            clip: "rect(0, 0, 0, 0)",
-                            whiteSpace: "nowrap",
-                            border: 0,
-                          }}
-                        >
-                          {formStatusActive ? "Set event to draft" : "Set event to active"}
-                        </span>
-                        <span
-                          style={{
-                            position: "absolute",
-                            cursor: "pointer",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: formStatusActive ? "#667eea" : "#c9cccf",
-                            borderRadius: "24px",
-                            transition: "background-color 0.2s",
-                          }}
-                          className="toggle-track"
-                        >
-                          <span
-                            style={{
-                              position: "absolute",
-                              content: '""',
-                              height: "18px",
-                              width: "18px",
-                              left: formStatusActive ? "22px" : "3px",
-                              bottom: "3px",
-                              backgroundColor: "white",
-                              borderRadius: "50%",
-                              transition: "left 0.2s",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                            }}
-                            className="toggle-thumb"
-                          />
-                        </span>
-                      </span>
-                      <span style={{ fontSize: "0.875rem", color: "#667eea", fontWeight: "500" }}>
-                        Active (published)
+                        {formStatusActive ? "Active" : "Paused"}
                       </span>
                     </label>
                   </div>
