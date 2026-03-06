@@ -394,6 +394,8 @@ export default function ThemeStreamPage() {
           <div
             role="button"
             tabIndex={0}
+            aria-expanded={!wizardCollapsed}
+            aria-label={wizardCollapsed ? "Expand getting started" : "Collapse getting started"}
             onClick={() => setWizardCollapsed((c) => !c)}
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setWizardCollapsed((c) => !c)}
             style={{
@@ -3000,8 +3002,9 @@ export const headers = (headersArgs) => {
 // Add error boundary to catch and handle errors properly
 export function ErrorBoundary() {
   const error = useRouteError();
-  console.error("[ErrorBoundary] Error caught:", error);
-  
-  // Use Shopify's default error boundary
+  console.error("[ErrorBoundary]", error?.message ?? String(error));
+  if (process.env.NODE_ENV !== "production" && error?.stack) {
+    console.debug("[ErrorBoundary] Stack:", error.stack);
+  }
   return boundary.error(error);
 }
