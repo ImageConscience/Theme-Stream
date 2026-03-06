@@ -41,11 +41,12 @@ async function main() {
   const { Readable } = await import("stream");
   app.post(
     WEBHOOK_PATHS,
-    express.raw({ type: "application/json" }),
+    express.raw({ type: () => true }), // Accept any content-type; must preserve exact bytes for HMAC
     async (req, res, next) => {
       try {
-        const rawBody = req.body instanceof Buffer ? req.body.toString("utf8") : String(req.body ?? "");
-        const bodyStream = Readable.from([Buffer.from(rawBody, "utf8")]);
+        // Preserve exact bytes - no string conversion (breaks HMAC)
+        const rawBuffer = req.body instanceof Buffer ? req.body : Buffer.from(String(req.body ?? ""), "utf8");
+        const bodyStream = Readable.from([rawBuffer]);
         const reqWithRawBody = Object.assign(bodyStream, {
           method: req.method,
           get: req.get?.bind(req),
