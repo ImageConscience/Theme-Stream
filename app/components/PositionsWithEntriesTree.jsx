@@ -318,7 +318,7 @@ function EntryRow({
           color: "#4d5156",
           fontSize: "0.75rem",
           fontWeight: 600,
-          textAlign: "center",
+          textAlign: "left",
           minWidth: "7rem",
           padding: "0.2rem 0.5rem",
         }}
