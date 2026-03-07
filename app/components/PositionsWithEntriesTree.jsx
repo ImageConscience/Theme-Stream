@@ -59,6 +59,19 @@ function computeEntryStatus(entry, activeEntryId) {
   return "fallback";
 }
 
+const STATUS_SORT_ORDER = { active: 0, fallback: 1, scheduled: 2, ended: 3, paused: 4 };
+
+function sortEntriesByStatus(entriesArr, activeEntryId) {
+  return [...entriesArr].sort((a, b) => {
+    const sa = STATUS_SORT_ORDER[computeEntryStatus(a, activeEntryId)] ?? 4;
+    const sb = STATUS_SORT_ORDER[computeEntryStatus(b, activeEntryId)] ?? 4;
+    if (sa !== sb) return sa - sb;
+    const aStart = (a.fields || []).find((f) => f.key === "start_at")?.value || "";
+    const bStart = (b.fields || []).find((f) => f.key === "start_at")?.value || "";
+    return bStart.localeCompare(aStart);
+  });
+}
+
 /** Position row (parent) - used inside Draggable */
 function PositionRow({
   position,
@@ -479,25 +492,12 @@ export default function PositionsWithEntriesTree({
         {(provided) => (
           <div style={{ minHeight: 50 }} ref={provided.innerRef} {...provided.droppableProps}>
             {positions.map((position, idx) => {
-              const positionEntries = entries
-                .filter((e) => {
-                  const fm = Object.fromEntries((e.fields || []).map((f) => [f.key, f.value]));
-                  return fm.position_id === position.handle;
-                })
-                .sort((a, b) => {
-                  const aOrder = parseInt(
-                    (a.fields || []).find((f) => f.key === "sort_order")?.value || "0",
-                    10
-                  );
-                  const bOrder = parseInt(
-                    (b.fields || []).find((f) => f.key === "sort_order")?.value || "0",
-                    10
-                  );
-                  if (aOrder !== bOrder) return aOrder - bOrder;
-                  const aStart = (a.fields || []).find((f) => f.key === "start_at")?.value || "";
-                  const bStart = (b.fields || []).find((f) => f.key === "start_at")?.value || "";
-                  return aStart.localeCompare(bStart);
-                });
+              const filteredEntries = entries.filter((e) => {
+                const fm = Object.fromEntries((e.fields || []).map((f) => [f.key, f.value]));
+                return fm.position_id === position.handle;
+              });
+              const activeId = findActiveEntryId(filteredEntries);
+              const positionEntries = sortEntriesByStatus(filteredEntries, activeId);
 
               const isExpanded = expanded[position.id] !== false;
 
