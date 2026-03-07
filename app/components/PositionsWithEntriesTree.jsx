@@ -384,16 +384,31 @@ export default function PositionsWithEntriesTree({
   onEntryToggleStatus,
   isDefaultPosition,
 }) {
+  const STORAGE_KEY = "theme-stream-expanded-streams";
+
   const [expanded, setExpanded] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const init = {};
+        positions.forEach((p) => {
+          init[p.id] = parsed[p.id] !== undefined ? parsed[p.id] : true;
+        });
+        return init;
+      }
+    } catch (_) {}
     const init = {};
-    positions.forEach((p) => {
-      init[p.id] = true;
-    });
+    positions.forEach((p) => { init[p.id] = true; });
     return init;
   });
 
   const toggleExpanded = useCallback((positionId) => {
-    setExpanded((prev) => ({ ...prev, [positionId]: !prev[positionId] }));
+    setExpanded((prev) => {
+      const next = { ...prev, [positionId]: !prev[positionId] };
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch (_) {}
+      return next;
+    });
   }, []);
 
   const [dragType, setDragType] = useState(null);
