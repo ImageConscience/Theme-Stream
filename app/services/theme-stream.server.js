@@ -102,11 +102,8 @@ export const loader = async ({ request }) => {
     let positions = [];
     if (shop) {
       try {
-        const { ensureSchedulerPositionDefinition, syncAllPositionsToMetaobjects } = await import("./positions-metaobject.server.js");
-        await ensureSchedulerPositionDefinition(admin);
         const { listPositions } = await import("./positions.server.js");
         positions = await listPositions(shop);
-        await syncAllPositionsToMetaobjects(admin, positions);
       } catch (posErr) {
         logger.warn("Could not load positions:", posErr);
       }
