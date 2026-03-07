@@ -14,6 +14,51 @@ const BLOCK_TYPE_BG = {
 };
 const DEFAULT_BLOCK_TYPE_BG = "#f5f5f5";
 
+const STATUS_STYLES = {
+  active:    { bg: "#d4edda", color: "#155724", label: "Active" },
+  fallback:  { bg: "#fff3cd", color: "#856404", label: "Fallback" },
+  scheduled: { bg: "#cce5ff", color: "#004085", label: "Scheduled" },
+  ended:     { bg: "#f8d7da", color: "#721c24", label: "Ended" },
+  paused:    { bg: "#e9ecef", color: "#6c757d", label: "Paused" },
+};
+
+/**
+ * Determine the "winning" (currently-displaying) entry ID for a set of
+ * entries in one stream. Mirrors the Liquid selection logic: among all
+ * entries that are ACTIVE with start <= now < end, pick the one with
+ * the latest start_at.
+ */
+function findActiveEntryId(streamEntries) {
+  const now = Date.now();
+  let bestId = null;
+  let bestStart = 0;
+  for (const entry of streamEntries) {
+    if (entry.capabilities?.publishable?.status !== "ACTIVE") continue;
+    const fm = Object.fromEntries((entry.fields || []).map((f) => [f.key, f.value]));
+    const start = fm.start_at ? new Date(fm.start_at).getTime() : 0;
+    const end = fm.end_at ? new Date(fm.end_at).getTime() : 0;
+    if (start <= now && end > now && start > bestStart) {
+      bestStart = start;
+      bestId = entry.id;
+    }
+  }
+  return bestId;
+}
+
+/** Compute the display status for a single entry given its stream's active entry ID. */
+function computeEntryStatus(entry, activeEntryId) {
+  if (entry.capabilities?.publishable?.status !== "ACTIVE") return "paused";
+  const fm = Object.fromEntries((entry.fields || []).map((f) => [f.key, f.value]));
+  const now = Date.now();
+  const start = fm.start_at ? new Date(fm.start_at).getTime() : 0;
+  const end = fm.end_at ? new Date(fm.end_at).getTime() : 0;
+
+  if (end && end <= now) return "ended";
+  if (start && start > now) return "scheduled";
+  if (entry.id === activeEntryId) return "active";
+  return "fallback";
+}
+
 /** Position row (parent) - used inside Draggable */
 function PositionRow({
   position,
@@ -34,6 +79,8 @@ function PositionRow({
   dragType,
   draggingEntryPositionId,
 }) {
+  const activeEntryId = findActiveEntryId(positionEntries);
+
   return (
     <div>
       <div
@@ -140,6 +187,7 @@ function PositionRow({
                     {(entProvided) => (
                       <EntryRow
                         entry={entry}
+                        activeEntryId={activeEntryId}
                         blockTypes={blockTypes}
                         storeTimeZone={storeTimeZone}
                         onEdit={onEntryEdit}
@@ -173,6 +221,7 @@ function PositionRow({
 /** Entry row (child) */
 function EntryRow({
   entry,
+  activeEntryId,
   blockTypes,
   storeTimeZone,
   onEdit,
@@ -186,7 +235,9 @@ function EntryRow({
   const referenceMap = Object.fromEntries(
     (entry.fields || []).map((f) => [f.key, f.reference])
   );
-  const isActive = entry.capabilities?.publishable?.status === "ACTIVE";
+  const isPublished = entry.capabilities?.publishable?.status === "ACTIVE";
+  const scheduleStatus = computeEntryStatus(entry, activeEntryId);
+  const style = STATUS_STYLES[scheduleStatus] || STATUS_STYLES.paused;
   const desktopBannerUrl = referenceMap.desktop_banner?.image?.url;
 
   let startDate = "—";
@@ -220,9 +271,9 @@ function EntryRow({
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          onToggleStatus(entry, isActive);
+          onToggleStatus(entry, isPublished);
         }}
-        title={isActive ? "Click to pause" : "Click to activate"}
+        title={isPublished ? "Click to pause" : "Click to activate"}
         style={{
           padding: "0.15rem 0.5rem",
           fontSize: "0.6875rem",
@@ -230,11 +281,11 @@ function EntryRow({
           border: "none",
           borderRadius: "4px",
           cursor: "pointer",
-          backgroundColor: isActive ? "#d4edda" : "#e9ecef",
-          color: isActive ? "#155724" : "#6c757d",
+          backgroundColor: style.bg,
+          color: style.color,
         }}
       >
-        {isActive ? "Active" : "Paused"}
+        {style.label}
       </button>
       {desktopBannerUrl && (
         <img
