@@ -304,11 +304,10 @@ function EntryRow({
         style={{
           color: "#4d5156",
           fontSize: "0.75rem",
+          fontWeight: 600,
           textAlign: "center",
           minWidth: "7rem",
           padding: "0.2rem 0.5rem",
-          borderRadius: "4px",
-          backgroundColor: BLOCK_TYPE_BG[fieldMap.block_type] ?? DEFAULT_BLOCK_TYPE_BG,
         }}
       >
         {blockTypes[fieldMap.block_type || "hero"]?.label || "Hero"}
