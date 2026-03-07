@@ -6,7 +6,7 @@ import { useLoaderData } from "react-router";
 
 export const loader = () => {
   return {
-    supportEmail: process.env.SUPPORT_EMAIL || "support@imageconscience.com",
+    supportEmail: process.env.SUPPORT_EMAIL || "loyalestapp@gmail.com",
     appUrl: process.env.SHOPIFY_APP_URL || "",
   };
 };
