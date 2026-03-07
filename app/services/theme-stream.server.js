@@ -104,6 +104,8 @@ export const loader = async ({ request }) => {
       try {
         const { listPositions } = await import("./positions.server.js");
         positions = await listPositions(shop);
+        const { syncAllPositionsToMetaobjects } = await import("./positions-metaobject.server.js");
+        await syncAllPositionsToMetaobjects(admin, positions);
       } catch (posErr) {
         logger.warn("Could not load positions:", posErr);
       }
