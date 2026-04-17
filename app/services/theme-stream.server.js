@@ -2,7 +2,7 @@ import { authenticate } from "../shopify.server";
 import {
   checkSubscriptionStatus,
   createSubscriptionForPlan,
-  isMerchantBillingUiEnabled,
+  shouldShowPlanBillingUi,
 } from "../utils/billing.server";
 import { parseLocalDateTimeToUTC, getDefaultDateBounds } from "../utils/datetime";
 import { json } from "../utils/responses.server";
@@ -64,7 +64,7 @@ export const loader = async ({ request }) => {
       positions: [],
       billingPlan: billingStatus.plan,
       shopifyPlus: billingStatus.shopifyPlus,
-      billingUiEnabled: isMerchantBillingUiEnabled(),
+      billingUiEnabled: shouldShowPlanBillingUi(billingStatus),
       error: "Metaobject definition not found. Please ensure the app has been properly installed.",
     };
       }
@@ -127,7 +127,7 @@ export const loader = async ({ request }) => {
       positions,
       billingPlan: billingStatus.plan,
       shopifyPlus: billingStatus.shopifyPlus,
-      billingUiEnabled: isMerchantBillingUiEnabled(),
+      billingUiEnabled: shouldShowPlanBillingUi(billingStatus),
     };
   } catch (error) {
     logger.error("Error loading schedulable entities:", error);
@@ -139,9 +139,9 @@ export const loader = async ({ request }) => {
       blockTypes: BLOCK_TYPES,
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions: [],
-      billingPlan: null,
-      shopifyPlus: false,
-      billingUiEnabled: isMerchantBillingUiEnabled(),
+      billingPlan: billingStatus.plan,
+      shopifyPlus: billingStatus.shopifyPlus,
+      billingUiEnabled: shouldShowPlanBillingUi(billingStatus),
       error: `Failed to load entries: ${error.message}`,
     };
   }

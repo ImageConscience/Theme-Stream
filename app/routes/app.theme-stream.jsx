@@ -32,7 +32,7 @@ export default function ThemeStreamPage() {
   const needsPlanSelection = loaderData?.needsPlanSelection === true;
   const shopifyPlus = loaderData?.shopifyPlus === true;
   const billingPlan = loaderData?.billingPlan ?? null;
-  const billingUiEnabled = loaderData?.billingUiEnabled === true;
+  const billingUiEnabled = Boolean(loaderData?.billingUiEnabled);
   const storeTimeZone = loaderData?.storeTimeZone ?? "UTC";
   const fetcher = useFetcher();
   const shopify = useAppBridge();

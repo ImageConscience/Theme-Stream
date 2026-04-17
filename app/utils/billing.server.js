@@ -151,11 +151,21 @@ export function getPlanConfig(planKey) {
 }
 
 /**
- * True when recurring billing is fully configured (merchants see Plan & billing in admin).
+ * True when recurring billing is fully configured (charges can be created).
  * Requires BILLING_ENABLED, SHOPIFY_APP_URL or BILLING_RETURN_URL, and valid plan prices/names.
  */
 export function isMerchantBillingUiEnabled() {
   return isBillingConfigured;
+}
+
+/**
+ * Show Plan & billing in the embedded app when either billing is fully configured, or we already
+ * resolved an active plan from Shopify (avoids hiding the section if env/module init disagrees).
+ */
+export function shouldShowPlanBillingUi(billingStatus) {
+  if (isMerchantBillingUiEnabled()) return true;
+  if (billingStatus?.plan) return true;
+  return false;
 }
 
 /** Check subscription status and shop type. Returns { hasActive, plan, shopifyPlus, partnerDevelopment } */
