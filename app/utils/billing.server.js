@@ -159,12 +159,16 @@ export function isMerchantBillingUiEnabled() {
 }
 
 /**
- * Show Plan & billing in the embedded app when either billing is fully configured, or we already
- * resolved an active plan from Shopify (avoids hiding the section if env/module init disagrees).
+ * Show Plan & billing in the embedded app.
+ * - Dev stores / Billing API unavailable: hasActive is true but plan is often null — still show so
+ *   merchants can attempt plan changes (may use test charges or see Shopify’s message).
+ * - Production: show when config is complete, or we matched a plan from Shopify.
  */
 export function shouldShowPlanBillingUi(billingStatus) {
+  if (!BILLING_ENABLED) return false;
   if (isMerchantBillingUiEnabled()) return true;
   if (billingStatus?.plan) return true;
+  if (billingStatus?.hasActive) return true;
   return false;
 }
 

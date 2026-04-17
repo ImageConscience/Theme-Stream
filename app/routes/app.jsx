@@ -7,16 +7,22 @@ export const loader = async ({ request }) => {
   await authenticate.admin(request);
 
   // eslint-disable-next-line no-undef
-  return { apiKey: process.env.SHOPIFY_API_KEY || "" };
+  return {
+    apiKey: process.env.SHOPIFY_API_KEY || "",
+    billingNavEnabled: process.env.BILLING_ENABLED !== "false",
+  };
 };
 
 export default function App() {
-  const { apiKey } = useLoaderData();
+  const { apiKey, billingNavEnabled } = useLoaderData();
 
   return (
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
         <s-link href="/app/theme-stream">Streams</s-link>
+        {billingNavEnabled && (
+          <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
+        )}
       </s-app-nav>
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <div style={{ flex: 1 }}>

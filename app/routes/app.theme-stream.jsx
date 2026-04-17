@@ -383,6 +383,7 @@ export default function ThemeStreamPage() {
 
       {billingUiEnabled && (
         <div
+          id="plan-billing"
           style={{
             margin: "0 1rem 1rem",
             padding: "1rem",
