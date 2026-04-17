@@ -2,26 +2,40 @@ const BILLING_ENABLED = process.env.BILLING_ENABLED !== "false";
 const CURRENCY_CODE = (process.env.BILLING_CURRENCY || "USD").toUpperCase();
 const INTERVAL = (process.env.BILLING_INTERVAL || "EVERY_30_DAYS").toUpperCase();
 const TRIAL_DAYS = Number.parseInt(process.env.BILLING_TRIAL_DAYS ?? "7", 10);
+
+/**
+ * Parse price from env. Empty string is not nullish for ?? so Number.parseFloat("") is NaN and
+ * broke isBillingConfigured — treat blank / invalid as default.
+ */
+function parseBillingPrice(envKey, defaultPrice) {
+  const raw = process.env[envKey];
+  const str = raw == null || String(raw).trim() === "" ? String(defaultPrice) : String(raw).trim();
+  const n = Number.parseFloat(str);
+  return Number.isFinite(n) && n > 0 ? n : defaultPrice;
+}
+
 /** Base URL for billing return links (no trailing slash). Required for real charges + Plan & billing UI. */
-const APP_BASE_URL = (process.env.BILLING_RETURN_URL || process.env.SHOPIFY_APP_URL || "").replace(/\/$/, "");
+const APP_BASE_URL = (process.env.BILLING_RETURN_URL || process.env.SHOPIFY_APP_URL || "")
+  .trim()
+  .replace(/\/$/, "");
 
 /** Plan keys: starter (Standard only), streamer (Standard only), streamer_plus (Plus only) */
 const PLAN_CONFIG = {
   starter: {
-    name: process.env.BILLING_PLAN_STARTER_NAME || "Starter",
-    price: Number.parseFloat(process.env.BILLING_PRICE_STARTER ?? "9"),
+    name: (process.env.BILLING_PLAN_STARTER_NAME || "Starter").trim() || "Starter",
+    price: parseBillingPrice("BILLING_PRICE_STARTER", 9),
     forShopifyPlus: false,
     maxStreams: 3,
   },
   streamer: {
-    name: process.env.BILLING_PLAN_STREAMER_NAME || "Streamer",
-    price: Number.parseFloat(process.env.BILLING_PRICE_STREAMER ?? "29"),
+    name: (process.env.BILLING_PLAN_STREAMER_NAME || "Streamer").trim() || "Streamer",
+    price: parseBillingPrice("BILLING_PRICE_STREAMER", 29),
     forShopifyPlus: false,
     maxStreams: null,
   },
   streamer_plus: {
-    name: process.env.BILLING_PLAN_STREAMER_PLUS_NAME || "Streamer Plus",
-    price: Number.parseFloat(process.env.BILLING_PRICE_STREAMER_PLUS ?? "49"),
+    name: (process.env.BILLING_PLAN_STREAMER_PLUS_NAME || "Streamer Plus").trim() || "Streamer Plus",
+    price: parseBillingPrice("BILLING_PRICE_STREAMER_PLUS", 49),
     forShopifyPlus: true,
     maxStreams: null,
   },
