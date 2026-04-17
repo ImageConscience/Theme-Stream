@@ -1,5 +1,9 @@
 import { authenticate } from "../shopify.server";
-import { checkSubscriptionStatus, createSubscriptionForPlan } from "../utils/billing.server";
+import {
+  checkSubscriptionStatus,
+  createSubscriptionForPlan,
+  isMerchantBillingUiEnabled,
+} from "../utils/billing.server";
 import { parseLocalDateTimeToUTC, getDefaultDateBounds } from "../utils/datetime";
 import { json } from "../utils/responses.server";
 import { logger } from "../utils/logger.server";
@@ -59,6 +63,8 @@ export const loader = async ({ request }) => {
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions: [],
       billingPlan: billingStatus.plan,
+      shopifyPlus: billingStatus.shopifyPlus,
+      billingUiEnabled: isMerchantBillingUiEnabled(),
       error: "Metaobject definition not found. Please ensure the app has been properly installed.",
     };
       }
@@ -120,6 +126,8 @@ export const loader = async ({ request }) => {
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions,
       billingPlan: billingStatus.plan,
+      shopifyPlus: billingStatus.shopifyPlus,
+      billingUiEnabled: isMerchantBillingUiEnabled(),
     };
   } catch (error) {
     logger.error("Error loading schedulable entities:", error);
@@ -132,6 +140,8 @@ export const loader = async ({ request }) => {
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions: [],
       billingPlan: null,
+      shopifyPlus: false,
+      billingUiEnabled: isMerchantBillingUiEnabled(),
       error: `Failed to load entries: ${error.message}`,
     };
   }
@@ -164,7 +174,11 @@ export const action = async ({ request }) => {
           return json({ error: "Invalid plan", success: false });
         }
         try {
-          const confirmationUrl = await createSubscriptionForPlan(admin, request, planKey);
+          const billingBefore = await checkSubscriptionStatus(admin);
+          const isPlanChange = billingBefore.hasActive === true;
+          const confirmationUrl = await createSubscriptionForPlan(admin, request, planKey, {
+            isPlanChange,
+          });
           if (confirmationUrl) {
             return json({ redirectUrl: confirmationUrl });
           }

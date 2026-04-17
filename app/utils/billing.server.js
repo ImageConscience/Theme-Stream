@@ -72,12 +72,14 @@ const CREATE_SUBSCRIPTION_MUTATION = `#graphql
     $interval: AppPricingInterval!
     $returnUrl: URL!
     $test: Boolean
+    $replacementBehavior: AppSubscriptionReplacementBehavior
   ) {
     appSubscriptionCreate(
       name: $name
       trialDays: $trialDays
       returnUrl: $returnUrl
       test: $test
+      replacementBehavior: $replacementBehavior
       lineItems: [
         {
           plan: {
@@ -131,6 +133,11 @@ export function createAppBridgeRedirect(confirmationUrl) {
 /** Returns plan config for a given key */
 export function getPlanConfig(planKey) {
   return PLAN_CONFIG[planKey] ?? null;
+}
+
+/** True when recurring billing is configured (merchants can pick / change plans in admin). */
+export function isMerchantBillingUiEnabled() {
+  return isBillingConfigured;
 }
 
 /** Check subscription status and shop type. Returns { hasActive, plan, shopifyPlus, partnerDevelopment } */
@@ -201,8 +208,13 @@ export async function checkSubscriptionStatus(admin) {
   return result;
 }
 
-/** Create a subscription for the given plan key. Returns confirmation URL or null. */
-export async function createSubscriptionForPlan(admin, request, planKey) {
+/**
+ * Create a subscription for the given plan key. Returns confirmation URL or null.
+ * @param {object} [options]
+ * @param {boolean} [options.isPlanChange] — true when merchant already has an active subscription (upgrade/downgrade)
+ */
+export async function createSubscriptionForPlan(admin, request, planKey, options = {}) {
+  const { isPlanChange = false } = options;
   if (!VALID_PLAN_KEYS.includes(planKey)) {
     throw new Error(`[billing] Invalid plan key: ${planKey}`);
   }
@@ -251,15 +263,18 @@ export async function createSubscriptionForPlan(admin, request, planKey) {
   if (shopParam) returnUrl.searchParams.set("shop", shopParam);
 
   try {
+    const trialDays =
+      !isPlanChange && Number.isFinite(TRIAL_DAYS) && TRIAL_DAYS > 0 ? TRIAL_DAYS : null;
     const creationResponse = await admin.graphql(CREATE_SUBSCRIPTION_MUTATION, {
       variables: {
         name: config.name,
-        trialDays: Number.isFinite(TRIAL_DAYS) && TRIAL_DAYS > 0 ? TRIAL_DAYS : null,
+        trialDays,
         amount: config.price.toFixed(2),
         currencyCode: CURRENCY_CODE,
         interval: INTERVAL,
         returnUrl: returnUrl.toString(),
         test: false,
+        replacementBehavior: isPlanChange ? "APPLY_IMMEDIATELY" : null,
       },
     });
     const creationJson = await creationResponse.json();
