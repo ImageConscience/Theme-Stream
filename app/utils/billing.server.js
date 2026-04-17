@@ -2,7 +2,8 @@ const BILLING_ENABLED = process.env.BILLING_ENABLED !== "false";
 const CURRENCY_CODE = (process.env.BILLING_CURRENCY || "USD").toUpperCase();
 const INTERVAL = (process.env.BILLING_INTERVAL || "EVERY_30_DAYS").toUpperCase();
 const TRIAL_DAYS = Number.parseInt(process.env.BILLING_TRIAL_DAYS ?? "7", 10);
-const APP_BASE_URL = process.env.BILLING_RETURN_URL || process.env.SHOPIFY_APP_URL;
+/** Base URL for billing return links (no trailing slash). Required for real charges + Plan & billing UI. */
+const APP_BASE_URL = (process.env.BILLING_RETURN_URL || process.env.SHOPIFY_APP_URL || "").replace(/\/$/, "");
 
 /** Plan keys: starter (Standard only), streamer (Standard only), streamer_plus (Plus only) */
 const PLAN_CONFIG = {
@@ -135,7 +136,10 @@ export function getPlanConfig(planKey) {
   return PLAN_CONFIG[planKey] ?? null;
 }
 
-/** True when recurring billing is configured (merchants can pick / change plans in admin). */
+/**
+ * True when recurring billing is fully configured (merchants see Plan & billing in admin).
+ * Requires BILLING_ENABLED, SHOPIFY_APP_URL or BILLING_RETURN_URL, and valid plan prices/names.
+ */
 export function isMerchantBillingUiEnabled() {
   return isBillingConfigured;
 }
