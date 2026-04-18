@@ -128,8 +128,9 @@ export const loader = async ({ request }) => {
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions,
       billingPlan: billingStatus.plan,
-      shopifyPlus: billingStatus.shopifyPlus,
-      billingUiEnabled: shouldShowPlanBillingUi(billingStatus),
+      billingSubscriptionName: billingStatus.subscriptionName,
+      managedPricingUrl,
+      billingUiEnabled: isBillingEnabled(),
     };
   } catch (error) {
     logger.error("Error loading schedulable entities:", error);

@@ -153,6 +153,14 @@ When you reach the step for [setting up environment variables](https://shopify.d
 
 Pricing tiers (**Starter** and **Streamer**) are configured in the Partner Dashboard (managed app pricing), not in environment variables.
 
+**If you migrated from the old Billing API**, remove these from Railway (they are unused by the app now):
+
+- `BILLING_PLAN_STARTER_NAME`, `BILLING_PLAN_STREAMER_NAME`, `BILLING_PLAN_STREAMER_PLUS_NAME`
+- `BILLING_PRICE_STARTER`, `BILLING_PRICE_STREAMER`, `BILLING_PRICE_STREAMER_PLUS`
+- `BILLING_CURRENCY`, `BILLING_INTERVAL`, `BILLING_TRIAL_DAYS`, `BILLING_RETURN_URL`
+
+**Keep:** `BILLING_ENABLED` (optional; set to `false` to disable subscription checks entirely), plus `SHOPIFY_APP_HANDLE` for the **Plan & billing** link that opens Shopify’s plan page (upgrade/downgrade/cancel happens there).
+
 ### Debug logging toggles
 
 To keep production logs tidy, all incidental logging is disabled unless one of these environment variables is set (they default to `true` when `NODE_ENV !== "production"`):
