@@ -238,13 +238,19 @@ export default function ThemeStreamPage() {
       <s-page heading="Theme Stream | Choose Your Plan">
         <div style={{ maxWidth: 560, margin: "2rem auto", padding: "0 1rem" }}>
           <h2 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Choose your plan</h2>
-          <p style={{ color: "#6d7175", marginBottom: "1.5rem", lineHeight: 1.5 }}>
-            Theme Stream uses Shopify managed pricing. Continue to Shopify&apos;s plan page to pick <strong>Starter</strong> or{" "}
-            <strong>Streamer</strong>, then return to this app.
+          <p style={{ color: "#6d7175", marginBottom: "1rem", lineHeight: 1.5 }}>
+            Theme Stream uses Shopify managed pricing. The button opens a page on{" "}
+            <strong>admin.shopify.com</strong> (not your app domain)—that is expected. Choose <strong>Starter</strong> or{" "}
+            <strong>Streamer</strong>, then come back here.
+          </p>
+          <p style={{ color: "#6d7175", marginBottom: "1.25rem", fontSize: "0.8125rem", lineHeight: 1.5 }}>
+            If you see a 404 on that page on a <strong>development store</strong>, check that your app listing and the dev store use the{" "}
+            <strong>same language/locale</strong> (Shopify limitation for draft apps). Published apps are not affected.
           </p>
           {!managedPricingUrl && (
             <s-banner tone="critical" title="Configuration" style={{ marginBottom: "1rem" }}>
-              Set <code>SHOPIFY_APP_HANDLE</code> in your app environment to match the app handle in the Partner Dashboard.
+              Could not build the plan page link. Set <code>SHOPIFY_APP_HANDLE</code> in the server environment to your app&apos;s URL slug in the
+              Partner Dashboard (fallback if the Admin API does not return the handle).
             </s-banner>
           )}
           <button

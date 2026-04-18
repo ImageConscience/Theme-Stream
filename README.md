@@ -143,8 +143,8 @@ When you reach the step for [setting up environment variables](https://shopify.d
 - `SHOPIFY_API_SECRET` = your Shopify app Client Secret
 - `SHOPIFY_APP_URL` = your Railway HTTPS URL (e.g., `https://theme-stream-production.up.railway.app`)
 - `SCOPES` = `read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects,unauthenticated_read_metaobjects,read_files,write_files,read_content,write_content`
-- `SHOPIFY_APP_HANDLE` = App handle from the Partner Dashboard (URL slug; used for Shopify’s managed pricing page link)
-- `BILLING_ENABLED` = Set to `false` only to disable billing checks (default: enabled)
+- `SHOPIFY_APP_HANDLE` = Optional fallback: app URL slug from the Partner Dashboard. The app normally resolves the handle from the Admin API (`currentAppInstallation.app.handle`) so the pricing link matches your install; set this if that query fails.
+- `BILLING_ENABLED` = Optional. **Omit** or any value except the string `false` = subscription required (default). Set to `false` only if you need to bypass the paywall temporarily (e.g. local debugging without a plan).
 - Optional: `MANAGED_PLAN_MATCH_STARTER` / `MANAGED_PLAN_MATCH_STREAMER` — comma-separated `AppSubscription` names if they differ from `starter` / `Streamer` (see `app/utils/managed-billing.server.js`)
 - `DATABASE_URL` = Railway Postgres connection URL
 - `NODE_ENV` = `production`
@@ -159,7 +159,17 @@ Pricing tiers (**Starter** and **Streamer**) are configured in the Partner Dashb
 - `BILLING_PRICE_STARTER`, `BILLING_PRICE_STREAMER`, `BILLING_PRICE_STREAMER_PLUS`
 - `BILLING_CURRENCY`, `BILLING_INTERVAL`, `BILLING_TRIAL_DAYS`, `BILLING_RETURN_URL`
 
-**Keep:** `BILLING_ENABLED` (optional; set to `false` to disable subscription checks entirely), plus `SHOPIFY_APP_HANDLE` for the **Plan & billing** link that opens Shopify’s plan page (upgrade/downgrade/cancel happens there).
+**Keep:** Nothing extra is required for billing beyond Shopify keys and `SHOPIFY_APP_URL`. Add `SHOPIFY_APP_HANDLE` only as a fallback. **`BILLING_ENABLED` can be removed** from Railway if you always want the paywall on (unset behaves like “on”).
+
+### Managed pricing link (why it is not your app URL)
+
+The **Plan & billing** / **Pricing** links open Shopify’s hosted page:
+
+`https://admin.shopify.com/store/{store}/charges/{app_handle}/pricing_plans`
+
+That hostname is **correct**—plans are not served from your Railway URL.
+
+**404 on the plan page (dev / draft apps):** Shopify documents that while testing a **draft** app, the plan page can 404 if the **development store and the app listing use different locales**. Align languages in the Partner listing and the dev store, or test with a published app. Production merchants are not affected.
 
 ### Debug logging toggles
 

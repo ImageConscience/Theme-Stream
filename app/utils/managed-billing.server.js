@@ -25,19 +25,55 @@ export function isBillingEnabled() {
   return BILLING_ENABLED;
 }
 
+const APP_HANDLE_QUERY = `#graphql
+  query ThemeStreamAppBillingHandle {
+    currentAppInstallation {
+      app {
+        handle
+      }
+    }
+  }
+`;
+
 /**
- * URL of Shopify-hosted plan selection for this app (managed pricing).
- * `SHOPIFY_APP_HANDLE` must match the app handle in the Partner Dashboard (URL slug).
+ * Shopify-hosted plan page (not your app host). Pattern:
+ * https://admin.shopify.com/store/:store_handle/charges/:app_handle/pricing_plans
+ *
+ * Resolves `:app_handle` from the Admin API when `admin` is provided (recommended), so it matches
+ * the installed app even if `SHOPIFY_APP_HANDLE` in env is wrong. Falls back to `SHOPIFY_APP_HANDLE`.
+ *
+ * @param {object | null | undefined} admin - REST/GraphQL admin from `authenticate.admin` (optional)
+ * @param {string | undefined} shop - `*.myshopify.com`
  */
-export function getManagedPricingPageUrl(shop) {
+export async function getManagedPricingPageUrl(admin, shop) {
   if (!shop) return "";
   const storeHandle = shop.replace(/\.myshopify\.com$/i, "");
-  const appHandle = (process.env.SHOPIFY_APP_HANDLE || "").trim();
+  let appHandle = (process.env.SHOPIFY_APP_HANDLE || "").trim();
+
+  if (admin?.graphql) {
+    try {
+      const response = await admin.graphql(APP_HANDLE_QUERY);
+      const json = await response.json();
+      if (json?.errors?.length) {
+        console.warn("[billing] App handle query errors:", json.errors.map((e) => e.message).join("; "));
+      } else {
+        const apiHandle = json?.data?.currentAppInstallation?.app?.handle;
+        if (apiHandle && String(apiHandle).trim()) {
+          appHandle = String(apiHandle).trim();
+        }
+      }
+    } catch (err) {
+      console.warn("[billing] Could not load app handle from Admin API:", err?.message);
+    }
+  }
+
   if (!appHandle) {
     console.warn(
-      "[billing] SHOPIFY_APP_HANDLE is not set. Set it to your app handle from the Partner Dashboard.",
+      "[billing] App handle unknown. Set SHOPIFY_APP_HANDLE to your app URL slug in Partner Dashboard, or ensure the Admin API returns currentAppInstallation.app.handle.",
     );
+    return "";
   }
+
   return `https://admin.shopify.com/store/${storeHandle}/charges/${appHandle}/pricing_plans`;
 }
 

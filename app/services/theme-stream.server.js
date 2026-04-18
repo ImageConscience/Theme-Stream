@@ -15,7 +15,7 @@ import { BLOCK_TYPES, DEFAULT_BLOCK_TYPE } from "../constants/block-types";
 export const loader = async ({ request }) => {
   const { admin, session, billing } = await authenticate.admin(request);
   const shop = session?.shop;
-  const managedPricingUrl = getManagedPricingPageUrl(shop);
+  const managedPricingUrl = await getManagedPricingPageUrl(admin, shop);
 
   const billingStatus = await getManagedBillingStatus(billing);
   if (isBillingEnabled() && !billingStatus.hasActivePayment) {
@@ -176,7 +176,7 @@ export const action = async ({ request }) => {
       if (isBillingEnabled() && !billingStatus.hasActivePayment) {
         return json({
           needsPlanSelection: true,
-          managedPricingUrl: getManagedPricingPageUrl(shop),
+          managedPricingUrl: await getManagedPricingPageUrl(admin, shop),
         });
       }
 
@@ -595,7 +595,7 @@ export const action = async ({ request }) => {
     if (isBillingEnabled() && !formBillingStatus.hasActivePayment) {
       return json({
         needsPlanSelection: true,
-        managedPricingUrl: getManagedPricingPageUrl(session?.shop),
+        managedPricingUrl: await getManagedPricingPageUrl(admin, session?.shop),
       });
     }
 

@@ -5,8 +5,8 @@ import { authenticate } from "../shopify.server";
 import { getManagedPricingPageUrl } from "../utils/managed-billing.server";
 
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
-  const managedPricingUrl = getManagedPricingPageUrl(session?.shop);
+  const { session, admin } = await authenticate.admin(request);
+  const managedPricingUrl = await getManagedPricingPageUrl(admin, session?.shop);
 
   // eslint-disable-next-line no-undef
   return {

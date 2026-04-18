@@ -4,8 +4,13 @@
 
 ## Pre-flight
 
-- [ ] Railway (or host) has `SHOPIFY_APP_URL`, `SHOPIFY_APP_HANDLE`, `BILLING_ENABLED`, and Shopify app keys.
+- [ ] Railway (or host) has `SHOPIFY_APP_URL`, Shopify app keys, and (optional) `SHOPIFY_APP_HANDLE` / `BILLING_ENABLED` / `MANAGED_PLAN_MATCH_*`.
 - [ ] Partner Dashboard: managed pricing enabled; public plans **starter** and **streamer** (handles) match `MANAGED_PLAN_MATCH_*` if you customize env.
+
+## Troubleshooting
+
+- **404 on Shopify’s plan page (`admin.shopify.com/.../pricing_plans`)** on a dev store: often a **locale mismatch** between the draft app listing and the dev store (Shopify limitation). Match languages, or test after listing is published.
+- **Pricing link is not your Railway URL**: expected — billing UI is hosted by Shopify, not your app.
 
 ## Test cases
 
