@@ -16,6 +16,16 @@ export const loader = async ({ request }) => {
   };
 };
 
+/** Same absolute admin URL for nav + footer. Do not use `s-link` here — it resolves against the embedded app and mangles the path. */
+function ManagedPricingAnchor({ href, children, style }) {
+  if (!href) return null;
+  return (
+    <a href={href} target="_top" rel="noopener noreferrer" style={style}>
+      {children}
+    </a>
+  );
+}
+
 export default function App() {
   const { apiKey, billingNavEnabled, managedPricingUrl } = useLoaderData();
 
@@ -25,9 +35,7 @@ export default function App() {
         <s-link href="/app/theme-stream">Streams</s-link>
         {billingNavEnabled &&
           (managedPricingUrl ? (
-            <s-link href={managedPricingUrl} target="_top" rel="noopener noreferrer">
-              Plan &amp; billing
-            </s-link>
+            <ManagedPricingAnchor href={managedPricingUrl}>Plan &amp; billing</ManagedPricingAnchor>
           ) : (
             <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
           ))}
@@ -38,15 +46,10 @@ export default function App() {
         </div>
         <footer style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "#6d7175", borderTop: "1px solid #e1e3e5" }}>
           <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ marginRight: "1rem", color: "inherit" }}>Privacy</a>
-          {billingNavEnabled && managedPricingUrl ? (
-            <a
-              href={managedPricingUrl}
-              target="_top"
-              rel="noopener noreferrer"
-              style={{ marginRight: "1rem", color: "inherit" }}
-            >
+          {billingNavEnabled ? (
+            <ManagedPricingAnchor href={managedPricingUrl} style={{ marginRight: "1rem", color: "inherit" }}>
               Pricing
-            </a>
+            </ManagedPricingAnchor>
           ) : null}
           <a href="/support" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>Support</a>
         </footer>
