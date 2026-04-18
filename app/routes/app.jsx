@@ -16,13 +16,47 @@ export const loader = async ({ request }) => {
   };
 };
 
-/** Same absolute admin URL for nav + footer. Do not use `s-link` here — it resolves against the embedded app and mangles the path. */
+/** Footer: plain anchor works outside `s-app-nav`. */
 function ManagedPricingAnchor({ href, children, style }) {
   if (!href) return null;
   return (
     <a href={href} target="_top" rel="noopener noreferrer" style={style}>
       {children}
     </a>
+  );
+}
+
+/**
+ * Left nav lives inside `s-app-nav`, which intercepts `<a>` / `s-link` and routes as embedded app URLs
+ * (e.g. …/apps/theme-stream/app/theme-stream). Use a button + top-window navigation to the real admin URL.
+ */
+function ManagedPricingAppNavButton({ href, children }) {
+  if (!href) return null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.top && window.top !== window.self) {
+          window.top.location.assign(href);
+        } else {
+          window.location.assign(href);
+        }
+      }}
+      style={{
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        font: "inherit",
+        color: "inherit",
+        padding: 0,
+        margin: 0,
+        textAlign: "inherit",
+      }}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -35,7 +69,7 @@ export default function App() {
         <s-link href="/app/theme-stream">Streams</s-link>
         {billingNavEnabled &&
           (managedPricingUrl ? (
-            <ManagedPricingAnchor href={managedPricingUrl}>Plan &amp; billing</ManagedPricingAnchor>
+            <ManagedPricingAppNavButton href={managedPricingUrl}>Plan &amp; billing</ManagedPricingAppNavButton>
           ) : (
             <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
           ))}
