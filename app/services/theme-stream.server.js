@@ -17,7 +17,7 @@ export const loader = async ({ request }) => {
   const shop = session?.shop;
   const managedPricingUrl = await getManagedPricingPageUrl(admin, shop);
 
-  const billingStatus = await getManagedBillingStatus(billing);
+  const billingStatus = await getManagedBillingStatus(billing, admin);
   if (isBillingEnabled() && !billingStatus.hasActivePayment) {
     return json({
       needsPlanSelection: true,
@@ -172,7 +172,7 @@ export const action = async ({ request }) => {
     if (contentType.includes("application/json")) {
       const body = await request.json();
 
-      const billingStatus = await getManagedBillingStatus(billing);
+      const billingStatus = await getManagedBillingStatus(billing, admin);
       if (isBillingEnabled() && !billingStatus.hasActivePayment) {
         return json({
           needsPlanSelection: true,
@@ -591,7 +591,7 @@ export const action = async ({ request }) => {
       }
     }
 
-    const formBillingStatus = await getManagedBillingStatus(billing);
+    const formBillingStatus = await getManagedBillingStatus(billing, admin);
     if (isBillingEnabled() && !formBillingStatus.hasActivePayment) {
       return json({
         needsPlanSelection: true,

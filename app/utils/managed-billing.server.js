@@ -5,6 +5,8 @@
  */
 
 const BILLING_ENABLED = process.env.BILLING_ENABLED !== "false";
+/** When `true`, Partner development stores skip the active-subscription check (use if the hosted plan page is unreachable). Never affects real merchant shops. */
+const BILLING_DEV_STORE_BYPASS = process.env.BILLING_DEV_STORE_BYPASS === "true";
 
 /** Comma-separated subscription names that count as the Starter plan (must match Partner plan display/handle). */
 function nameSetFromEnv(key, fallbackCsv) {
@@ -81,6 +83,35 @@ export async function getManagedPricingPageUrl(admin, shop) {
  * Map active AppSubscription name to internal plan key for feature limits (e.g. stream cap).
  * Returns null if active but name does not match known plans (no cap).
  */
+const SHOP_PARTNER_DEV_QUERY = `#graphql
+  query ThemeStreamShopPartnerDevelopment {
+    shop {
+      plan {
+        partnerDevelopment
+      }
+    }
+  }
+`;
+
+/**
+ * `true` only for stores created as Partner **development** stores (not production merchants).
+ */
+export async function getShopPartnerDevelopment(admin) {
+  if (!admin?.graphql) return false;
+  try {
+    const response = await admin.graphql(SHOP_PARTNER_DEV_QUERY);
+    const json = await response.json();
+    if (json?.errors?.length) {
+      console.warn("[billing] partnerDevelopment query:", json.errors.map((e) => e.message).join("; "));
+      return false;
+    }
+    return Boolean(json?.data?.shop?.plan?.partnerDevelopment);
+  } catch (err) {
+    console.warn("[billing] Could not read shop.plan.partnerDevelopment:", err?.message);
+    return false;
+  }
+}
+
 export function resolvePlanFromSubscriptionName(name) {
   if (name == null || String(name).trim() === "") return null;
   const trimmed = String(name).trim();
@@ -92,14 +123,30 @@ export function resolvePlanFromSubscriptionName(name) {
   return null;
 }
 
-/** @param {object} billing - `billing` from `authenticate.admin(request)` */
-export async function getManagedBillingStatus(billing) {
+/**
+ * @param {object} billing - from `authenticate.admin(request)`
+ * @param {object | null | undefined} admin - GraphQL admin (optional; required for dev-store bypass)
+ */
+export async function getManagedBillingStatus(billing, admin) {
   if (!BILLING_ENABLED) {
     return {
       hasActivePayment: true,
       plan: null,
       subscriptionName: null,
+      devStoreBypass: false,
     };
+  }
+
+  if (BILLING_DEV_STORE_BYPASS && admin) {
+    const isPartnerDevStore = await getShopPartnerDevelopment(admin);
+    if (isPartnerDevStore) {
+      return {
+        hasActivePayment: true,
+        plan: null,
+        subscriptionName: null,
+        devStoreBypass: true,
+      };
+    }
   }
 
   const { hasActivePayment, appSubscriptions } = await billing.check({ isTest: true });
@@ -111,5 +158,6 @@ export async function getManagedBillingStatus(billing) {
     hasActivePayment,
     plan,
     subscriptionName,
+    devStoreBypass: false,
   };
 }

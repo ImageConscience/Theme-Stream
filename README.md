@@ -145,6 +145,7 @@ When you reach the step for [setting up environment variables](https://shopify.d
 - `SCOPES` = `read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects,unauthenticated_read_metaobjects,read_files,write_files,read_content,write_content`
 - `SHOPIFY_APP_HANDLE` = Optional fallback: app URL slug from the Partner Dashboard. The app normally resolves the handle from the Admin API (`currentAppInstallation.app.handle`) so the pricing link matches your install; set this if that query fails.
 - `BILLING_ENABLED` = Optional. **Omit** or any value except the string `false` = subscription required (default). Set to `false` only if you need to bypass the paywall temporarily (e.g. local debugging without a plan).
+- `BILLING_DEV_STORE_BYPASS` = Optional. Set to `true` **only** on non-production environments when you use a **Partner development store** and the hosted plan page is unusable. The app checks `shop.plan.partnerDevelopment`; **real merchant shops never match**, so production stays protected. Omit on production.
 - Optional: `MANAGED_PLAN_MATCH_STARTER` / `MANAGED_PLAN_MATCH_STREAMER` — comma-separated `AppSubscription` names if they differ from `starter` / `Streamer` (see `app/utils/managed-billing.server.js`)
 - `DATABASE_URL` = Railway Postgres connection URL
 - `NODE_ENV` = `production`

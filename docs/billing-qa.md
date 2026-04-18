@@ -11,6 +11,8 @@
 
 - **404 on Shopify’s plan page (`admin.shopify.com/.../pricing_plans`)** on a dev store: often a **locale mismatch** between the draft app listing and the dev store (Shopify limitation). Match languages, or test after listing is published.
 - **Pricing link is not your Railway URL**: expected — billing UI is hosted by Shopify, not your app.
+- **Can’t complete a plan on a dev store** but you need to test the app: set `BILLING_DEV_STORE_BYPASS=true` on your **staging** Railway service (not production). Only **Partner development stores** are allowed through; remove or set `false` before shipping.
+
 
 ## Test cases
 
