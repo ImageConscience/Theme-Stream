@@ -23,9 +23,14 @@ export default function App() {
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
         <s-link href="/app/theme-stream">Streams</s-link>
-        {billingNavEnabled && (
-          <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
-        )}
+        {billingNavEnabled &&
+          (managedPricingUrl ? (
+            <s-link href={managedPricingUrl} target="_top" rel="noopener noreferrer">
+              Plan &amp; billing
+            </s-link>
+          ) : (
+            <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
+          ))}
       </s-app-nav>
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <div style={{ flex: 1 }}>
