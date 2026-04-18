@@ -1,6 +1,9 @@
+import { useCallback } from "react";
 import { Outlet, useLoaderData, useRouteError } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
+import { useAppBridge } from "@shopify/app-bridge-react";
+import { Redirect } from "@shopify/app-bridge/actions";
 import { authenticate } from "../shopify.server";
 import { getManagedPricingPageUrl } from "../utils/managed-billing.server";
 
@@ -26,35 +29,48 @@ function ManagedPricingAnchor({ href, children, style }) {
   );
 }
 
+const navPricingButtonStyle = {
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  font: "inherit",
+  color: "inherit",
+  padding: 0,
+  margin: 0,
+  textAlign: "inherit",
+};
+
 /**
- * Left nav lives inside `s-app-nav`, which intercepts `<a>` / `s-link` and routes as embedded app URLs
- * (e.g. …/apps/theme-stream/app/theme-stream). Use a button + top-window navigation to the real admin URL.
+ * `s-app-nav` hijacks normal links. Same approach as theme-stream billing buttons: App Bridge
+ * `Redirect.Action.REMOTE` (not `window.location` / plain anchors inside the nav slot).
  */
-function ManagedPricingAppNavButton({ href, children }) {
+function AppNavManagedPricingButton({ href, children }) {
+  const shopify = useAppBridge();
+  const onClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!href) return;
+      if (shopify) {
+        try {
+          const redirect = Redirect.create(shopify);
+          redirect.dispatch(Redirect.Action.REMOTE, {
+            url: href,
+            newContext: true,
+          });
+          return;
+        } catch (err) {
+          console.error("[app nav] App Bridge redirect failed:", err);
+        }
+      }
+      window.open(href, "_top");
+    },
+    [shopify, href],
+  );
+
   if (!href) return null;
   return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (window.top && window.top !== window.self) {
-          window.top.location.assign(href);
-        } else {
-          window.location.assign(href);
-        }
-      }}
-      style={{
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        font: "inherit",
-        color: "inherit",
-        padding: 0,
-        margin: 0,
-        textAlign: "inherit",
-      }}
-    >
+    <button type="button" onClick={onClick} style={navPricingButtonStyle}>
       {children}
     </button>
   );
@@ -69,7 +85,7 @@ export default function App() {
         <s-link href="/app/theme-stream">Streams</s-link>
         {billingNavEnabled &&
           (managedPricingUrl ? (
-            <ManagedPricingAppNavButton href={managedPricingUrl}>Plan &amp; billing</ManagedPricingAppNavButton>
+            <AppNavManagedPricingButton href={managedPricingUrl}>Plan &amp; billing</AppNavManagedPricingButton>
           ) : (
             <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
           ))}
