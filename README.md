@@ -143,20 +143,15 @@ When you reach the step for [setting up environment variables](https://shopify.d
 - `SHOPIFY_API_SECRET` = your Shopify app Client Secret
 - `SHOPIFY_APP_URL` = your Railway HTTPS URL (e.g., `https://theme-stream-production.up.railway.app`)
 - `SCOPES` = `read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects,unauthenticated_read_metaobjects,read_files,write_files,read_content,write_content`
-- `BILLING_PLAN_STARTER_NAME` = Plan label for Starter (default: `Starter`)
-- `BILLING_PRICE_STARTER` = Starter price in USD (default: `9`) — Shopify Standard only, up to 3 streams
-- `BILLING_PLAN_STREAMER_NAME` = Plan label for Streamer (default: `Streamer`)
-- `BILLING_PRICE_STREAMER` = Streamer price in USD (default: `29`) — Shopify Standard only, unlimited streams
-- `BILLING_PLAN_STREAMER_PLUS_NAME` = Plan label for Streamer Plus (default: `Streamer Plus`)
-- `BILLING_PRICE_STREAMER_PLUS` = Streamer Plus price in USD (default: `49`) — Shopify Plus only, unlimited streams
-- `BILLING_CURRENCY` = ISO currency code for billing (e.g., `USD`)
-- `BILLING_INTERVAL` = Billing interval (default: `EVERY_30_DAYS`)
-- `BILLING_TRIAL_DAYS` = Number of trial days (set to `7` for a one-week trial)
+- `SHOPIFY_APP_HANDLE` = App handle from the Partner Dashboard (URL slug; used for Shopify’s managed pricing page link)
+- `BILLING_ENABLED` = Set to `false` only to disable billing checks (default: enabled)
+- Optional: `MANAGED_PLAN_MATCH_STARTER` / `MANAGED_PLAN_MATCH_STREAMER` — comma-separated `AppSubscription` names if they differ from `starter` / `Streamer` (see `app/utils/managed-billing.server.js`)
 - `DATABASE_URL` = Railway Postgres connection URL
 - `NODE_ENV` = `production`
 - Optional: `SHOP_CUSTOM_DOMAIN`
-- Optional: `BILLING_ENABLED` (defaults to `true`) and `BILLING_RETURN_URL` (defaults to `SHOPIFY_APP_URL/app/theme-stream`)
 - Optional: `SUPPORT_EMAIL` (for privacy policy and support page; defaults to `support@imageconscience.com`)
+
+Pricing tiers (**Starter** and **Streamer**) are configured in the Partner Dashboard (managed app pricing), not in environment variables.
 
 ### Debug logging toggles
 
@@ -168,12 +163,7 @@ To keep production logs tidy, all incidental logging is disabled unless one of t
 
 ### Billing QA checklist
 
-Before enabling **App Store** distribution and turning on `BILLING_ENABLED`, run through the steps in [`docs/billing-qa.md`](docs/billing-qa.md). The checklist covers:
-
-1. Verifying environment variables and return URLs.
-2. Installing on a development store and confirming the billing confirmation screen appears.
-3. Cancelling the test charge and ensuring the app redirects back to billing on re-entry.
-4. Re-accepting the charge to confirm normal behaviour and noting the steps required when switching to paid mode.
+Before shipping, run through [`docs/billing-qa.md`](docs/billing-qa.md) for managed pricing: env vars (`SHOPIFY_APP_HANDLE`), plan selection in admin, and subscription cancel/re-accept flows.
 
 3. Shopify Partners app URLs
 

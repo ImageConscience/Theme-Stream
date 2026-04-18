@@ -1,9 +1,9 @@
 import { authenticate } from "../shopify.server";
 import {
-  checkSubscriptionStatus,
-  createSubscriptionForPlan,
-  shouldShowPlanBillingUi,
-} from "../utils/billing.server";
+  getManagedBillingStatus,
+  getManagedPricingPageUrl,
+  isBillingEnabled,
+} from "../utils/managed-billing.server";
 import { parseLocalDateTimeToUTC, getDefaultDateBounds } from "../utils/datetime";
 import { json } from "../utils/responses.server";
 import { logger } from "../utils/logger.server";
@@ -13,14 +13,15 @@ import { uploadFileToShopify } from "./theme-stream-upload.server";
 import { BLOCK_TYPES, DEFAULT_BLOCK_TYPE } from "../constants/block-types";
 
 export const loader = async ({ request }) => {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin, session, billing } = await authenticate.admin(request);
   const shop = session?.shop;
+  const managedPricingUrl = getManagedPricingPageUrl(shop);
 
-  const billingStatus = await checkSubscriptionStatus(admin);
-  if (!billingStatus.hasActive) {
+  const billingStatus = await getManagedBillingStatus(billing);
+  if (isBillingEnabled() && !billingStatus.hasActivePayment) {
     return json({
       needsPlanSelection: true,
-      shopifyPlus: billingStatus.shopifyPlus,
+      managedPricingUrl,
     });
   }
 
@@ -63,8 +64,9 @@ export const loader = async ({ request }) => {
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions: [],
       billingPlan: billingStatus.plan,
-      shopifyPlus: billingStatus.shopifyPlus,
-      billingUiEnabled: shouldShowPlanBillingUi(billingStatus),
+      billingSubscriptionName: billingStatus.subscriptionName,
+      managedPricingUrl,
+      billingUiEnabled: isBillingEnabled(),
       error: "Metaobject definition not found. Please ensure the app has been properly installed.",
     };
       }
@@ -140,8 +142,9 @@ export const loader = async ({ request }) => {
       defaultBlockType: DEFAULT_BLOCK_TYPE,
       positions: [],
       billingPlan: billingStatus.plan,
-      shopifyPlus: billingStatus.shopifyPlus,
-      billingUiEnabled: shouldShowPlanBillingUi(billingStatus),
+      billingSubscriptionName: billingStatus.subscriptionName,
+      managedPricingUrl,
+      billingUiEnabled: isBillingEnabled(),
       error: `Failed to load entries: ${error.message}`,
     };
   }
@@ -156,7 +159,7 @@ export const action = async ({ request }) => {
     logger.debug("[ACTION] Accept header:", request.headers.get("accept"));
     logger.debug("[ACTION] X-Requested-With:", request.headers.get("x-requested-with"));
 
-    const { admin, session } = await authenticate.admin(request);
+    const { admin, session, billing } = await authenticate.admin(request);
     const shop = session?.shop;
 
     const contentType = request.headers.get("content-type") || "";
@@ -168,32 +171,11 @@ export const action = async ({ request }) => {
     if (contentType.includes("application/json")) {
       const body = await request.json();
 
-      if (body.intent === "createSubscription") {
-        const planKey = body.planKey;
-        if (!["starter", "streamer", "streamer_plus"].includes(planKey)) {
-          return json({ error: "Invalid plan", success: false });
-        }
-        try {
-          const billingBefore = await checkSubscriptionStatus(admin);
-          const isPlanChange = billingBefore.hasActive === true;
-          const confirmationUrl = await createSubscriptionForPlan(admin, request, planKey, {
-            isPlanChange,
-          });
-          if (confirmationUrl) {
-            return json({ redirectUrl: confirmationUrl });
-          }
-          throw new Error("Subscription could not be created. Billing may be disabled or not configured.");
-        } catch (err) {
-          logger.error("[ACTION] createSubscription error:", err);
-          return json({ error: err.message || "Failed to create subscription", success: false });
-        }
-      }
-
-      const billingStatus = await checkSubscriptionStatus(admin);
-      if (!billingStatus.hasActive) {
+      const billingStatus = await getManagedBillingStatus(billing);
+      if (isBillingEnabled() && !billingStatus.hasActivePayment) {
         return json({
           needsPlanSelection: true,
-          shopifyPlus: billingStatus.shopifyPlus,
+          managedPricingUrl: getManagedPricingPageUrl(shop),
         });
       }
 
@@ -608,11 +590,11 @@ export const action = async ({ request }) => {
       }
     }
 
-    const formBillingStatus = await checkSubscriptionStatus(admin);
-    if (!formBillingStatus.hasActive) {
+    const formBillingStatus = await getManagedBillingStatus(billing);
+    if (isBillingEnabled() && !formBillingStatus.hasActivePayment) {
       return json({
         needsPlanSelection: true,
-        shopifyPlus: formBillingStatus.shopifyPlus,
+        managedPricingUrl: getManagedPricingPageUrl(session?.shop),
       });
     }
 

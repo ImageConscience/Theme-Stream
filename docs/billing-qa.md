@@ -1,29 +1,26 @@
-# Billing QA Checklist
+# Billing QA Checklist (managed app pricing)
 
-> Run this sequence after flipping the Partner app to **App Store** distribution and before enabling `BILLING_ENABLED`. Keep the app installed on a development store until you are satisfied with the results.
+> Plans are defined in the **Partner Dashboard** (managed pricing). The app checks `billing.check()` and links merchants to Shopify’s plan page. Set `SHOPIFY_APP_HANDLE` to your app’s handle (Partners URL slug).
 
 ## Pre-flight
 
-- [ ] Confirm the Railway deployment has the latest code and env vars (`SHOPIFY_APP_URL`, `BILLING_*`, `BILLING_ENABLED`).
-- [ ] Update the Partner app listing (pricing section, free-trial copy) to match the values above.
+- [ ] Railway (or host) has `SHOPIFY_APP_URL`, `SHOPIFY_APP_HANDLE`, `BILLING_ENABLED`, and Shopify app keys.
+- [ ] Partner Dashboard: managed pricing enabled; public plans **starter** and **streamer** (handles) match `MANAGED_PLAN_MATCH_*` if you customize env.
 
 ## Test cases
 
-1. **Fresh install / re-install**
-   - Install the app on a development store.
-   - Expect to see the plan selection page (Starter $9, Streamer $29 for Standard; Streamer Plus $49 for Plus).
-   - Select a plan; expect to be redirected to the Shopify billing confirmation screen (7-day trial).
-   - Accept the charge and confirm the app loads the dashboard without loops.
+1. **Fresh install**
+   - Install on a development store.
+   - Expect **Choose your plan** → **View plans in Shopify** opens the hosted pricing page.
+   - Subscribe; after approval, the app dashboard loads.
 2. **Cancel subscription**
-   - From the dev store’s *Apps > Manage subscription* screen, cancel the plan.
-   - Return to the app; it should redirect to the billing confirmation screen again.
-3. **Re-accept subscription**
-   - Accept the charge once more (still in test mode).
-   - Confirm the app behaves normally (entries load, fetchers succeed).
-4. **Decline flow (optional)**
-   - Repeat the install flow but decline the charge; verify the app blocks access and surfaces a clear message.
+   - In the dev store, cancel the app subscription.
+   - Re-open the app; expect **Choose your plan** again.
+3. **Re-accept**
+   - Subscribe again; confirm entries and JSON actions work.
+4. **Starter stream cap**
+   - On Starter, confirm creating more than three streams is blocked until upgrading to Streamer (via Shopify plan page).
 
 ## Post-test
 
-- [ ] Update the support docs / release notes with the plan name, amount, trial length, and expected redirect URL.
-- [ ] Once approved, deploy with `BILLING_ENABLED=true` for production.
+- [ ] Document plan names and trial copy for support / App Store listing.

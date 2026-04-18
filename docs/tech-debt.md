@@ -7,7 +7,7 @@ These items are outside the scope of the current deployment but worth capturing 
   - ✅ Extracted staged upload flow into `app/services/theme-stream-upload.server.js`.
   - Remaining: add unit tests around the staged upload flow.
 - **Add automated tests.**
-  - Unit-test the `ensureActiveSubscription` billing helper with mocked GraphQL responses.
+  - Unit-test `getManagedBillingStatus` / `resolvePlanFromSubscriptionName` with mocked `billing.check` responses.
   - Add an integration test that covers loader/action happy paths (e.g., using React Router’s data APIs or Playwright component tests).
 - **Improve observability.**
   - Replace ad-hoc debug logging with a structured logger (e.g., pino) backed by an env-driven log level.

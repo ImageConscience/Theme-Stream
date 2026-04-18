@@ -30,8 +30,9 @@ export default function ThemeStreamPage() {
   const loaderError = loaderData?.error ?? null;
   const redirectUrl = loaderData?.redirectUrl ?? null;
   const needsPlanSelection = loaderData?.needsPlanSelection === true;
-  const shopifyPlus = loaderData?.shopifyPlus === true;
+  const managedPricingUrl = loaderData?.managedPricingUrl ?? "";
   const billingPlan = loaderData?.billingPlan ?? null;
+  const billingSubscriptionName = loaderData?.billingSubscriptionName ?? null;
   const billingUiEnabled = Boolean(loaderData?.billingUiEnabled);
   const storeTimeZone = loaderData?.storeTimeZone ?? "UTC";
   const fetcher = useFetcher();
@@ -232,142 +233,36 @@ export default function ThemeStreamPage() {
 
   const isLoading = navigation.state === "submitting" || fetcher.state === "submitting";
 
-  const planFetcher = useFetcher();
-
-  useEffect(() => {
-    if (planFetcher.data?.redirectUrl) {
-      performRedirect(planFetcher.data.redirectUrl, "plan-selection");
-    }
-  }, [planFetcher.data?.redirectUrl, performRedirect]);
-
   if (needsPlanSelection) {
     return (
       <s-page heading="Theme Stream | Choose Your Plan">
-        <div style={{ maxWidth: 600, margin: "2rem auto", padding: "0 1rem" }}>
+        <div style={{ maxWidth: 560, margin: "2rem auto", padding: "0 1rem" }}>
           <h2 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Choose your plan</h2>
-          <p style={{ color: "#6d7175", marginBottom: "1.5rem" }}>
-            Select a plan to get started with Theme Stream.
+          <p style={{ color: "#6d7175", marginBottom: "1.5rem", lineHeight: 1.5 }}>
+            Theme Stream uses Shopify managed pricing. Continue to Shopify&apos;s plan page to pick <strong>Starter</strong> or{" "}
+            <strong>Streamer</strong>, then return to this app.
           </p>
-          {planFetcher.data?.error && (
-            <s-banner tone="critical" title="Error" style={{ marginBottom: "1rem" }}>
-              {planFetcher.data.error}
+          {!managedPricingUrl && (
+            <s-banner tone="critical" title="Configuration" style={{ marginBottom: "1rem" }}>
+              Set <code>SHOPIFY_APP_HANDLE</code> in your app environment to match the app handle in the Partner Dashboard.
             </s-banner>
           )}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {shopifyPlus ? (
-              <div
-                style={{
-                  border: "2px solid #667eea",
-                  borderRadius: "8px",
-                  padding: "1.5rem",
-                  backgroundColor: "#f8f9ff",
-                }}
-              >
-                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.125rem" }}>Streamer Plus</h3>
-                <p style={{ margin: "0 0 1rem 0", color: "#6d7175", fontSize: "0.875rem" }}>
-                  For Shopify Plus stores. Unlimited streams, unlimited events.
-                </p>
-                <p style={{ margin: "0 0 1rem 0", fontSize: "1.25rem", fontWeight: 600 }}>$49/month</p>
-                <button
-                  type="button"
-                  disabled={planFetcher.state === "submitting"}
-                  onClick={() => {
-                    planFetcher.submit(
-                      { intent: "createSubscription", planKey: "streamer_plus" },
-                      { method: "POST", encType: "application/json" },
-                    );
-                  }}
-                  style={{
-                    padding: "0.5rem 1.5rem",
-                    backgroundColor: "#667eea",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontWeight: 600,
-                    cursor: planFetcher.state === "submitting" ? "wait" : "pointer",
-                  }}
-                >
-                  {planFetcher.state === "submitting" ? "Loading…" : "Get Streamer Plus"}
-                </button>
-              </div>
-            ) : (
-              <>
-                <div
-                  style={{
-                    border: "1px solid #e1e3e5",
-                    borderRadius: "8px",
-                    padding: "1.5rem",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.125rem" }}>Starter</h3>
-                  <p style={{ margin: "0 0 1rem 0", color: "#6d7175", fontSize: "0.875rem" }}>
-                    Up to 3 streams. Unlimited events and block placements.
-                  </p>
-                  <p style={{ margin: "0 0 1rem 0", fontSize: "1.25rem", fontWeight: 600 }}>$9/month</p>
-                  <button
-                    type="button"
-                    disabled={planFetcher.state === "submitting"}
-                    onClick={() => {
-                      planFetcher.submit(
-                        { intent: "createSubscription", planKey: "starter" },
-                        { method: "POST", encType: "application/json" },
-                      );
-                    }}
-                    style={{
-                      padding: "0.5rem 1.5rem",
-                      backgroundColor: "#667eea",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      fontWeight: 600,
-                      cursor: planFetcher.state === "submitting" ? "wait" : "pointer",
-                    }}
-                  >
-                    {planFetcher.state === "submitting" ? "Loading…" : "Get Starter"}
-                  </button>
-                </div>
-                <div
-                  style={{
-                    border: "2px solid #667eea",
-                    borderRadius: "8px",
-                    padding: "1.5rem",
-                    backgroundColor: "#f8f9ff",
-                  }}
-                >
-                  <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.125rem" }}>Streamer</h3>
-                  <p style={{ margin: "0 0 1rem 0", color: "#6d7175", fontSize: "0.875rem" }}>
-                    Unlimited streams. For Shopify Standard stores.
-                  </p>
-                  <p style={{ margin: "0 0 1rem 0", fontSize: "1.25rem", fontWeight: 600 }}>$29/month</p>
-                  <button
-                    type="button"
-                    disabled={planFetcher.state === "submitting"}
-                    onClick={() => {
-                      planFetcher.submit(
-                        { intent: "createSubscription", planKey: "streamer" },
-                        { method: "POST", encType: "application/json" },
-                      );
-                    }}
-                    style={{
-                      padding: "0.5rem 1.5rem",
-                      backgroundColor: "#667eea",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      fontWeight: 600,
-                      cursor: planFetcher.state === "submitting" ? "wait" : "pointer",
-                    }}
-                  >
-                    {planFetcher.state === "submitting" ? "Loading…" : "Get Streamer"}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-          <p style={{ marginTop: "1.5rem", fontSize: "0.75rem", color: "#6d7175" }}>
-            All plans include a 7-day free trial. You can cancel anytime.
-          </p>
+          <button
+            type="button"
+            disabled={!managedPricingUrl}
+            onClick={() => managedPricingUrl && performRedirect(managedPricingUrl, "managed-pricing")}
+            style={{
+              padding: "0.6rem 1.5rem",
+              backgroundColor: managedPricingUrl ? "#008060" : "#c9cccf",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontWeight: 600,
+              cursor: managedPricingUrl ? "pointer" : "not-allowed",
+            }}
+          >
+            View plans in Shopify
+          </button>
         </div>
       </s-page>
     );
@@ -394,155 +289,39 @@ export default function ThemeStreamPage() {
         >
           <h2 style={{ fontSize: "1.125rem", margin: "0 0 0.25rem 0" }}>Plan &amp; billing</h2>
           <p style={{ margin: "0 0 1rem 0", color: "#6d7175", fontSize: "0.875rem", lineHeight: 1.5 }}>
-            Upgrade or downgrade your plan anytime. You&apos;ll confirm the new charge in Shopify; it appears in{" "}
-            <strong>Settings → Apps and sales channels</strong> under this app, and in your store&apos;s billing history.
+            Plans and prices are managed in the Shopify Partner Dashboard. Change your plan on Shopify&apos;s billing page; charges appear under{" "}
+            <strong>Settings → Apps and sales channels</strong> for this app.
           </p>
-          {billingPlan && (
+          {(billingSubscriptionName || billingPlan) && (
             <p style={{ margin: "0 0 1rem 0", fontSize: "0.875rem" }}>
-              <strong>Current plan:</strong>{" "}
-              {billingPlan === "starter" && "Starter ($9/mo)"}
-              {billingPlan === "streamer" && "Streamer ($29/mo)"}
-              {billingPlan === "streamer_plus" && "Streamer Plus ($49/mo)"}
+              <strong>Subscription:</strong>{" "}
+              {billingSubscriptionName ||
+                (billingPlan === "starter" ? "Starter" : billingPlan === "streamer" ? "Streamer" : billingPlan)}
             </p>
           )}
-          {planFetcher.data?.error && (
-            <s-banner tone="critical" title="Billing" style={{ marginBottom: "1rem" }}>
-              {planFetcher.data.error}
+          {!managedPricingUrl && (
+            <s-banner tone="warning" title="Configuration">
+              Set <code>SHOPIFY_APP_HANDLE</code> in your deployment environment.
             </s-banner>
           )}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {shopifyPlus ? (
-              <div
-                style={{
-                  border: billingPlan === "streamer_plus" ? "2px solid #008060" : "1px solid #e1e3e5",
-                  borderRadius: "8px",
-                  padding: "1rem",
-                  backgroundColor: billingPlan === "streamer_plus" ? "#f4fbf7" : "#fafafa",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-                  <div>
-                    <strong>Streamer Plus</strong>
-                    <span style={{ color: "#6d7175", fontSize: "0.875rem", marginLeft: "0.5rem" }}>$49/mo · Plus stores</span>
-                  </div>
-                  {billingPlan === "streamer_plus" ? (
-                    <span style={{ fontSize: "0.8125rem", color: "#008060", fontWeight: 600 }}>Current plan</span>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={planFetcher.state === "submitting"}
-                      onClick={() => {
-                        planFetcher.submit(
-                          { intent: "createSubscription", planKey: "streamer_plus" },
-                          { method: "POST", encType: "application/json" },
-                        );
-                      }}
-                      style={{
-                        padding: "0.4rem 1rem",
-                        backgroundColor: "#667eea",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        fontWeight: 600,
-                        fontSize: "0.8125rem",
-                        cursor: planFetcher.state === "submitting" ? "wait" : "pointer",
-                      }}
-                    >
-                      {planFetcher.state === "submitting" ? "Loading…" : "Switch to Streamer Plus"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <>
-                <div
-                  style={{
-                    border: billingPlan === "starter" ? "2px solid #008060" : "1px solid #e1e3e5",
-                    borderRadius: "8px",
-                    padding: "1rem",
-                    backgroundColor: billingPlan === "starter" ? "#f4fbf7" : "#fafafa",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-                    <div>
-                      <strong>Starter</strong>
-                      <span style={{ color: "#6d7175", fontSize: "0.875rem", marginLeft: "0.5rem" }}>$9/mo · up to 3 streams</span>
-                    </div>
-                    {billingPlan === "starter" ? (
-                      <span style={{ fontSize: "0.8125rem", color: "#008060", fontWeight: 600 }}>Current plan</span>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={planFetcher.state === "submitting"}
-                        onClick={() => {
-                          planFetcher.submit(
-                            { intent: "createSubscription", planKey: "starter" },
-                            { method: "POST", encType: "application/json" },
-                          );
-                        }}
-                        style={{
-                          padding: "0.4rem 1rem",
-                          backgroundColor: "#667eea",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          fontWeight: 600,
-                          fontSize: "0.8125rem",
-                          cursor: planFetcher.state === "submitting" ? "wait" : "pointer",
-                        }}
-                      >
-                        {planFetcher.state === "submitting" ? "Loading…" : "Switch to Starter"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    border: billingPlan === "streamer" ? "2px solid #008060" : "1px solid #e1e3e5",
-                    borderRadius: "8px",
-                    padding: "1rem",
-                    backgroundColor: billingPlan === "streamer" ? "#f4fbf7" : "#fafafa",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-                    <div>
-                      <strong>Streamer</strong>
-                      <span style={{ color: "#6d7175", fontSize: "0.875rem", marginLeft: "0.5rem" }}>$29/mo · unlimited streams</span>
-                    </div>
-                    {billingPlan === "streamer" ? (
-                      <span style={{ fontSize: "0.8125rem", color: "#008060", fontWeight: 600 }}>Current plan</span>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={planFetcher.state === "submitting"}
-                        onClick={() => {
-                          planFetcher.submit(
-                            { intent: "createSubscription", planKey: "streamer" },
-                            { method: "POST", encType: "application/json" },
-                          );
-                        }}
-                        style={{
-                          padding: "0.4rem 1rem",
-                          backgroundColor: "#667eea",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          fontWeight: 600,
-                          fontSize: "0.8125rem",
-                          cursor: planFetcher.state === "submitting" ? "wait" : "pointer",
-                        }}
-                      >
-                        {planFetcher.state === "submitting" ? "Loading…" : "Switch to Streamer"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          <p style={{ margin: "1rem 0 0 0", fontSize: "0.75rem", color: "#6d7175" }}>
-            First-time subscriptions include a 7-day free trial. Plan changes bill immediately or at the next cycle per Shopify&apos;s confirmation screen.
-          </p>
+          <button
+            type="button"
+            disabled={!managedPricingUrl}
+            onClick={() => managedPricingUrl && performRedirect(managedPricingUrl, "managed-pricing")}
+            style={{
+              marginTop: "0.75rem",
+              padding: "0.5rem 1.25rem",
+              backgroundColor: managedPricingUrl ? "#008060" : "#c9cccf",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              cursor: managedPricingUrl ? "pointer" : "not-allowed",
+            }}
+          >
+            View or change plan
+          </button>
         </div>
       )}
 
@@ -1417,7 +1196,7 @@ export default function ThemeStreamPage() {
         </div>
         {billingPlan === "starter" && positions.length >= 3 ? (
           <div style={{ marginTop: "1rem", padding: "0.5rem 0.75rem", fontSize: "0.8125rem", color: "#6d7175" }}>
-            Starter plan allows up to 3 streams. Use <strong>Plan &amp; billing</strong> above to switch to Streamer for unlimited streams.
+            Starter plan allows up to 3 streams. Use <strong>Plan &amp; billing</strong> above to open Shopify and switch to Streamer for unlimited streams.
           </div>
         ) : (
           <button
