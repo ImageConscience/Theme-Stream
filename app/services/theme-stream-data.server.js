@@ -133,13 +133,17 @@ export async function migratePositionIdInEntries(admin, nodes) {
   }
 }
 
-/** Fetch all files via cursor pagination */
-export async function fetchAllFiles(admin, queryFilter, pageSize = FILES_PAGE_SIZE) {
+/**
+ * Fetch files from Shopify. Defaults to a single page of recent files since stores
+ * can have tens of thousands of files; paginating all of them on every loader run
+ * is prohibitively slow. Pass `{ paginate: true }` to walk every page (rare).
+ */
+export async function fetchAllFiles(admin, queryFilter, pageSize = FILES_PAGE_SIZE, { paginate = false } = {}) {
   const allEdges = [];
   let after = null;
   const gql = `#graphql
     query GetFiles($first: Int!, $after: String, $fileQuery: String) {
-      files(first: $first, after: $after, query: $fileQuery) {
+      files(first: $first, after: $after, query: $fileQuery, sortKey: CREATED_AT, reverse: true) {
             edges {
               node {
                 id
@@ -170,6 +174,7 @@ export async function fetchAllFiles(admin, queryFilter, pageSize = FILES_PAGE_SI
     const data = json?.data?.files;
     if (!data) break;
     allEdges.push(...(data.edges ?? []));
+    if (!paginate) break;
     const pageInfo = data.pageInfo;
     if (!pageInfo?.hasNextPage) break;
     after = pageInfo.endCursor;
