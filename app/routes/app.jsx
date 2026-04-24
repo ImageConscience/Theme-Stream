@@ -33,18 +33,21 @@ export default function App() {
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
         <s-link href="/app/theme-stream">Streams</s-link>
-        {billingNavEnabled &&
-          (managedPricingUrl ? (
-            <s-link href={managedPricingUrl} target="_top">Plan &amp; billing</s-link>
-          ) : (
-            <s-link href="/app/theme-stream#plan-billing">Plan &amp; billing</s-link>
-          ))}
       </s-app-nav>
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <div style={{ flex: 1 }}>
           <Outlet />
         </div>
-        <footer style={{ padding: "0.75rem 1rem", fontSize: "0.8125rem", color: "#6d7175", borderTop: "1px solid #e1e3e5" }}>
+        <footer
+          style={{
+            padding: "0.75rem 1rem",
+            fontSize: "0.8125rem",
+            fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+            color: "#6d7175",
+            borderTop: "1px solid #e1e3e5",
+            textAlign: "center",
+          }}
+        >
           <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ marginRight: "1rem", color: "inherit" }}>Privacy</a>
           {billingNavEnabled ? (
             <ManagedPricingAnchor href={managedPricingUrl} style={{ marginRight: "1rem", color: "inherit" }}>
