@@ -32,8 +32,6 @@ export default function ThemeStreamPage() {
   const needsPlanSelection = loaderData?.needsPlanSelection === true;
   const managedPricingUrl = loaderData?.managedPricingUrl ?? "";
   const billingPlan = loaderData?.billingPlan ?? null;
-  const billingSubscriptionName = loaderData?.billingSubscriptionName ?? null;
-  const billingUiEnabled = Boolean(loaderData?.billingUiEnabled);
   const storeTimeZone = loaderData?.storeTimeZone ?? "UTC";
   const fetcher = useFetcher();
   const shopify = useAppBridge();
@@ -51,6 +49,8 @@ export default function ThemeStreamPage() {
   const [positionFormName, setPositionFormName] = useState("");
   const [positionFormDesc, setPositionFormDesc] = useState("");
   const [positionDeleteConfirm, setPositionDeleteConfirm] = useState(null);
+  const [positionSaving, setPositionSaving] = useState(false);
+  const [positionDeleting, setPositionDeleting] = useState(false);
   const [userTimeZone, setUserTimeZone] = useState("UTC");
   const [userTimezoneOffset, setUserTimezoneOffset] = useState(0);
   const [formBlockType, setFormBlockType] = useState("hero");
@@ -72,14 +72,14 @@ export default function ThemeStreamPage() {
   }, []);
 
   useEffect(() => {
-    if (!clientMounted || typeof localStorage === "undefined") return;
-    const dismissed = localStorage.getItem(WIZARD_STORAGE_KEY) === "true";
+    if (!clientMounted || typeof sessionStorage === "undefined") return;
+    const dismissed = sessionStorage.getItem(WIZARD_STORAGE_KEY) === "true";
     setWizardDismissed(dismissed);
   }, [clientMounted, WIZARD_STORAGE_KEY]);
 
   const dismissWizard = useCallback(() => {
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(WIZARD_STORAGE_KEY, "true");
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem(WIZARD_STORAGE_KEY, "true");
     }
     setWizardDismissed(true);
   }, [WIZARD_STORAGE_KEY]);
@@ -273,55 +273,6 @@ export default function ThemeStreamPage() {
         <s-banner tone="critical" title="Error">
           {loaderError || fetcher.data?.error}
         </s-banner>
-      )}
-
-      {billingUiEnabled && (
-        <div
-          id="plan-billing"
-          style={{
-            margin: "0 1rem 1rem",
-            padding: "1rem",
-            border: "1px solid #e1e3e5",
-            borderRadius: "8px",
-            backgroundColor: "#fff",
-          }}
-        >
-          <h2 style={{ fontSize: "1.125rem", margin: "0 0 0.25rem 0" }}>Plan &amp; billing</h2>
-          <p style={{ margin: "0 0 1rem 0", color: "#6d7175", fontSize: "0.875rem", lineHeight: 1.5 }}>
-            Plans and prices are managed in the Shopify Partner Dashboard. Change your plan on Shopify&apos;s billing page; charges appear under{" "}
-            <strong>Settings → Apps and sales channels</strong> for this app.
-          </p>
-          {(billingSubscriptionName || billingPlan) && (
-            <p style={{ margin: "0 0 1rem 0", fontSize: "0.875rem" }}>
-              <strong>Subscription:</strong>{" "}
-              {billingSubscriptionName ||
-                (billingPlan === "starter" ? "Starter" : billingPlan === "streamer" ? "Streamer" : billingPlan)}
-            </p>
-          )}
-          {!managedPricingUrl && (
-            <s-banner tone="warning" title="Configuration">
-              Set <code>SHOPIFY_APP_HANDLE</code> in your deployment environment.
-            </s-banner>
-          )}
-          <button
-            type="button"
-            disabled={!managedPricingUrl}
-            onClick={() => managedPricingUrl && performRedirect(managedPricingUrl, "managed-pricing")}
-            style={{
-              marginTop: "0.75rem",
-              padding: "0.5rem 1.25rem",
-              backgroundColor: managedPricingUrl ? "#008060" : "#c9cccf",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              cursor: managedPricingUrl ? "pointer" : "not-allowed",
-            }}
-          >
-            View or change plan
-          </button>
-        </div>
       )}
 
       {/* Getting Started Wizard */}
@@ -1289,12 +1240,14 @@ export default function ThemeStreamPage() {
               </button>
               <button
                 type="button"
+                disabled={positionSaving}
                 onClick={async () => {
                   const name = positionFormName.trim();
                   if (!name) return;
                   const body = positionEditTarget
                     ? { intent: "positionUpdate", id: positionEditTarget.id, name, description: positionFormDesc.trim() || null }
                     : { intent: "positionCreate", name, description: positionFormDesc.trim() || null };
+                  setPositionSaving(true);
                   try {
                     const res = await fetch(window.location.pathname, {
                       method: "POST",
@@ -1311,11 +1264,24 @@ export default function ThemeStreamPage() {
                     }
                   } catch (err) {
                     alert(err.message || "Failed");
+                  } finally {
+                    setPositionSaving(false);
                   }
                 }}
-                style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", background: "#008060", color: "white", cursor: "pointer", fontSize: "0.875rem", fontWeight: "600" }}
+                style={{
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  background: positionSaving ? "#6d7175" : "#008060",
+                  color: "white",
+                  cursor: positionSaving ? "not-allowed" : "pointer",
+                  fontSize: "0.875rem",
+                  fontWeight: "600",
+                }}
               >
-                {positionEditTarget ? "Save" : "Add"}
+                {positionSaving
+                  ? (positionEditTarget ? "Saving..." : "Adding...")
+                  : (positionEditTarget ? "Save" : "Add")}
               </button>
             </div>
           </div>
@@ -1365,7 +1331,9 @@ export default function ThemeStreamPage() {
               </button>
               <button
                 type="button"
+                disabled={positionDeleting}
                 onClick={async () => {
+                  setPositionDeleting(true);
                   try {
                     const res = await fetch(window.location.pathname, {
                       method: "POST",
@@ -1382,11 +1350,22 @@ export default function ThemeStreamPage() {
                     }
                   } catch (err) {
                     alert(err.message || "Failed");
+                  } finally {
+                    setPositionDeleting(false);
                   }
                 }}
-                style={{ padding: "0.5rem 1rem", border: "none", borderRadius: "4px", background: "#d72c0d", color: "white", cursor: "pointer", fontSize: "0.875rem", fontWeight: "600" }}
+                style={{
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  background: positionDeleting ? "#6d7175" : "#d72c0d",
+                  color: "white",
+                  cursor: positionDeleting ? "not-allowed" : "pointer",
+                  fontSize: "0.875rem",
+                  fontWeight: "600",
+                }}
               >
-                Delete
+                {positionDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
