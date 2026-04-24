@@ -8,16 +8,68 @@ import { parseLocalDateTimeToUTC, getDefaultDateBounds } from "../utils/datetime
 import { json } from "../utils/responses.server";
 import { logger } from "../utils/logger.server";
 import { ensureMetaobjectDefinition } from "./metaobjects.server";
-import { fetchAllMetaobjects, migratePositionIdInEntries, fetchAllFiles, FILES_PAGE_SIZE } from "./theme-stream-data.server";
+import { fetchAllMetaobjects, fetchAllFiles, FILES_PAGE_SIZE } from "./theme-stream-data.server";
 import { uploadFileToShopify } from "./theme-stream-upload.server";
 import { BLOCK_TYPES, DEFAULT_BLOCK_TYPE } from "../constants/block-types";
+
+const fetchShopTimezone = async (admin) => {
+  try {
+    const res = await admin.graphql(
+      `#graphql
+      query GetShopTimezone { shop { ianaTimezone } }
+      `,
+    );
+    const j = await res.json();
+    return j?.data?.shop?.ianaTimezone || "UTC";
+  } catch (err) {
+    logger.warn("Could not fetch shop timezone:", err);
+    return "UTC";
+  }
+};
+
+const fetchPositionsForShop = async (shop) => {
+  if (!shop) return [];
+  try {
+    const { listPositions } = await import("./positions.server.js");
+    return await listPositions(shop);
+  } catch (err) {
+    logger.warn("Could not load positions:", err);
+    return [];
+  }
+};
+
+const mapImageEdges = (edges) =>
+  edges
+    .map((edge) => ({
+      id: edge.node.id,
+      url: edge.node.image?.url || "",
+      alt: edge.node.alt || "",
+      createdAt: edge.node.createdAt,
+      type: "image",
+    }))
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+const mapVideoEdges = (edges) =>
+  edges
+    .map((edge) => ({
+      id: edge.node.id,
+      url: edge.node.sources?.[0]?.url || "",
+      alt: edge.node.alt || "",
+      createdAt: edge.node.createdAt,
+      type: "video",
+    }))
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
 export const loader = async ({ request }) => {
   const { admin, session, billing } = await authenticate.admin(request);
   const shop = session?.shop;
-  const managedPricingUrl = await getManagedPricingPageUrl(admin, shop);
 
-  const billingStatus = await getManagedBillingStatus(billing, admin);
+  // Billing gate needs to resolve before we do any data work
+  const [managedPricingUrl, billingStatus] = await Promise.all([
+    getManagedPricingPageUrl(admin, shop),
+    getManagedBillingStatus(billing, admin),
+  ]);
+
   if (isBillingEnabled() && !billingStatus.hasActivePayment) {
     return json({
       needsPlanSelection: true,
@@ -25,130 +77,82 @@ export const loader = async ({ request }) => {
     });
   }
 
-  try {
-    // Fetch shop timezone (store timezone is source of truth for scheduling)
-    let storeTimeZone = "UTC";
-    try {
-      const shopResponse = await admin.graphql(
-        `#graphql
-        query GetShopTimezone {
-          shop {
-            ianaTimezone
-          }
-        }
-      `,
-      );
-      const shopJson = await shopResponse.json();
-      if (shopJson?.data?.shop?.ianaTimezone) {
-        storeTimeZone = shopJson.data.shop.ianaTimezone;
-      }
-    } catch (shopError) {
-      logger.warn("Could not fetch shop timezone:", shopError);
-    }
+  // Independent data fetches — run in parallel. Each handler returns safe defaults on failure
+  // so one slow/broken call doesn't tank the whole loader.
+  const [storeTimeZone, entriesResult, imgResult, vidResult, positions] = await Promise.all([
+    fetchShopTimezone(admin),
+    fetchAllMetaobjects(admin).then(
+      (entries) => ({ ok: true, entries }),
+      (err) => ({ ok: false, err }),
+    ),
+    fetchAllFiles(admin, "media_type:IMAGE", FILES_PAGE_SIZE).then(
+      (edges) => ({ ok: true, edges }),
+      (err) => ({ ok: false, err }),
+    ),
+    fetchAllFiles(admin, "media_type:VIDEO", 100).then(
+      (edges) => ({ ok: true, edges }),
+      (err) => ({ ok: false, err }),
+    ),
+    fetchPositionsForShop(shop),
+  ]);
 
-    let entries = [];
-    try {
-      entries = await fetchAllMetaobjects(admin);
-      await migratePositionIdInEntries(admin, entries);
-      logger.debug("Loader fetched", entries.length, "metaobject entries");
-    } catch (metaError) {
-      const errorMessages = metaError.message || "";
-      if (errorMessages.includes("metaobject definition") || errorMessages.includes("type")) {
-        logger.warn("Metaobject definition may not exist yet. Returning empty entries.");
+  const base = {
+    storeTimeZone,
+    blockTypes: BLOCK_TYPES,
+    defaultBlockType: DEFAULT_BLOCK_TYPE,
+    positions,
+    billingPlan: billingStatus.plan,
+    billingSubscriptionName: billingStatus.subscriptionName,
+    managedPricingUrl,
+    billingUiEnabled: isBillingEnabled(),
+  };
+
+  if (!entriesResult.ok) {
+    const msg = entriesResult.err?.message || "";
+    if (msg.includes("metaobject definition") || msg.includes("type")) {
+      logger.warn("Metaobject definition may not exist yet. Returning empty entries.");
+      return {
+        ...base,
+        entries: [],
+        mediaFiles: [],
+        videoFiles: [],
+        error: "Metaobject definition not found. Please ensure the app has been properly installed.",
+      };
+    }
+    logger.error("Error loading schedulable entities:", entriesResult.err);
     return {
+      ...base,
       entries: [],
       mediaFiles: [],
       videoFiles: [],
-      storeTimeZone,
-      blockTypes: BLOCK_TYPES,
-      defaultBlockType: DEFAULT_BLOCK_TYPE,
-      positions: [],
-      billingPlan: billingStatus.plan,
-      billingSubscriptionName: billingStatus.subscriptionName,
-      managedPricingUrl,
-      billingUiEnabled: isBillingEnabled(),
-      error: "Metaobject definition not found. Please ensure the app has been properly installed.",
-    };
-      }
-      throw metaError;
-    }
-
-    let mediaFiles = [];
-    let videoFiles = [];
-    try {
-      let imgEdges = await fetchAllFiles(admin, "media_type:IMAGE", FILES_PAGE_SIZE);
-      let vidEdges = await fetchAllFiles(admin, "media_type:VIDEO", 100);
-      if (imgEdges.length === 0) {
-        const allEdges = await fetchAllFiles(admin, null, FILES_PAGE_SIZE);
-        imgEdges = allEdges.filter((e) => e.node.image != null);
-        vidEdges = allEdges.filter((e) => e.node.sources != null);
-        logger.debug("Media filter returned 0; fetched all files:", allEdges.length, "images:", imgEdges.length, "videos:", vidEdges.length);
-      }
-      mediaFiles = imgEdges
-        .map((edge) => ({
-          id: edge.node.id,
-          url: edge.node.image?.url || "",
-          alt: edge.node.alt || "",
-          createdAt: edge.node.createdAt,
-          type: "image",
-        }))
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-      videoFiles = vidEdges
-        .map((edge) => ({
-          id: edge.node.id,
-          url: edge.node.sources?.[0]?.url || "",
-          alt: edge.node.alt || "",
-          createdAt: edge.node.createdAt,
-          type: "video",
-        }))
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-      logger.debug("Loader fetched", mediaFiles.length, "images and", videoFiles.length, "videos");
-    } catch (error) {
-      logger.error("Error loading media files:", error);
-    }
-
-    let positions = [];
-    if (shop) {
-      try {
-        const { listPositions } = await import("./positions.server.js");
-        positions = await listPositions(shop);
-        const { syncAllPositionsToMetaobjects } = await import("./positions-metaobject.server.js");
-        await syncAllPositionsToMetaobjects(admin, positions);
-      } catch (posErr) {
-        logger.warn("Could not load positions:", posErr);
-      }
-    }
-
-    return {
-      entries,
-      mediaFiles,
-      videoFiles,
-      storeTimeZone,
-      blockTypes: BLOCK_TYPES,
-      defaultBlockType: DEFAULT_BLOCK_TYPE,
-      positions,
-      billingPlan: billingStatus.plan,
-      billingSubscriptionName: billingStatus.subscriptionName,
-      managedPricingUrl,
-      billingUiEnabled: isBillingEnabled(),
-    };
-  } catch (error) {
-    logger.error("Error loading schedulable entities:", error);
-    return {
-      entries: [],
-      mediaFiles: [],
-      videoFiles: [],
-      storeTimeZone: "UTC",
-      blockTypes: BLOCK_TYPES,
-      defaultBlockType: DEFAULT_BLOCK_TYPE,
-      positions: [],
-      billingPlan: billingStatus.plan,
-      billingSubscriptionName: billingStatus.subscriptionName,
-      managedPricingUrl,
-      billingUiEnabled: isBillingEnabled(),
-      error: `Failed to load entries: ${error.message}`,
+      error: `Failed to load entries: ${entriesResult.err?.message || "unknown error"}`,
     };
   }
+
+  if (!imgResult.ok) logger.error("Error loading image files:", imgResult.err);
+  if (!vidResult.ok) logger.error("Error loading video files:", vidResult.err);
+
+  const mediaFiles = imgResult.ok ? mapImageEdges(imgResult.edges) : [];
+  const videoFiles = vidResult.ok ? mapVideoEdges(vidResult.edges) : [];
+
+  logger.debug(
+    "Loader:",
+    entriesResult.entries.length,
+    "entries,",
+    mediaFiles.length,
+    "images,",
+    videoFiles.length,
+    "videos,",
+    positions.length,
+    "positions",
+  );
+
+  return {
+    ...base,
+    entries: entriesResult.entries,
+    mediaFiles,
+    videoFiles,
+  };
 };
 
 export const action = async ({ request }) => {
